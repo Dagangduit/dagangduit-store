@@ -206,7 +206,7 @@ const SUPABASE_URL = 'https://vdzyfyerqnyaxotlawgr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
 const STORAGE_BUCKET = 'product-images';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
@@ -231,7 +231,7 @@ function showDashboard(email) {
 }
 
 async function checkSession() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showDashboard(session.user.email);
   } else {
@@ -239,7 +239,7 @@ async function checkSession() {
   }
 }
 
-supabase.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT') {
     dashboardView.classList.add('hidden');
     showLogin();
@@ -258,7 +258,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   btn.disabled = true;
   btn.textContent = 'Memeriksa...';
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   btn.disabled = false;
   btn.textContent = 'Masuk';
@@ -271,7 +271,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
 /* ---------- Logout ---------- */
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 });
 
 /* ===================== UPLOAD GAMBAR ===================== */
@@ -307,7 +307,7 @@ fileInput.addEventListener('change', async (e) => {
   const ext = file.name.split('.').pop() || 'png';
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(STORAGE_BUCKET)
     .upload(path, file, { cacheControl: '3600', upsert: false });
 
@@ -319,7 +319,7 @@ fileInput.addEventListener('change', async (e) => {
   }
 
   uploadBar.style.width = '70%';
-  const { data: pub } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
+  const { data: pub } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
   uploadedImageUrl = pub.publicUrl;
 
   uploadBar.style.width = '100%';
@@ -373,7 +373,7 @@ productForm.addEventListener('submit', async (e) => {
   saveBtn.disabled = true;
   saveBtn.textContent = 'Menyimpan...';
 
-  const { error } = await supabase.from('products').insert({
+  const { error } = await supabaseClient.from('products').insert({
     name,
     price,
     platform,
@@ -418,7 +418,7 @@ async function loadProducts() {
   productTable.classList.add('hidden');
   tableEmpty.classList.add('hidden');
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('products')
     .select('*')
     .order('created_at', { ascending: false });
@@ -470,7 +470,7 @@ async function loadProducts() {
 window.deleteProduct = async function (id, name) {
   if (!confirm(`Hapus produk "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
 
-  const { error } = await supabase.from('products').delete().eq('id', id);
+  const { error } = await supabaseClient.from('products').delete().eq('id', id);
   if (error) {
     alert('Gagal menghapus: ' + error.message);
     return;
