@@ -156,9 +156,16 @@
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Jual / Lisensi (Rp) *</label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-medium text-slate-400">Harga Jual / Lisensi (<span id="cur-label">IDR</span>) *</label>
+                <select id="f-currency" class="bg-slate-900/70 border border-slate-700/60 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-300 focus:border-emerald-500 focus:outline-none">
+                  <option value="IDR">IDR (Rupiah)</option>
+                  <option value="USD">USD ($)</option>
+                </select>
+              </div>
               <input id="f-price" type="number" min="0" step="1000" required placeholder="150000"
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+              <p id="rate-hint" class="hidden mt-1 text-[10px] text-slate-500">Kurs USD/IDR hari ini: <span id="rate-value" class="text-emerald-400 font-bold"></span> — harga USD otomatis dikonversi ke IDR.</p>
             </div>
 
             <div>
@@ -459,8 +466,36 @@ const formSuccess = document.getElementById('form-success');
 const formTitle = document.getElementById('form-title');
 const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
+/* ---------- Mata uang harga ---------- */
+let RATE = 16000, formCurrency = 'IDR';
+const fCurrency = document.getElementById('f-currency');
+
+async function loadRate() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const j = await r.json();
+    if (j && j.rates && j.rates.IDR) {
+      RATE = j.rates.IDR;
+      document.getElementById('rate-value').textContent = 'Rp ' + Math.round(RATE).toLocaleString('id-ID');
+    }
+  } catch(e) {}
+  updatePriceLabels();
+}
+function updatePriceLabels() {
+  const isUsd = formCurrency === 'USD';
+  document.getElementById('cur-label').textContent = formCurrency;
+  document.getElementById('rate-hint').classList.toggle('hidden', !isUsd);
+  ['f-price','f-price-1m','f-price-3m','f-price-12m'].forEach(id => {
+    const el = document.getElementById(id);
+    el.step = isUsd ? '0.01' : '1000';
+    el.placeholder = isUsd ? '29.99' : '150000';
+  });
+}
+fCurrency.addEventListener('change', () => { formCurrency = fCurrency.value; updatePriceLabels(); });
+
 function resetForm() {
   productForm.reset();
+  fCurrency.value = 'IDR'; formCurrency = 'IDR'; updatePriceLabels();
   imageUrls = [];
   editingId = null;
   renderImagePreviews();
@@ -493,12 +528,19 @@ productForm.addEventListener('submit', async (e) => {
     return;
   }
 
+  // Konversi ke IDR jika admin input dalam USD
+  const toIDR = (v) => v == null ? null : Math.round(v * (formCurrency === 'USD' ? RATE : 1));
+  const priceIdr = toIDR(price);
+  const price1mIdr = toIDR(price1m);
+  const price3mIdr = toIDR(price3m);
+  const price12mIdr = toIDR(price12m);
+
   const payload = {
     name,
-    price,
-    price_1m: price1m,
-    price_3m: price3m,
-    price_12m: price12m,
+    price: priceIdr,
+    price_1m: price1mIdr,
+    price_3m: price3mIdr,
+    price_12m: price12mIdr,
     discount_percent: discount,
     category,
     platform,
@@ -538,6 +580,7 @@ window.editProduct = function (id) {
   if (!p) return;
 
   editingId = p.id;
+  fCurrency.value = 'IDR'; formCurrency = 'IDR'; updatePriceLabels();
   document.getElementById('f-name').value = p.name || '';
   document.getElementById('f-price').value = p.price ?? '';
   document.getElementById('f-price-1m').value = p.price_1m ?? '';
@@ -695,6 +738,8 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 /* ---------- Init ---------- */
+loadRate();
+setInterval(loadRate, 60 * 60 * 1000); // refresh kurs tiap 1 jam
 checkSession();
 </script>
 </body>
