@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DagangDuit — Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { background-color: #020617; }
+  .glass {
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+  }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fade-in { animation: fadeIn .25s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  input, textarea, select { outline: none; }
+  input:focus, textarea:focus, select:focus { border-color: rgba(52,211,153,.6) !important; box-shadow: 0 0 0 3px rgba(52,211,153,.12); }
+</style>
+</head>
+<body class="min-h-screen text-slate-200 antialiased">
+
+<!-- ===================== LOADING ===================== -->
+<div id="auth-loading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
+  <div class="flex flex-col items-center gap-4">
+    <div class="w-10 h-10 rounded-full border-2 border-emerald-400/30 border-t-emerald-400 spin"></div>
+    <p class="text-slate-400 text-sm">Memeriksa sesi...</p>
+  </div>
+</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-view" class="hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-emerald-500/10 blur-3xl"></div>
+  </div>
+  <div class="relative glass rounded-2xl w-full max-w-sm p-8 fade-in">
+    <div class="flex items-center gap-2 mb-6 justify-center">
+      <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-slate-950 font-bold">DD</span>
+      <span class="text-xl font-bold text-white">Dagang<span class="text-emerald-400">Duit</span> <span class="text-xs font-medium text-slate-500 align-middle">Admin</span></span>
+    </div>
+
+    <h1 class="text-lg font-bold text-white text-center">Masuk ke Dashboard</h1>
+    <p class="text-sm text-slate-400 text-center mt-1 mb-6">Kelola produk dagang Anda.</p>
+
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Email</label>
+        <input id="login-email" type="email" required placeholder="admin@dagangduit.id"
+               class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1.5">Password</label>
+        <input id="login-password" type="password" required placeholder="••••••••"
+               class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+      </div>
+      <p id="login-error" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2"></p>
+      <button type="submit" id="login-btn"
+              class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50">
+        Masuk
+      </button>
+    </form>
+
+    <a href="index.html" class="block mt-6 text-center text-xs text-slate-500 hover:text-emerald-300 transition-colors">&larr; Kembali ke Katalog</a>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="dashboard-view" class="hidden min-h-screen">
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-40 glass border-b border-slate-800/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-slate-950 font-bold text-sm">DD</span>
+        <span class="text-lg font-bold text-white">Dagang<span class="text-emerald-400">Duit</span> <span class="text-xs font-medium text-slate-500 align-middle">Admin</span></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="admin-email" class="hidden sm:block text-xs text-slate-400 max-w-[200px] truncate"></span>
+        <a href="index.html" class="text-xs text-slate-400 hover:text-emerald-300 transition-colors">Lihat Katalog</a>
+        <button id="logout-btn" class="px-4 py-2 rounded-xl bg-slate-700/50 border border-slate-600/50 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition-colors">
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- ===== FORM TAMBAH PRODUK ===== -->
+      <section class="lg:col-span-1">
+        <div class="glass rounded-2xl p-6 fade-in">
+          <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Tambah Produk
+          </h2>
+
+          <form id="product-form" class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Nama Produk *</label>
+              <input id="f-name" type="text" required placeholder="Contoh: EA Gold Scalper v2"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga (Rp) *</label>
+              <input id="f-price" type="number" min="0" step="1000" required placeholder="150000"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Platform</label>
+              <select id="f-platform"
+                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white transition-all">
+                <option value="MT4">MT4</option>
+                <option value="MT5">MT5</option>
+                <option value="PineScript">PineScript</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Deskripsi</label>
+              <textarea id="f-desc" rows="3" placeholder="Deskripsi singkat produk..."
+                        class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Upload gambar -->
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Gambar Produk</label>
+              <div class="flex items-center gap-3">
+                <label class="flex-1 cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/70 border border-dashed border-slate-600/60 text-xs text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                  <span id="upload-label">Pilih File</span>
+                  <input id="f-image" type="file" accept="image/*" class="hidden" />
+                </label>
+              </div>
+              <div id="upload-progress" class="hidden mt-2">
+                <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="upload-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div>
+                </div>
+                <p id="upload-status" class="mt-1 text-[11px] text-slate-500">Mengunggah...</p>
+              </div>
+              <div id="image-preview-wrap" class="hidden mt-3">
+                <img id="image-preview" class="w-full h-32 object-cover rounded-xl border border-slate-700/60" alt="Preview" />
+                <p class="mt-1 text-[11px] text-emerald-400/80 truncate" id="image-url-text"></p>
+              </div>
+              <!-- URL manual fallback -->
+              <input id="f-image-url" type="url" placeholder="atau tempel URL gambar manual"
+                     class="mt-2 w-full px-4 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-xs text-white placeholder-slate-600 transition-all" />
+            </div>
+
+            <p id="form-error" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2"></p>
+            <p id="form-success" class="hidden text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">Produk berhasil disimpan!</p>
+
+            <button type="submit" id="save-btn"
+                    class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50">
+              Simpan Produk
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===== TABEL PRODUK ===== -->
+      <section class="lg:col-span-2">
+        <div class="glass rounded-2xl overflow-hidden fade-in">
+          <div class="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between">
+            <h2 class="text-base font-bold text-white">Inventory Produk</h2>
+            <span id="product-count" class="text-xs text-slate-500"></span>
+          </div>
+
+          <div id="table-loading" class="flex items-center justify-center py-16 gap-3">
+            <div class="w-6 h-6 rounded-full border-2 border-emerald-400/30 border-t-emerald-400 spin"></div>
+            <span class="text-sm text-slate-400">Memuat produk...</span>
+          </div>
+
+          <div id="table-empty" class="hidden py-16 text-center">
+            <p class="text-slate-500 text-sm">Belum ada produk. Tambahkan produk pertama Anda.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table id="product-table" class="hidden w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs text-slate-500 border-b border-slate-800/60">
+                  <th class="px-6 py-3 font-medium">Produk</th>
+                  <th class="px-6 py-3 font-medium">Platform</th>
+                  <th class="px-6 py-3 font-medium">Harga</th>
+                  <th class="px-6 py-3 font-medium">Tanggal</th>
+                  <th class="px-6 py-3 font-medium text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="product-tbody" class="divide-y divide-slate-800/40"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   KONFIGURASI — isi dengan kredensial Supabase Anda
+   ============================================================ */
+const SUPABASE_URL = 'https://vdzyfyerqnyaxotlawgr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
+const STORAGE_BUCKET = 'product-images';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+/* ===================== AUTH ===================== */
+const authLoading = document.getElementById('auth-loading');
+const loginView = document.getElementById('login-view');
+const dashboardView = document.getElementById('dashboard-view');
+
+function showLogin() {
+  authLoading.classList.add('hidden');
+  loginView.classList.remove('hidden');
+  loginView.classList.add('flex');
+}
+
+function showDashboard(email) {
+  authLoading.classList.add('hidden');
+  loginView.classList.add('hidden');
+  loginView.classList.remove('flex');
+  dashboardView.classList.remove('hidden');
+  document.getElementById('admin-email').textContent = email || '';
+  loadProducts();
+}
+
+async function checkSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    showDashboard(session.user.email);
+  } else {
+    showLogin();
+  }
+}
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    dashboardView.classList.add('hidden');
+    showLogin();
+  }
+});
+
+/* ---------- Login form ---------- */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Memeriksa...';
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Masuk';
+
+  if (error) {
+    errEl.textContent = 'Login gagal: ' + error.message;
+    errEl.classList.remove('hidden');
+  }
+});
+
+/* ---------- Logout ---------- */
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+});
+
+/* ===================== UPLOAD GAMBAR ===================== */
+let uploadedImageUrl = '';
+const fileInput = document.getElementById('f-image');
+const uploadLabel = document.getElementById('upload-label');
+const uploadProgress = document.getElementById('upload-progress');
+const uploadBar = document.getElementById('upload-bar');
+const uploadStatus = document.getElementById('upload-status');
+const previewWrap = document.getElementById('image-preview-wrap');
+const imagePreview = document.getElementById('image-preview');
+const imageUrlText = document.getElementById('image-url-text');
+const manualUrlInput = document.getElementById('f-image-url');
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('File harus berupa gambar.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Ukuran file maksimal 5MB.');
+    return;
+  }
+
+  uploadLabel.textContent = file.name;
+  uploadProgress.classList.remove('hidden');
+  uploadBar.style.width = '30%';
+  uploadStatus.textContent = 'Mengunggah ke Supabase Storage...';
+
+  const ext = file.name.split('.').pop() || 'png';
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { cacheControl: '3600', upsert: false });
+
+  if (error) {
+    uploadBar.style.width = '0%';
+    uploadStatus.textContent = 'Upload gagal: ' + error.message;
+    uploadStatus.className = 'mt-1 text-[11px] text-red-400';
+    return;
+  }
+
+  uploadBar.style.width = '70%';
+  const { data: pub } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
+  uploadedImageUrl = pub.publicUrl;
+
+  uploadBar.style.width = '100%';
+  uploadStatus.textContent = 'Upload selesai!';
+  uploadStatus.className = 'mt-1 text-[11px] text-emerald-400';
+
+  imagePreview.src = uploadedImageUrl;
+  imageUrlText.textContent = uploadedImageUrl;
+  previewWrap.classList.remove('hidden');
+  manualUrlInput.value = uploadedImageUrl;
+
+  setTimeout(() => uploadProgress.classList.add('hidden'), 1500);
+});
+
+manualUrlInput.addEventListener('input', () => {
+  const url = manualUrlInput.value.trim();
+  uploadedImageUrl = url;
+  if (url) {
+    imagePreview.src = url;
+    imageUrlText.textContent = url;
+    previewWrap.classList.remove('hidden');
+  } else {
+    previewWrap.classList.add('hidden');
+  }
+});
+
+/* ===================== CRUD PRODUK ===================== */
+const productForm = document.getElementById('product-form');
+const saveBtn = document.getElementById('save-btn');
+const formError = document.getElementById('form-error');
+const formSuccess = document.getElementById('form-success');
+
+productForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById('f-name').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value);
+  const platform = document.getElementById('f-platform').value;
+  const description = document.getElementById('f-desc').value.trim();
+  const imageUrl = uploadedImageUrl || manualUrlInput.value.trim() || '';
+
+  formError.classList.add('hidden');
+  formSuccess.classList.add('hidden');
+
+  if (!name || isNaN(price) || price < 0) {
+    formError.textContent = 'Nama dan harga wajib diisi dengan benar.';
+    formError.classList.remove('hidden');
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Menyimpan...';
+
+  const { error } = await supabase.from('products').insert({
+    name,
+    price,
+    platform,
+    description,
+    image_url: imageUrl
+  });
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Simpan Produk';
+
+  if (error) {
+    formError.textContent = 'Gagal menyimpan: ' + error.message;
+    formError.classList.remove('hidden');
+    return;
+  }
+
+  formSuccess.textContent = 'Produk berhasil disimpan!';
+  formSuccess.classList.remove('hidden');
+
+  /* Reset form */
+  productForm.reset();
+  uploadedImageUrl = '';
+  fileInput.value = '';
+  uploadLabel.textContent = 'Pilih File';
+  uploadProgress.classList.add('hidden');
+  previewWrap.classList.add('hidden');
+
+  loadProducts();
+
+  setTimeout(() => formSuccess.classList.add('hidden'), 3000);
+});
+
+/* ---------- Tabel produk ---------- */
+const tableLoading = document.getElementById('table-loading');
+const tableEmpty = document.getElementById('table-empty');
+const productTable = document.getElementById('product-table');
+const productTbody = document.getElementById('product-tbody');
+const productCount = document.getElementById('product-count');
+
+async function loadProducts() {
+  tableLoading.classList.remove('hidden');
+  productTable.classList.add('hidden');
+  tableEmpty.classList.add('hidden');
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  tableLoading.classList.add('hidden');
+
+  if (error) {
+    tableEmpty.classList.remove('hidden');
+    tableEmpty.querySelector('p').textContent = 'Gagal memuat: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    tableEmpty.classList.remove('hidden');
+    return;
+  }
+
+  productCount.textContent = `${data.length} produk`;
+  productTbody.innerHTML = data.map((p) => `
+    <tr class="hover:bg-slate-800/30 transition-colors">
+      <td class="px-6 py-3">
+        <div class="flex items-center gap-3">
+          ${p.image_url
+            ? `<img src="${p.image_url}" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-700/50" />`
+            : `<div class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700/50 flex items-center justify-center text-slate-600 text-xs">NO</div>`}
+          <div>
+            <p class="font-semibold text-white text-sm">${p.name}</p>
+            <p class="text-xs text-slate-500 line-clamp-1 max-w-[220px]">${p.description || '-'}</p>
+          </div>
+        </div>
+      </td>
+      <td class="px-6 py-3">
+        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p.platform || 'General'}</span>
+      </td>
+      <td class="px-6 py-3 font-semibold text-emerald-300">${rupiah(p.price)}</td>
+      <td class="px-6 py-3 text-xs text-slate-500">${new Date(p.created_at).toLocaleDateString('id-ID')}</td>
+      <td class="px-6 py-3 text-right">
+        <button onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')"
+                class="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors">
+          Hapus
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  productTable.classList.remove('hidden');
+}
+
+window.deleteProduct = async function (id, name) {
+  if (!confirm(`Hapus produk "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) {
+    alert('Gagal menghapus: ' + error.message);
+    return;
+  }
+  loadProducts();
+};
+
+/* ---------- Init ---------- */
+checkSession();
+</script>
+</body>
+</html>
