@@ -108,7 +108,7 @@
         <div class="inline-flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-500/30 px-4 py-2 rounded-full mb-5 backdrop-blur">
           <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> LIVE • <span id="live-count">128</span> <span data-i18n="hero.online">Trader Online Sekarang</span>
         </div>
-        <h1 class="text-4xl leading-[1.02] sm:text-6xl lg:text-7xl font-black tracking-tight">
+        <h1 class="text-3xl leading-[1.05] sm:text-5xl lg:text-6xl font-black tracking-tight">
           <span data-i18n="hero.l1">Trading Tenang.</span><br>
           <span class="animated-gradient" data-i18n="hero.l2">Profit Jalan Otomatis,</span><br>
           <span id="typing-suffix" class="typing-cursor" data-i18n="hero.l3">Tanpa Emosi.</span>
@@ -225,9 +225,11 @@
 <!-- LIGHTBOX -->
 <div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/95 backdrop-blur-md">
   <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-red-500 transition flex items-center justify-center">✕</button>
-  <button onclick="zoomLightbox(-0.25)" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">−</button>
-  <button onclick="zoomLightbox(0.25)" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">+</button>
-  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 bg-slate-900/90 border border-slate-700 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400" id="zoom-level">100%</div>
+  <button onclick="lbNav(-1)" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">‹</button>
+  <button onclick="lbNav(1)" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">›</button>
+  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 bg-slate-900/90 border border-slate-700 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-3">
+    <span id="zoom-level">100%</span><span id="lb-counter" class="text-slate-400"></span>
+  </div>
   <div id="lightbox-stage" class="overflow-hidden w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing" style="touch-action:none">
     <img id="lightbox-img" src="" alt="Preview" draggable="false" class="max-w-none select-none" style="transform:translate(0px,0px) scale(1); transition:transform .15s ease-out;">
   </div>
@@ -311,6 +313,7 @@ function setLang(l) {
   document.getElementById('lang-en').className = 'px-2.5 py-1.5 ' + (l==='en' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('calc-deposit-cur').textContent = CUR === 'USD' ? '($)' : '(Rp)';
   updateCalculator(); renderProducts(); renderFAQ(); renderTestimonials();
+  if (window.resetTyping) window.resetTyping();
 }
 
 /* ==================== CALCULATOR ==================== */
@@ -332,9 +335,14 @@ document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 // TYPING EFFECT
 document.addEventListener('DOMContentLoaded', () => {
-  const words = ['Tanpa Emosi.','Bebas Stres.','Profit Maksimal.','Disiplin Total.','No Revenge Trading.','Risk Terukur.'];
+  const WORDS = {
+    id: ['Tanpa Emosi.','Bebas Stres.','Profit Maksimal.','Disiplin Total.','No Revenge Trading.','Risk Terukur.'],
+    en: ['No Emotions.','Stress-Free.','Maximum Profit.','Total Discipline.','No Revenge Trading.','Measured Risk.']
+  };
   const el = document.getElementById('typing-suffix'); let wi = 0, ci = 0, del = false;
+  window.resetTyping = () => { wi = 0; ci = 0; del = false; };
   (function typeLoop(){
+    const words = WORDS[LANG] || WORDS.id;
     const w = words[wi];
     el.textContent = w.slice(0, ci);
     if (!del && ci < w.length) { ci++; setTimeout(typeLoop, 70); }
@@ -369,12 +377,19 @@ function bindTilt(card) {
 
 /* ==================== TICKER LIVE ==================== */
 const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['GC=F','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
+const TICKER_FALLBACK = [
+  ['EUR/USD','1.0842','+0.12%'],['GOLD','2651.30','+0.45%'],['BTC','97450','+1.20%'],
+  ['GBP/USD','1.2715','-0.08%'],['USD/JPY','154.32','+0.21%'],['OIL','71.84','-0.33%']
+];
 async function fetchQuote(sym) {
-  try {
-    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
-    const j = await r.json(); const m = j.chart.result[0].meta;
-    return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.regularMarketPrice };
-  } catch(e) { return null; }
+  for (const host of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
+    try {
+      const r = await fetch(`${host}/v8/finance/chart/${sym}?interval=1d&range=1d`);
+      const j = await r.json(); const m = j.chart.result[0].meta;
+      return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.regularMarketPrice };
+    } catch(e) {}
+  }
+  return null;
 }
 async function loadTicker() {
   const items = await Promise.all(TICKER_SYMBOLS.map(async ([sym, name]) => {
@@ -382,8 +397,14 @@ async function loadTicker() {
     const up = q.price >= q.prev, pct = ((q.price - q.prev) / q.prev * 100);
     return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${name}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${q.price.toLocaleString('en-US',{maximumFractionDigits:2})}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span></span>`;
   }));
-  const html = items.filter(Boolean).join('<span class="text-slate-700">|</span>');
-  if (html) document.getElementById('ticker').innerHTML = html + '<span class="text-slate-700">|</span>' + html;
+  let html = items.filter(Boolean).join('<span class="text-slate-700">|</span>');
+  if (!html) {
+    html = TICKER_FALLBACK.map(([n,p,c]) => {
+      const up = !c.startsWith('-');
+      return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${n}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${p}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${c.replace('-','')}</span></span>`;
+    }).join('<span class="text-slate-700">|</span>');
+  }
+  document.getElementById('ticker').innerHTML = html + '<span class="text-slate-700">|</span>' + html;
 }
 
 /* ==================== TESTIMONI ==================== */
@@ -481,6 +502,7 @@ function renderProducts() {
   if (!filtered.length) { (allProducts.length ? noResultState : emptyState).classList.remove('hidden'); return; }
   productGrid.innerHTML = filtered.map((p, idx) => {
     const imgs = (Array.isArray(p.images) && p.images.length ? p.images : (p.image_url ? [p.image_url] : []));
+    productImagesMap[p.id] = imgs;
     const cover = imgs[0] || '';
     const disc = discPct(p);
     const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
@@ -497,7 +519,7 @@ function renderProducts() {
     ].join('');
     return `
     <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card reveal">
-      <div class="relative h-44 bg-slate-900 overflow-hidden cursor-zoom-in" onclick="openLightbox('${cover.replace(/'/g,"\\'")}')">
+      <div class="relative h-44 bg-slate-900 overflow-hidden cursor-zoom-in" onclick="openLightbox('${p.id}')">
         ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
         <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
         ${imgs.length > 1 ? `<span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold">📷 ${imgs.length}</span>` : ''}
@@ -546,19 +568,32 @@ function closeQrisModal() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQrisModal(); closeLightbox(); } });
 
-/* ==================== LIGHTBOX (drag + zoom) ==================== */
+/* ==================== LIGHTBOX (drag + zoom + galeri) ==================== */
 let lbScale = 1, lbX = 0, lbY = 0, lbDragging = false, lbSX = 0, lbSY = 0, lbOX = 0, lbOY = 0;
+let lbImages = [], lbIndex = 0;
+const productImagesMap = {};
 function applyLb() {
+  document.getElementById('lightbox-img').src = lbImages[lbIndex] || '';
   document.getElementById('lightbox-img').style.transform = `translate(${lbX}px,${lbY}px) scale(${lbScale})`;
   document.getElementById('zoom-level').textContent = Math.round(lbScale * 100) + '%';
+  document.getElementById('lb-counter').textContent = lbImages.length > 1 ? `${lbIndex + 1} / ${lbImages.length}` : '';
 }
-function openLightbox(src) {
-  if (!src) return;
-  document.getElementById('lightbox-img').src = src;
+function openLightbox(srcOrId) {
+  if (productImagesMap[srcOrId] && productImagesMap[srcOrId].length) {
+    lbImages = productImagesMap[srcOrId]; lbIndex = 0;
+  } else {
+    lbImages = srcOrId ? [srcOrId] : []; lbIndex = 0;
+  }
+  if (!lbImages.length) return;
   lbScale = 1; lbX = 0; lbY = 0; applyLb();
   document.getElementById('lightbox').classList.remove('hidden');
   document.getElementById('lightbox').classList.add('flex');
   document.body.style.overflow = 'hidden';
+}
+function lbNav(d) {
+  if (lbImages.length < 2) return;
+  lbIndex = (lbIndex + d + lbImages.length) % lbImages.length;
+  lbScale = 1; lbX = 0; lbY = 0; applyLb();
 }
 function closeLightbox() {
   document.getElementById('lightbox').classList.add('hidden');
@@ -566,6 +601,11 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 function zoomLightbox(d) { lbScale = Math.min(5, Math.max(0.5, lbScale + d)); applyLb(); }
+document.addEventListener('keydown', e => {
+  if (document.getElementById('lightbox').classList.contains('hidden')) return;
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+});
 const lbStage = document.getElementById('lightbox-stage');
 lbStage.addEventListener('wheel', e => { e.preventDefault(); zoomLightbox(e.deltaY < 0 ? 0.2 : -0.2); }, {passive:false});
 lbStage.addEventListener('pointerdown', e => { lbDragging = true; lbSX = e.clientX; lbSY = e.clientY; lbOX = lbX; lbOY = lbY; lbStage.setPointerCapture(e.pointerId); });
