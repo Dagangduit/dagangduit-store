@@ -136,8 +136,8 @@
           <div class="flex justify-between items-center mt-4"><div><p class="text-xs text-slate-400" data-i18n="hero.cardTag">EA Best Seller</p><p class="font-bold text-sm">DagangDuit Auto Risk EA</p></div><div class="text-right"><p class="text-xs line-through text-slate-500">Rp 750.000</p><p class="font-black text-emerald-400">Rp 450.000</p></div></div>
           <a href="#katalog" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl" data-i18n="hero.cardBtn">Beli Sekarang - QRIS ⚡</a>
         </div>
-        <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text-[10px] text-slate-400 leading-none" data-i18n="hero.badge1">Order Baru</p><p class="text-xs font-bold">Rizky • Jakarta • EA</p></div></div>
-        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black">+ $124.50 ▲</p></div>
+        <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text-[10px] text-slate-400 leading-none" data-i18n="hero.badge1">Order Baru</p><p class="text-xs font-bold" id="badge-order">Rizky • Jakarta • EA</p></div></div>
+        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black" id="badge-profit">+ $124.50 ▲</p></div>
       </div>
     </div>
   </section>
@@ -807,6 +807,32 @@ cfForm.addEventListener('submit', e => {
   window.open(waLink(msg), '_blank');
   if (window.confetti) confetti({particleCount:80, spread:70, origin:{y:.7}, colors:['#10b981','#34d399','#22d3ee']});
 });
+
+/* ==================== HERO BADGES ROTATION ==================== */
+const ORDER_FEED = [
+  'Rizky • Jakarta • EA','Dewi • Surabaya • Indikator','Budi • Bandung • EA',
+  'Sari • Medan • EA','Andi • Bali • Indikator','Putri • Yogyakarta • EA',
+  'Fajar • Semarang • EA','Maya • Makassar • Indikator','Rian • Palembang • EA',
+  'Nadia • Solo • EA','Eko • Manado • Indikator','Lina • Jambi • EA'
+];
+const PROFIT_FEED = ['+$124.50','+$89.20','+$210.75','+$56.40','+$178.90','+$342.10','+$67.80','+$145.30','+$98.60','+$256.45','+$73.15','+$189.90'];
+let orderIdx = 0, profitIdx = 0;
+function rotateOrder() {
+  const o = document.getElementById('badge-order');
+  if (!o) return;
+  o.style.opacity = 0;
+  setTimeout(() => { orderIdx = (orderIdx + 1) % ORDER_FEED.length; o.textContent = ORDER_FEED[orderIdx]; o.style.opacity = 1; }, 300);
+}
+function rotateProfit() {
+  const p = document.getElementById('badge-profit');
+  if (!p) return;
+  p.style.opacity = 0;
+  setTimeout(() => { profitIdx = (profitIdx + 1) % PROFIT_FEED.length; p.textContent = PROFIT_FEED[profitIdx] + ' ▲'; p.style.opacity = 1; }, 300);
+}
+document.getElementById('badge-order').style.transition = 'opacity .3s';
+document.getElementById('badge-profit').style.transition = 'opacity .3s';
+setInterval(rotateOrder, 10 * 60 * 1000);   // order baru tiap 10 menit
+setInterval(rotateProfit, 30 * 60 * 1000);  // profit tiap 30 menit
 
 /* ==================== ORDER TRACKING (otomatis, tanpa form) ==================== */
 document.getElementById('modal-wa-btn').addEventListener('click', () => {
