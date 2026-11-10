@@ -54,6 +54,9 @@
   @keyframes floatLogo{0%,100%{transform:translateY(0) rotate(-4deg) scale(1)}50%{transform:translateY(-16px) rotate(5deg) scale(1.06)}}
   .pop{animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
   @keyframes popIn{from{transform:scale(.8); opacity:0}to{transform:scale(1); opacity:1}}
+  .shine-card{position:relative; overflow:hidden;}
+  .shine-card::after{content:''; position:absolute; top:0; left:-100%; width:60%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.14),transparent); transform:skewX(-20deg); transition:left .6s ease; pointer-events:none; z-index:2;}
+  .shine-card:hover::after{left:130%;}
   ::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#134e4a; border-radius:99px}
   @keyframes modal-pop{from{opacity:0; transform:translateY(24px) scale(.96)}to{opacity:1; transform:translateY(0) scale(1)}}
   .modal-card{animation:modal-pop .3s cubic-bezier(.34,1.56,.64,1);}
@@ -64,13 +67,8 @@
 
 <div class="aurora"><span class="particle"></span><span class="particle"></span><span class="particle"></span><span class="particle"></span><span class="particle"></span></div>
 
-<!-- LOGO MENGAMBANG -->
-<div class="fixed right-3 sm:right-5 top-24 sm:top-28 z-40 pointer-events-none">
-  <img src="logo.png" alt="DagangDuit" class="float-logo w-14 h-14 sm:w-20 sm:h-20 rounded-2xl object-contain">
-</div>
-
 <!-- TOP PROMO -->
-<div class="relative z-20 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-center text-xs sm:text-sm font-extrabold py-2 px-4">
+<div class="relative z-20 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-center text-[10px] sm:text-xs font-bold py-1.5 px-4">
   🔥 <span data-i18n="promo.text">PROMO: Diskon s.d 40% + Gratis Setting VPS</span> — <a href="#katalog" class="underline" data-i18n="promo.cta">Klaim Sekarang →</a>
 </div>
 
@@ -312,7 +310,7 @@ function setLang(l) {
   document.getElementById('lang-id').className = 'px-2.5 py-1.5 ' + (l==='id' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('lang-en').className = 'px-2.5 py-1.5 ' + (l==='en' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('calc-deposit-cur').textContent = CUR === 'USD' ? '($)' : '(Rp)';
-  updateCalculator(); renderProducts(); renderFAQ();
+  updateCalculator(); renderProducts(); renderFAQ(); renderTestimonials();
 }
 
 /* ==================== CALCULATOR ==================== */
@@ -357,15 +355,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // LIVE COUNT
   let count = 118; setInterval(() => { count += Math.floor(Math.random() * 5) - 2; if (count < 100) count = 100; if (count > 160) count = 160; document.getElementById('live-count').textContent = count; }, 3000);
   // TILT CARDS
-  document.querySelectorAll('.tilt-card').forEach(card => {
-    card.addEventListener('mousemove', e => { const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
-      const rx = ((e.clientY - r.top) / r.height - .5) * -8, ry = ((e.clientX - r.left) / r.width - .5) * 8;
-      card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`; });
-    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
-  });
+  document.querySelectorAll('.tilt-card').forEach(bindTilt);
 });
+
+function bindTilt(card) {
+  card.addEventListener('mousemove', e => { const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    const rx = ((e.clientY - r.top) / r.height - .5) * -8, ry = ((e.clientX - r.left) / r.width - .5) * 8;
+    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`; });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+}
 
 /* ==================== TICKER LIVE ==================== */
 const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['GC=F','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
@@ -387,17 +387,27 @@ async function loadTicker() {
 }
 
 /* ==================== TESTIMONI ==================== */
-const TESTIMONIALS = [
-  {n:'Rizky Pratama',c:'Jakarta',t:'EA-nya mantap! 3 bulan konsisten profit 8-12% per bulan. Support WA super cepat.',s:5},
-  {n:'Sari Wulandari',c:'Surabaya',t:'Dulu sering revenge trading. Sejak pakai Auto Risk EA, psikologi jauh lebih tenang.',s:5},
-  {n:'Budi Santoso',c:'Bandung',t:'Indikator SMC-nya akurat banget. Worth every rupiah!',s:5},
-  {n:'Andi Wijaya',c:'Medan',t:'File langsung terkirim setelah bayar QRIS. Mantap!',s:5},
-  {n:'Dewi Lestari',c:'Semarang',t:'Profit konsisten, tidak ada lag. Recommended!',s:5},
-  {n:'Fajar Nugroho',c:'Makassar',t:'Customer service ramah, produknya original. Repeat order!',s:5},
-];
+const TESTIMONIALS = {
+  id: [
+    {n:'Rizky Pratama',c:'Jakarta',t:'EA-nya mantap! 3 bulan konsisten profit 8-12% per bulan. Support WA super cepat.',s:5},
+    {n:'Sari Wulandari',c:'Surabaya',t:'Dulu sering revenge trading. Sejak pakai Auto Risk EA, psikologi jauh lebih tenang.',s:5},
+    {n:'Budi Santoso',c:'Bandung',t:'Indikator SMC-nya akurat banget. Worth every rupiah!',s:5},
+    {n:'Andi Wijaya',c:'Medan',t:'File langsung terkirim setelah bayar QRIS. Mantap!',s:5},
+    {n:'Dewi Lestari',c:'Semarang',t:'Profit konsisten, tidak ada lag. Recommended!',s:5},
+    {n:'Fajar Nugroho',c:'Makassar',t:'Customer service ramah, produknya original. Repeat order!',s:5},
+  ],
+  en: [
+    {n:'Rizky Pratama',c:'Jakarta',t:'Amazing EA! 3 months of consistent 8-12% monthly profit. WA support is super fast.',s:5},
+    {n:'Sarah Mitchell',c:'London',t:'I used to revenge trade. Since using the Auto Risk EA, my psychology is so much calmer.',s:5},
+    {n:'Budi Santoso',c:'Bandung',t:'The SMC indicator is incredibly accurate. Worth every penny!',s:5},
+    {n:'Andi Wijaya',c:'Medan',t:'Files delivered right after QRIS payment. Awesome!',s:5},
+    {n:'Dewi Lestari',c:'Semarang',t:'Consistent profit, zero lag. Highly recommended!',s:5},
+    {n:'Fajar Nugroho',c:'Makassar',t:'Friendly customer service, genuine products. Ordered again!',s:5},
+  ]
+};
 function renderTestimonials() {
   const card = t => `<div class="glass-panel rounded-2xl p-5 w-72 shrink-0 mx-2"><div class="flex gap-0.5 mb-2">${'★'.repeat(t.s)}</div><p class="text-xs text-slate-300 leading-relaxed mb-3">"${t.t}"</p><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-black text-emerald-400">${t.n[0]}</div><div><p class="text-xs font-bold">${t.n}</p><p class="text-[10px] text-slate-500">${t.c} • Verified</p></div></div></div>`;
-  const html = TESTIMONIALS.map(card).join('');
+  const html = (TESTIMONIALS[LANG] || TESTIMONIALS.id).map(card).join('');
   document.getElementById('testi-track').innerHTML = html + html;
 }
 
@@ -486,7 +496,7 @@ function renderProducts() {
       idx === 0 ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">★ TERLARIS</span>` : '',
     ].join('');
     return `
-    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card reveal">
+    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card reveal">
       <div class="relative h-44 bg-slate-900 overflow-hidden cursor-zoom-in" onclick="openLightbox('${cover.replace(/'/g,"\\'")}')">
         ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
         <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
@@ -509,6 +519,7 @@ function renderProducts() {
     </div>`;
   }).join('');
   productGrid.classList.remove('hidden');
+  productGrid.querySelectorAll('.tilt-card').forEach(bindTilt);
   requestAnimationFrame(() => productGrid.querySelectorAll('.reveal').forEach(el => io.observe(el)));
 }
 
