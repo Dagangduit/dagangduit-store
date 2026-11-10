@@ -672,6 +672,13 @@ function renderIntlOptions() {
     </div>`).join('')
     : `<p class="text-xs text-slate-500 text-center py-3">${LANG==='en'?'International payment links not configured yet. Please chat via WhatsApp.':'Link pembayaran internasional belum diatur. Silakan chat via WhatsApp.'}</p>`;
 }
+async function loadPaySettings() {
+  try {
+    const { data, error } = await supabaseClient.from('settings').select('key, value').like('key', 'pay_');
+    if (error || !data) return;
+    data.forEach(r => { const k = r.key.slice(4); if (k in PAY_LINKS) PAY_LINKS[k] = r.value || ''; });
+  } catch(e) {}
+}
 function copyPay(text) {
   navigator.clipboard.writeText(text).then(() => {
     if (window.confetti) confetti({particleCount:30, spread:40, origin:{y:.6}, colors:['#10b981','#34d399']});
@@ -788,6 +795,7 @@ cfForm.addEventListener('submit', e => {
 
 /* ==================== INIT ==================== */
 setLang(LANG); // terapkan bahasa hasil deteksi browser
+loadPaySettings();
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
 loadProducts();
