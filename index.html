@@ -190,6 +190,63 @@
     <p class="text-center text-slate-400 text-sm mb-8" data-i18n="faq.sub">Masih ragu? Chat WhatsApp kami langsung.</p>
     <div class="space-y-3" id="faq-list"></div>
   </section>
+
+  <!-- CUSTOM EA / INDIKATOR -->
+  <section id="custom" class="max-w-7xl mx-auto px-4 sm:px-8 py-14 reveal">
+    <div class="relative glass-panel rounded-3xl overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"></div>
+      <div class="relative grid lg:grid-cols-2 gap-8 p-6 sm:p-10">
+        <div>
+          <span class="inline-block text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-4 py-1.5 rounded-full mb-4" data-i18n="custom.kicker">Jasa Custom Development</span>
+          <h2 class="text-2xl sm:text-4xl font-black leading-tight mb-4" data-i18n="custom.title">Butuh EA atau Indikator <span class="animated-gradient">Sesuai Strategi Kamu?</span></h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6" data-i18n="custom.desc">Tim developer kami siap membangun Expert Advisor / Indikator MT4 & MT5 custom — dari strategi sederhana sampai sistem trading kompleks. Konsultasi gratis, estimasi harga transparan.</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xs">✓</span><span data-i18n="custom.b1">Gratis konsultasi &amp; estimasi biaya</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xs">✓</span><span data-i18n="custom.b2">Source code .mq4/.mq5 milik kamu 100%</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xs">✓</span><span data-i18n="custom.b3">Garansi revisi hingga sesuai ekspektasi</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xs">✓</span><span data-i18n="custom.b4">Support setup &amp; optimasi parameter</span></div>
+          </div>
+          <div class="mt-6 flex items-center gap-3 bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
+            <div class="text-2xl">⚡</div>
+            <div><p class="text-xs text-slate-500" data-i18n="custom.avg">Rata-rata pengerjaan</p><p class="font-black text-emerald-400" data-i18n="custom.avgv">3–7 hari kerja</p></div>
+          </div>
+        </div>
+        <form id="custom-form" class="bg-slate-950/50 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+          <h3 class="font-extrabold text-sm flex items-center gap-2"><span class="text-emerald-400">🛠️</span> <span data-i18n="custom.formTitle">Request Custom Project</span></h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fName">Nama *</label><input id="cf-name" required type="text" placeholder="Nama kamu" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none"></div>
+            <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fPlatform">Platform *</label>
+              <select id="cf-platform" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                <option value="MT5">MT5</option><option value="MT4">MT4</option><option value="MT5+MT4">MT4 & MT5</option>
+              </select></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fType">Jenis *</label>
+              <select id="cf-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                <option value="EA" data-i18n="custom.tEA">Expert Advisor (EA)</option>
+                <option value="Indicator" data-i18n="custom.tInd">Custom Indicator</option>
+                <option value="Keduanya" data-i18n="custom.tBoth">EA + Indicator</option>
+                <option value="Belum tahu" data-i18n="custom.tDont">Belum tahu — perlu saran</option>
+              </select></div>
+            <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fBudget">Estimasi Budget</label>
+              <select id="cf-budget" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                <option value="< 500rb" data-i18n="custom.b1o">&lt; Rp 500rb</option>
+                <option value="500rb - 1jt" data-i18n="custom.b2o">Rp 500rb – 1jt</option>
+                <option value="1jt - 3jt" data-i18n="custom.b3o">Rp 1jt – 3jt</option>
+                <option value="3jt - 5jt" data-i18n="custom.b4o">Rp 3jt – 5jt</option>
+                <option value="> 5jt" data-i18n="custom.b5o">&gt; Rp 5jt</option>
+                <option value="Nego" data-i18n="custom.b6o">Nego / Belum tahu</option>
+              </select></div>
+          </div>
+          <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fDesc">Jelaskan Strategi / Kebutuhan *</label>
+            <textarea id="cf-desc" required rows="4" data-i18n-ph="custom.fDescPh" placeholder="Contoh: EA grid untuk XAUUSD dengan lot sizing otomatis, SL/TP trailing, filter news..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none resize-none"></textarea></div>
+          <button type="submit" class="btn-shine w-full bg-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-sm" data-i18n="custom.submit">🚀 Kirim Request via WhatsApp</button>
+          <p class="text-center text-[10px] text-slate-600" data-i18n="custom.note">Gratis konsultasi • Balasan max 1x24 jam</p>
+        </form>
+      </div>
+    </div>
+  </section>
 </main>
 <!-- FOOTER -->
 <footer class="border-t border-slate-800/60 bg-slate-950 py-8 mt-10 relative z-10">
@@ -266,7 +323,16 @@ const I18N = {
     'modal.title':'Checkout QRIS','modal.sub':'Scan kode QR di bawah ini dengan aplikasi e-wallet / m-banking apa pun',
     'modal.product':'Produk','modal.plan':'Paket','modal.total':'Total Bayar','modal.note':'Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.','modal.wa':'💬 Konfirmasi Pembayaran via WhatsApp','modal.secure':'Pembayaran aman • Diproses manual oleh admin',
     'faq.title':'Pertanyaan Sering Ditanyakan','faq.sub':'Masih ragu? Chat WhatsApp kami langsung.',
-    'footer.tag':'EA & Indikator Trading • MT4/MT5','footer.disc':'⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.'
+    'footer.tag':'EA & Indikator Trading • MT4/MT5','footer.disc':'⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.',
+    'custom.kicker':'Jasa Custom Development','custom.title':'Butuh EA atau Indikator <span class="animated-gradient">Sesuai Strategi Kamu?</span>',
+    'custom.desc':'Tim developer kami siap membangun Expert Advisor / Indikator MT4 & MT5 custom — dari strategi sederhana sampai sistem trading kompleks. Konsultasi gratis, estimasi harga transparan.',
+    'custom.b1':'Gratis konsultasi & estimasi biaya','custom.b2':'Source code .mq4/.mq5 milik kamu 100%','custom.b3':'Garansi revisi hingga sesuai ekspektasi','custom.b4':'Support setup & optimasi parameter',
+    'custom.avg':'Rata-rata pengerjaan','custom.avgv':'3–7 hari kerja',
+    'custom.formTitle':'Request Custom Project','custom.fName':'Nama *','custom.fPlatform':'Platform *','custom.fType':'Jenis *','custom.fBudget':'Estimasi Budget',
+    'custom.tEA':'Expert Advisor (EA)','custom.tInd':'Custom Indicator','custom.tBoth':'EA + Indicator','custom.tDont':'Belum tahu — perlu saran',
+    'custom.b1o':'< Rp 500rb','custom.b2o':'Rp 500rb – 1jt','custom.b3o':'Rp 1jt – 3jt','custom.b4o':'Rp 3jt – 5jt','custom.b5o':'> Rp 5jt','custom.b6o':'Nego / Belum tahu',
+    'custom.fDesc':'Jelaskan Strategi / Kebutuhan *','custom.fDescPh':'Contoh: EA grid untuk XAUUSD dengan lot sizing otomatis, SL/TP trailing, filter news...',
+    'custom.submit':'🚀 Kirim Request via WhatsApp','custom.note':'Gratis konsultasi • Balasan max 1x24 jam'
   },
   en: {
     'promo.text':'PROMO: Up to 40% OFF + Free VPS Setup','promo.cta':'Claim Now →',
@@ -290,7 +356,16 @@ const I18N = {
     'modal.title':'QRIS Checkout','modal.sub':'Scan the QR code below with any e-wallet / mobile banking app',
     'modal.product':'Product','modal.plan':'Plan','modal.total':'Total','modal.note':'After payment, send proof via WhatsApp. Product files delivered within 5 minutes.','modal.wa':'💬 Confirm Payment via WhatsApp','modal.secure':'Secure payment • Processed manually by admin',
     'faq.title':'Frequently Asked Questions','faq.sub':'Still unsure? Chat us on WhatsApp.',
-    'footer.tag':'Trading EA & Indicators • MT4/MT5','footer.disc':'⚠️ Trading involves risk. Make sure you understand before trading.'
+    'footer.tag':'Trading EA & Indicators • MT4/MT5','footer.disc':'⚠️ Trading involves risk. Make sure you understand before trading.',
+    'custom.kicker':'Custom Development Service','custom.title':'Need an EA or Indicator <span class="animated-gradient">Built for Your Strategy?</span>',
+    'custom.desc':'Our developer team builds custom MT4 & MT5 Expert Advisors / Indicators — from simple strategies to complex trading systems. Free consultation, transparent pricing.',
+    'custom.b1':'Free consultation & cost estimate','custom.b2':'100% .mq4/.mq5 source code ownership','custom.b3':'Revision warranty until it meets expectations','custom.b4':'Setup & parameter optimization support',
+    'custom.avg':'Average turnaround','custom.avgv':'3–7 business days',
+    'custom.formTitle':'Custom Project Request','custom.fName':'Name *','custom.fPlatform':'Platform *','custom.fType':'Type *','custom.fBudget':'Budget Estimate',
+    'custom.tEA':'Expert Advisor (EA)','custom.tInd':'Custom Indicator','custom.tBoth':'EA + Indicator','custom.tDont':'Not sure — need advice',
+    'custom.b1o':'< $30','custom.b2o':'$30 – $60','custom.b3o':'$60 – $180','custom.b4o':'$180 – $300','custom.b5o':'> $300','custom.b6o':'Negotiable / Not sure',
+    'custom.fDesc':'Describe Your Strategy / Needs *','custom.fDescPh':'e.g. Grid EA for XAUUSD with auto lot sizing, trailing SL/TP, news filter...',
+    'custom.submit':'🚀 Send Request via WhatsApp','custom.note':'Free consultation • Reply within 24h'
   }
 };
 const t = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
@@ -612,6 +687,19 @@ lbStage.addEventListener('pointerdown', e => { lbDragging = true; lbSX = e.clien
 lbStage.addEventListener('pointermove', e => { if (!lbDragging) return; lbX = lbOX + (e.clientX - lbSX); lbY = lbOY + (e.clientY - lbSY); applyLb(); });
 lbStage.addEventListener('pointerup', () => lbDragging = false);
 lbStage.addEventListener('pointercancel', () => lbDragging = false);
+
+/* ==================== CUSTOM EA FORM ==================== */
+document.getElementById('custom-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('cf-name').value.trim();
+  const platform = document.getElementById('cf-platform').value;
+  const type = document.getElementById('cf-type').selectedOptions[0].textContent;
+  const budget = document.getElementById('cf-budget').selectedOptions[0].textContent;
+  const desc = document.getElementById('cf-desc').value.trim();
+  const msg = `Halo Admin DagangDuit, saya ingin request custom project:\n\nNama: ${name}\nPlatform: ${platform}\nJenis: ${type}\nBudget: ${budget}\n\nDetail kebutuhan:\n${desc}`;
+  window.open('https://wa.me/6285161853108?text=' + encodeURIComponent(msg), '_blank');
+  if (window.confetti) confetti({particleCount:80, spread:70, origin:{y:.7}, colors:['#10b981','#34d399','#22d3ee']});
+});
 
 /* ==================== INIT ==================== */
 loadRate();
