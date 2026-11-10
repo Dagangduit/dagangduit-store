@@ -70,6 +70,15 @@
             pointer-events: none;
         }
         .shine:hover::after { transform: translateX(120%); }
+        /* Logo mengambang di kanan atas */
+        .float-logo {
+            animation: float-logo 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.45));
+        }
+        @keyframes float-logo {
+            0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); }
+            50%      { transform: translateY(-16px) rotate(5deg) scale(1.06); }
+        }
         @keyframes modal-pop {
             from { opacity: 0; transform: translateY(24px) scale(0.96); }
             to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -81,6 +90,11 @@
 
     <!-- Top Ambient Glow -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-emerald-500/20 via-teal-500/5 to-transparent pointer-events-none blur-3xl"></div>
+
+    <!-- Logo Mengambang -->
+    <div class="fixed right-3 sm:right-5 top-24 sm:top-28 z-40 pointer-events-none">
+        <img src="logo.png" alt="DagangDuit" class="float-logo w-14 h-14 sm:w-20 sm:h-20 rounded-2xl object-contain">
+    </div>
 
     <!-- 1. NAVIGATION BAR -->
     <header class="border-b border-slate-900 bg-slate-950/85 backdrop-blur-xl sticky top-0 z-50 py-3.5 px-4 sm:px-8">
@@ -178,6 +192,21 @@
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1" data-i18n="m4">Tanpa Biaya Admin</p>
                 </div>
             </div>
+        </section>
+
+        <!-- 3b. LIVE MARKET PRICES -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-8 pb-10 reveal">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="mkt.kicker">Live Market Data</span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-100 mt-1" data-i18n="mkt.title">Harga Pasar Terkini</h2>
+                </div>
+                <span class="flex items-center gap-2 text-[10px] font-black text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span data-i18n="mkt.live">LIVE</span>
+                </span>
+            </div>
+            <div id="market-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
         </section>
 
         <!-- 4. INTERACTIVE COMPOUNDING & RISK CALCULATOR -->
@@ -427,6 +456,7 @@
                 'hero.desc':'Platform resmi <strong>DagangDuit</strong> oleh <span class="text-slate-200 font-bold">Agus Pujianto</span>. Kami memprogram <strong>Expert Advisor (EA)</strong>, <strong>Indikator Visual</strong>, dan <strong>Tools Analytics Multi-Akun</strong> yang dirancang khusus untuk memperketat manajemen risiko ekuitas Anda di pasar forex &amp; komoditas.',
                 'hero.cta1':'Eksplorasi Katalog Produk','hero.cta2':'Simulasi Risk/Reward',
                 'm1':'Kecepatan Eksekusi Script','m2':'Optimasi Order Buffer','m3':'MQL4 / MQL5 / PineScript','m4':'Tanpa Biaya Admin',
+                'mkt.kicker':'Live Market Data','mkt.title':'Harga Pasar Terkini','mkt.live':'LIVE',
                 'calc.kicker':'Risk &amp; Compounding Simulator','calc.title':'Simulasikan Ketahanan Modal Anda',
                 'calc.desc':'Sebelum memilih produk EA atau indikator, gunakan kalkulator simulasi ini untuk memperkirakan pertumbuhan ekuitas berbasis proyeksi profit bulanan dan manajemen risiko lot.',
                 'calc.deposit':'Modal Awal Deposit','calc.rate':'Estimasi Profit Bulanan (%)','calc.months':'Durasi Waktu (Bulan)',
@@ -457,6 +487,7 @@
                 'hero.desc':'The official <strong>DagangDuit</strong> platform by <span class="text-slate-200 font-bold">Agus Pujianto</span>. We engineer <strong>Expert Advisors (EA)</strong>, <strong>Visual Indicators</strong>, and <strong>Multi-Account Analytics Tools</strong> designed to tighten equity risk management in forex &amp; commodities markets.',
                 'hero.cta1':'Explore Product Catalog','hero.cta2':'Risk/Reward Simulation',
                 'm1':'Script Execution Speed','m2':'Order Buffer Optimization','m3':'MQL4 / MQL5 / PineScript','m4':'No Admin Fees',
+                'mkt.kicker':'Live Market Data','mkt.title':'Current Market Prices','mkt.live':'LIVE',
                 'calc.kicker':'Risk &amp; Compounding Simulator','calc.title':'Simulate Your Capital Growth',
                 'calc.desc':'Before choosing an EA or indicator, use this simulation calculator to estimate equity growth based on projected monthly profit and lot risk management.',
                 'calc.deposit':'Initial Deposit','calc.rate':'Est. Monthly Profit (%)','calc.months':'Duration (Months)',
@@ -849,6 +880,72 @@
                 if (e.key === 'Escape') closeLightbox();
             });
         })();
+
+        // ===================== LIVE MARKET PRICES =====================
+        const MARKETS = [
+            { sym: 'EURUSD=X', name: 'EUR/USD', label: 'Euro / US Dollar' },
+            { sym: 'GBPUSD=X', name: 'GBP/USD', label: 'Pound / US Dollar' },
+            { sym: 'USDJPY=X', name: 'USD/JPY', label: 'US Dollar / Yen' },
+            { sym: 'XAUUSD=X', name: 'XAU/USD', label: 'Gold Spot' },
+            { sym: 'BTC-USD',  name: 'BTC/USD', label: 'Bitcoin' },
+            { sym: 'CL=F',     name: 'OIL',     label: 'Crude Oil WTI' }
+        ];
+
+        const fmtPrice = (n, sym) => {
+            if (n == null || isNaN(n)) return '—';
+            if (sym === 'BTC-USD') return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+            if (sym === 'USDJPY=X') return n.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+            if (sym === 'XAUUSD=X') return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        };
+
+        async function fetchQuote(m) {
+            try {
+                const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${m.sym}?interval=1d&range=5d`);
+                const json = await res.json();
+                const result = json && json.chart && json.chart.result && json.chart.result[0];
+                if (!result) return null;
+                const meta = result.meta || {};
+                const closes = (((result.indicators || {}).quote || [])[0] || {}).close || [];
+                const valid = closes.filter(c => c != null);
+                const price = meta.regularMarketPrice ?? valid[valid.length - 1];
+                const prev = valid.length > 1 ? valid[valid.length - 2] : (meta.previousClose ?? meta.chartPreviousClose);
+                const chg = (price != null && prev) ? ((price - prev) / prev) * 100 : null;
+                return { price, chg };
+            } catch (e) { return null; }
+        }
+
+        async function loadMarkets() {
+            const grid = document.getElementById('market-grid');
+            if (!grid) return;
+            grid.innerHTML = MARKETS.map(m => `
+                <div class="glass-panel rounded-2xl p-4 reveal visible">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate">${m.name}</p>
+                            <p class="text-[10px] text-slate-600 truncate">${m.label}</p>
+                        </div>
+                        <span class="mkt-chg text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 shrink-0">—</span>
+                    </div>
+                    <p class="mkt-price text-base sm:text-lg font-black font-mono-code text-slate-200 mt-2 truncate">…</p>
+                </div>`).join('');
+
+            await Promise.all(MARKETS.map(async (m, i) => {
+                const q = await fetchQuote(m);
+                const card = grid.children[i];
+                if (!card || !q || q.price == null) return;
+                const up = q.chg == null ? null : q.chg >= 0;
+                card.querySelector('.mkt-price').innerText = fmtPrice(q.price, m.sym);
+                card.querySelector('.mkt-price').className = 'mkt-price text-base sm:text-lg font-black font-mono-code mt-2 truncate ' + (up === false ? 'text-red-300' : 'text-emerald-300');
+                const badge = card.querySelector('.mkt-chg');
+                if (q.chg != null) {
+                    badge.innerText = (up ? '+' : '') + q.chg.toFixed(2) + '%';
+                    badge.className = 'mkt-chg text-[9px] font-black px-1.5 py-0.5 rounded shrink-0 ' + (up ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400');
+                }
+            }));
+        }
+        loadMarkets();
+        setInterval(loadMarkets, 60000);
 
         loadProducts();
         loadRate().then(applyLang);
