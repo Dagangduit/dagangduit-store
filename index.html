@@ -25,6 +25,11 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(51, 65, 85, 0.5);
         }
+        @keyframes modal-pop {
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-card { animation: modal-pop 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 relative overflow-x-hidden">
@@ -50,15 +55,22 @@
             
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-400">
-                <a href="#about" class="hover:text-emerald-400 transition">Keunggulan</a>
-                <a href="#calculator" class="hover:text-emerald-400 transition">Kalkulator ROI</a>
-                <a href="#services" class="hover:text-emerald-400 transition">Ekosistem</a>
-                <a href="#katalog" class="hover:text-emerald-400 transition">Etalase Produk</a>
-                <a href="#faq" class="hover:text-emerald-400 transition">FAQ</a>
+                <a href="#about" class="hover:text-emerald-400 transition" data-i18n="nav.why">Keunggulan</a>
+                <a href="#calculator" class="hover:text-emerald-400 transition" data-i18n="nav.calc">Kalkulator ROI</a>
+                <a href="#services" class="hover:text-emerald-400 transition" data-i18n="nav.eco">Ekosistem</a>
+                <a href="#katalog" class="hover:text-emerald-400 transition" data-i18n="nav.catalog">Etalase Produk</a>
+                <a href="#faq" class="hover:text-emerald-400 transition" data-i18n="nav.faq">FAQ</a>
             </nav>
 
             <!-- Action Buttons -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Toggle Bahasa ID/EN -->
+                <div class="flex rounded-lg overflow-hidden border border-slate-800 text-[10px] font-black">
+                    <button onclick="setLang('id')" id="lang-id" class="lang-btn px-2.5 py-1.5 bg-emerald-500/15 text-emerald-300 transition">ID</button>
+                    <button onclick="setLang('en')" id="lang-en" class="lang-btn px-2.5 py-1.5 bg-slate-900 text-slate-500 hover:text-slate-300 transition">EN</button>
+                </div>
+                <!-- Toggle Mata Uang -->
+                <button onclick="toggleCurrency()" id="cur-btn" class="text-[10px] font-black px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-emerald-300 hover:border-emerald-500/40 transition" title="Switch currency">Rp</button>
                 <a href="admin.html" class="hidden sm:inline-flex text-xs text-slate-400 hover:text-emerald-400 font-bold px-3 py-2 transition">Admin</a>
                 <a href="https://wa.me/6285161853108?text=Halo%20Agus%20Pujianto,%20saya%20tertarik%20diskusi%20pembuatan%20EA/Indikator%20Custom." target="_blank" class="text-xs bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl transition shadow-lg shadow-emerald-500/20 hover:opacity-95 flex items-center gap-2">
                     <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
@@ -78,20 +90,20 @@
                 MetaTrader 4/5 &amp; PineScript Infrastructure
             </div>
             
-            <h1 class="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
+            <h1 class="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6" data-i18n="hero.title">
                 Eksekusi Pasar Berpresisi Tinggi.<br class="hidden sm:block">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Tanpa Emosi. Tanpa Delay.</span>
             </h1>
 
-            <p class="text-slate-400 text-sm sm:text-base lg:text-lg max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+            <p class="text-slate-400 text-sm sm:text-base lg:text-lg max-w-3xl mx-auto mb-10 leading-relaxed font-normal" data-i18n="hero.desc">
                 Platform resmi **DagangDuit** oleh <span class="text-slate-200 font-bold">Agus Pujianto</span>. Kami memprogram **Expert Advisor (EA)**, **Indikator Visual**, dan **Tools Analytics Multi-Akun** yang dirancang khusus untuk memperketat manajemen risiko ekuitas Anda di pasar forex &amp; komoditas.
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-                <a href="#katalog" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm px-8 py-4 rounded-2xl transition shadow-xl shadow-emerald-500/25">
+                <a href="#katalog" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm px-8 py-4 rounded-2xl transition shadow-xl shadow-emerald-500/25" data-i18n="hero.cta1">
                     Eksplorasi Katalog Produk
                 </a>
-                <a href="#calculator" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-sm px-8 py-4 rounded-2xl border border-slate-800 transition">
+                <a href="#calculator" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-sm px-8 py-4 rounded-2xl border border-slate-800 transition" data-i18n="hero.cta2">
                     Simulasi Risk/Reward
                 </a>
             </div>
@@ -102,11 +114,11 @@
             <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div class="p-4 border-r border-slate-900 last:border-0">
                     <h3 class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono-code">&lt; 0.01s</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Kecepatan Eksekusi Script</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1" data-i18n="m1">Kecepatan Eksekusi Script</p>
                 </div>
                 <div class="p-4 border-r border-slate-900 last:border-0">
                     <h3 class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono-code">Zero Slippage</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Optimasi Order Buffer</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1" data-i18n="m2">Optimasi Order Buffer</p>
                 </div>
                 <div class="p-4 border-r border-slate-900 last:border-0">
                     <h3 class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono-code">100% Native</h3>
@@ -114,7 +126,7 @@
                 </div>
                 <div class="p-4">
                     <h3 class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono-code">QRIS Instant</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Tanpa Biaya Admin</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1" data-i18n="m4">Tanpa Biaya Admin</p>
                 </div>
             </div>
         </section>
@@ -124,22 +136,22 @@
             <div class="glass-panel p-6 sm:p-10 rounded-3xl glow-emerald">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     <div class="lg:col-span-5">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Risk &amp; Compounding Simulator</span>
-                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2 mb-4">Simulasikan Ketahanan Modal Anda</h2>
-                        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="calc.kicker">Risk &amp; Compounding Simulator</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2 mb-4" data-i18n="calc.title">Simulasikan Ketahanan Modal Anda</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6" data-i18n="calc.desc">
                             Sebelum memilih produk EA atau indikator, gunakan kalkulator simulasi ini untuk memperkirakan pertumbuhan ekuitas berbasis proyeksi profit bulanan dan manajemen risiko lot.
                         </p>
                         <div class="space-y-4">
                             <div>
-                                <label class="text-xs text-slate-400 font-semibold block mb-2">Modal Awal Deposit ($):</label>
+                                <label class="text-xs text-slate-400 font-semibold block mb-2"><span data-i18n="calc.deposit">Modal Awal Deposit</span> <span class="text-slate-500" id="calc-deposit-cur">($)</span>:</label>
                                 <input type="number" id="calc-deposit" value="1000" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono-code text-emerald-400 focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
-                                <label class="text-xs text-slate-400 font-semibold block mb-2">Estimasi Profit Bulanan (%):</label>
+                                <label class="text-xs text-slate-400 font-semibold block mb-2" data-i18n="calc.rate">Estimasi Profit Bulanan (%):</label>
                                 <input type="number" id="calc-rate" value="5" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono-code text-emerald-400 focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
-                                <label class="text-xs text-slate-400 font-semibold block mb-2">Durasi Waktu (Bulan):</label>
+                                <label class="text-xs text-slate-400 font-semibold block mb-2" data-i18n="calc.months">Durasi Waktu (Bulan):</label>
                                 <input type="number" id="calc-months" value="12" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono-code text-emerald-400 focus:outline-none focus:border-emerald-500">
                             </div>
                         </div>
@@ -147,19 +159,19 @@
 
                     <!-- Calculator Output Card -->
                     <div class="lg:col-span-7 bg-slate-950 border border-slate-800/80 rounded-2xl p-6 sm:p-8">
-                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Proyeksi Hasil Compounding</div>
+                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2" data-i18n="calc.proj">Proyeksi Hasil Compounding</div>
                         <div class="text-3xl sm:text-5xl font-black text-emerald-400 font-mono-code mb-4" id="calc-result-total">$1,795.86</div>
                         <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-900">
                             <div>
-                                <span class="text-[11px] text-slate-500 block">Estimasi Keuntungan</span>
+                                <span class="text-[11px] text-slate-500 block" data-i18n="calc.profit">Estimasi Keuntungan</span>
                                 <span class="text-sm font-bold text-slate-200 font-mono-code" id="calc-result-profit">+$795.86 (79.5%)</span>
                             </div>
                             <div>
-                                <span class="text-[11px] text-slate-500 block">Estimasi Risk/Reward Ratio</span>
+                                <span class="text-[11px] text-slate-500 block" data-i18n="calc.rr">Estimasi Risk/Reward Ratio</span>
                                 <span class="text-sm font-bold text-teal-400 font-mono-code">1 : 2.5 (Recommended)</span>
                             </div>
                         </div>
-                        <div class="mt-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-xs text-emerald-300">
+                        <div class="mt-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-xs text-emerald-300" data-i18n="calc.note">
                             💡 **Catatan Risk Management:** Semua Expert Advisor di DagangDuit dilengkapi fitur *Hard Stop-Loss* otomatis untuk menjaga akun Anda dari Margin Call.
                         </div>
                     </div>
@@ -171,15 +183,15 @@
         <section id="about" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Filosfi Studio</span>
-                    <h2 class="text-3xl font-extrabold text-slate-100 mt-2 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="about.kicker">Filosfi Studio</span>
+                    <h2 class="text-3xl font-extrabold text-slate-100 mt-2 mb-6" data-i18n="about.title">
                         Mengapa Algoritma DagangDuit Berbeda?
                     </h2>
                     <div class="space-y-4 text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        <p>
+                        <p data-i18n="about.p1">
                             Diinisiasi oleh **Agus Pujianto**, DagangDuit tumbuh dari kebutuhan akan eksekusi perdagangan yang sistematis. Banyak trader kehilangan ekuitas bukan karena strateginya salah, melainkan karena emosi, keserakahan, dan kelambatan eksekusi manual.
                         </p>
-                        <p>
+                        <p data-i18n="about.p2">
                             Setiap *script* dan robot trading yang dipublikasikan di sini dibangun menggunakan arsitektur MQL5/MQL4 murni dengan optimasi memori tingkat rendah (low CPU thermal consumption) agar dapat berjalan 24/7 di VPS tanpa rasa khawatir.
                         </p>
                     </div>
@@ -187,20 +199,20 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="text-emerald-400 font-black text-lg mb-2">01. Smart Allocation</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Fitur dynamic lot sizing yang menyesuaikan besaran posisi secara proporsional sesuai saldo akun Anda.</p>
+                        <div class="text-emerald-400 font-black text-lg mb-2" data-i18n="about.c1t">01. Smart Allocation</div>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="about.c1d">Fitur dynamic lot sizing yang menyesuaikan besaran posisi secara proporsional sesuai saldo akun Anda.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="text-emerald-400 font-black text-lg mb-2">02. Multi-Broker Ready</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Dapat digunakan di server Exness, Headway, Octa, maupun broker ECN zero-spread pilihan Anda.</p>
+                        <div class="text-emerald-400 font-black text-lg mb-2" data-i18n="about.c2t">02. Multi-Broker Ready</div>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="about.c2d">Dapat digunakan di server Exness, Headway, Octa, maupun broker ECN zero-spread pilihan Anda.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="text-emerald-400 font-black text-lg mb-2">03. Code Efficiency</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Koding bersih tanpa bloating file sehingga grafik chart tetap responsif tanpa lag.</p>
+                        <div class="text-emerald-400 font-black text-lg mb-2" data-i18n="about.c3t">03. Code Efficiency</div>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="about.c3d">Koding bersih tanpa bloating file sehingga grafik chart tetap responsif tanpa lag.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="text-emerald-400 font-black text-lg mb-2">04. Transparent Logic</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Parameter input transparan yang bebas diubah sesuai selera dan toleransi risiko pribadi.</p>
+                        <div class="text-emerald-400 font-black text-lg mb-2" data-i18n="about.c4t">04. Transparent Logic</div>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="about.c4d">Parameter input transparan yang bebas diubah sesuai selera dan toleransi risiko pribadi.</p>
                     </div>
                 </div>
             </div>
@@ -210,8 +222,8 @@
         <section id="katalog" class="max-w-7xl mx-auto px-4 sm:px-8 py-20">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 pb-4 border-b border-slate-900">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Etalase Sistem</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-1">Katalog Produk &amp; Script Trading</h2>
+                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="cat.kicker">Etalase Sistem</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-1" data-i18n="cat.title">Katalog Produk &amp; Script Trading</h2>
                 </div>
                 <span id="product-count" class="text-xs font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400">
                     Memuat data...
@@ -222,11 +234,11 @@
             <div class="flex flex-col sm:flex-row gap-3 mb-8">
                 <div class="relative flex-1">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                    <input id="search-input" type="text" placeholder="Cari produk (nama / deskripsi)..."
+                    <input id="search-input" type="text" data-i18n-ph="cat.search" placeholder="Cari produk (nama / deskripsi)..."
                            class="w-full bg-slate-900/70 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/60 transition-all" />
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition-all bg-emerald-500/15 border-emerald-400/40 text-emerald-300">Semua</button>
+                    <button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition-all bg-emerald-500/15 border-emerald-400/40 text-emerald-300" data-i18n="cat.all">Semua</button>
                     <button onclick="setCategory('EA')" id="cat-EA" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">EA</button>
                     <button onclick="setCategory('Indicator')" id="cat-Indicator" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">Indicator</button>
                 </div>
@@ -235,15 +247,15 @@
             <!-- Loading State -->
             <div id="loading-state" class="py-24 text-center">
                 <div class="inline-block w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-500 text-sm">Menghubungkan ke database Supabase...</p>
+                <p class="text-slate-500 text-sm" data-i18n="cat.loading">Menghubungkan ke database Supabase...</p>
             </div>
 
             <!-- Empty State -->
             <div id="empty-state" class="hidden py-24 text-center">
-                <p class="text-slate-500 text-sm">Belum ada produk yang diunggah saat ini.</p>
+                <p class="text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk yang diunggah saat ini.</p>
             </div>
             <div id="no-result-state" class="hidden py-24 text-center">
-                <p class="text-slate-500 text-sm">Tidak ada produk yang cocok dengan pencarian/filter Anda.</p>
+                <p class="text-slate-500 text-sm" data-i18n="cat.noresult">Tidak ada produk yang cocok dengan pencarian/filter Anda.</p>
             </div>
 
             <!-- Grid Kartu Produk Responsive -->
@@ -254,21 +266,21 @@
         <section id="faq" class="border-t border-slate-900 bg-slate-950/60 py-20 px-4 sm:px-8">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-12">
-                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Frequently Asked Questions</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2">Pertanyaan Umum Calon Pembeli</h2>
+                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="faq.kicker">Frequently Asked Questions</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2" data-i18n="faq.title">Pertanyaan Umum Calon Pembeli</h2>
                 </div>
                 <div class="space-y-4">
                     <div class="glass-panel p-6 rounded-2xl">
-                        <h3 class="font-bold text-slate-200 text-sm mb-2">Bagaimana alur pengiriman file setelah bayar via QRIS?</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">Setelah pembayaran via QRIS berhasil, Anda tinggal menekan tombol konfirmasi WhatsApp. File `.ex4`, `.ex5`, atau `.mq5` akan dikirimkan secara instan langsung via chat WhatsApp beserta panduan pemasangannya.</p>
+                        <h3 class="font-bold text-slate-200 text-sm mb-2" data-i18n="faq.q1">Bagaimana alur pengiriman file setelah bayar via QRIS?</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="faq.a1">Setelah pembayaran via QRIS berhasil, Anda tinggal menekan tombol konfirmasi WhatsApp. File `.ex4`, `.ex5`, atau `.mq5` akan dikirimkan secara instan langsung via chat WhatsApp beserta panduan pemasangannya.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl">
-                        <h3 class="font-bold text-slate-200 text-sm mb-2">Apakah ada garansi jika timbul masalah teknis?</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">Tentu. Kami menyediakan bantuan konsultasi pemasangan hingga produk berjalan lancar di MetaTrader atau VPS Anda.</p>
+                        <h3 class="font-bold text-slate-200 text-sm mb-2" data-i18n="faq.q2">Apakah ada garansi jika timbul masalah teknis?</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="faq.a2">Tentu. Kami menyediakan bantuan konsultasi pemasangan hingga produk berjalan lancar di MetaTrader atau VPS Anda.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl">
-                        <h3 class="font-bold text-slate-200 text-sm mb-2">Apakah saya bisa memesan indikator/EA kustom dari logika saya sendiri?</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">Bisa! Anda cukup mengklik tombol "Custom Order" di pojok kanan atas untuk menyampaikan aturan entry/exit strategi pribadi Anda.</p>
+                        <h3 class="font-bold text-slate-200 text-sm mb-2" data-i18n="faq.q3">Apakah saya bisa memesan indikator/EA kustom dari logika saya sendiri?</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed" data-i18n="faq.a3">Bisa! Anda cukup mengklik tombol "Custom Order" di pojok kanan atas untuk menyampaikan aturan entry/exit strategi pribadi Anda.</p>
                     </div>
                 </div>
             </div>
@@ -277,8 +289,8 @@
     </main>
 
     <!-- 8. MODAL CHECKOUT QRIS STATIS -->
-    <div id="qris-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 relative shadow-2xl glow-emerald">
+    <div id="qris-modal" onclick="if(event.target===this)closeQrisModal()" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="modal-card bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 relative shadow-2xl glow-emerald">
             <button onclick="closeQrisModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center transition">
                 ✕
             </button>
@@ -299,7 +311,7 @@
 
             <!-- Pilihan Skema (Beli / Sewa) -->
             <div id="modal-plans-wrap" class="hidden mb-4">
-                <label class="block text-[11px] text-slate-500 font-semibold mb-1.5">Pilih Skema:</label>
+                <label class="block text-[11px] text-slate-500 font-semibold mb-1.5" data-i18n="modal.plan">Pilih Skema:</label>
                 <div id="modal-plans" class="grid grid-cols-2 gap-2"></div>
             </div>
 
@@ -309,13 +321,13 @@
 
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between mb-6">
                 <div>
-                    <span class="text-[11px] text-slate-400 block">Total Tagihan</span>
+                    <span class="text-[11px] text-slate-400 block" data-i18n="modal.total">Total Tagihan</span>
                     <span class="text-xl font-black text-emerald-400 font-mono-code" id="modal-product-price">Rp 0</span>
                 </div>
-                <span class="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Bebas Biaya Admin</span>
+                <span class="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20" data-i18n="modal.noadmin">Bebas Biaya Admin</span>
             </div>
 
-            <a id="modal-wa-btn" href="#" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-center py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/20 text-sm">
+            <a id="modal-wa-btn" href="#" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-center py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/20 text-sm" data-i18n="modal.confirm">
                 Konfirmasi Transfer via WhatsApp
             </a>
         </div>
@@ -326,9 +338,9 @@
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="text-center sm:text-left">
                 <p class="font-bold text-slate-300">DagangDuit Studio</p>
-                <p class="text-slate-600 mt-0.5">Custom Financial Automated Systems &amp; Technical Infrastructure.</p>
+                <p class="text-slate-600 mt-0.5" data-i18n="foot.tag">Custom Financial Automated Systems &amp; Technical Infrastructure.</p>
             </div>
-            <p class="text-slate-600">&copy; 2026 DagangDuit. Developed for Agus Pujianto.</p>
+            <p class="text-slate-600" data-i18n="foot.copy">&copy; 2026 DagangDuit. Developed for Agus Pujianto.</p>
         </div>
     </footer>
 
