@@ -295,6 +295,46 @@
         </div>
       </section>
 
+      <!-- ===== PENGATURAN UMUM ===== -->
+      <section class="mt-6 reveal">
+        <div class="glass rounded-2xl p-6 fade-in">
+          <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Pengaturan Umum
+          </h2>
+          <p class="text-xs text-slate-500 mb-4">Konfigurasi global toko — berlaku untuk semua halaman.</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Nomor WhatsApp Admin</label>
+              <input id="set-wa" type="text" placeholder="6285161853108"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none font-mono-code" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">URL Gambar QRIS</label>
+              <input id="set-qris" type="url" placeholder="https://.../qris.png (kosongkan = QR generate otomatis)"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Teks Promo (Indonesia)</label>
+              <input id="set-promo-id" type="text" placeholder="PROMO: Diskon s.d 40%..."
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Promo Text (English)</label>
+              <input id="set-promo-en" type="text" placeholder="PROMO: Up to 40% OFF..."
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3 mt-4">
+            <button id="save-general-btn" type="button"
+                    class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50">
+              Simpan Pengaturan Umum
+            </button>
+            <span id="general-status" class="text-xs text-slate-500"></span>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== PENGATURAN PEMBAYARAN ===== -->
       <section class="mt-6 reveal">
         <div class="glass rounded-2xl p-6 fade-in">
@@ -331,6 +371,44 @@
               Simpan Pengaturan
             </button>
             <span id="settings-status" class="text-xs text-slate-500"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ORDERS ===== -->
+      <section class="mt-6 reveal">
+        <div class="glass rounded-2xl overflow-hidden fade-in">
+          <div class="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+              Pesanan Masuk
+            </h2>
+            <div class="flex items-center gap-2">
+              <span id="order-count" class="text-xs text-slate-500"></span>
+              <button onclick="loadOrders()" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300 hover:bg-slate-700 transition">↻ Refresh</button>
+            </div>
+          </div>
+          <div id="orders-loading" class="flex items-center justify-center py-10 gap-3">
+            <div class="w-5 h-5 rounded-full border-2 border-emerald-400/30 border-t-emerald-400 spin"></div>
+            <span class="text-sm text-slate-400">Memuat pesanan...</span>
+          </div>
+          <div id="orders-empty" class="hidden py-12 text-center">
+            <p class="text-slate-500 text-sm">Belum ada pesanan masuk.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table id="orders-table" class="hidden w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs text-slate-500 border-b border-slate-800/60">
+                  <th class="px-6 py-3 font-medium">Tanggal</th>
+                  <th class="px-6 py-3 font-medium">Pembeli</th>
+                  <th class="px-6 py-3 font-medium">Produk / Paket</th>
+                  <th class="px-6 py-3 font-medium">Total</th>
+                  <th class="px-6 py-3 font-medium">Metode</th>
+                  <th class="px-6 py-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody" class="divide-y divide-slate-800/40"></tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -777,32 +855,88 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-/* ---------- Pengaturan Pembayaran ---------- */
+/* ---------- Pengaturan (Umum + Pembayaran) ---------- */
 const PAY_KEYS = ['paypal', 'wise', 'usdt', 'bank'];
-async function loadPaySettings() {
-  const { data, error } = await supabaseClient.from('settings').select('key, value').like('key', 'pay_%');
+const GENERAL_MAP = { wa_number: 'set-wa', promo_id: 'set-promo-id', promo_en: 'set-promo-en', qris_img: 'set-qris' };
+
+async function loadSettings() {
+  const { data, error } = await supabaseClient.from('settings').select('key, value');
   if (error || !data) return;
   data.forEach(r => {
-    const el = document.getElementById('set-' + r.key.slice(4));
-    if (el) el.value = r.value || '';
+    if (r.key.startsWith('pay_')) {
+      const el = document.getElementById('set-' + r.key.slice(4));
+      if (el) el.value = r.value || '';
+    } else if (GENERAL_MAP[r.key]) {
+      document.getElementById(GENERAL_MAP[r.key]).value = r.value || '';
+    }
   });
 }
-document.getElementById('save-settings-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('save-settings-btn');
-  const status = document.getElementById('settings-status');
+
+async function saveSettings(keys, btnId, statusId, doneMsg) {
+  const btn = document.getElementById(btnId);
+  const status = document.getElementById(statusId);
   btn.disabled = true; status.textContent = 'Menyimpan...'; status.className = 'text-xs text-slate-500';
-  const rows = PAY_KEYS.map(k => ({ key: 'pay_' + k, value: (document.getElementById('set-' + k).value || '').trim() }));
+  const rows = keys.map(k => ({ key: k, value: (document.getElementById(GENERAL_MAP[k] || 'set-' + k.slice(4)).value || '').trim() }));
   const { error } = await supabaseClient.from('settings').upsert(rows, { onConflict: 'key' });
   btn.disabled = false;
   if (error) { status.textContent = 'Gagal: ' + error.message; status.className = 'text-xs text-red-400'; return; }
-  status.textContent = '✓ Tersimpan!'; status.className = 'text-xs text-emerald-400';
+  status.textContent = '✓ ' + doneMsg; status.className = 'text-xs text-emerald-400';
   setTimeout(() => { status.textContent = ''; }, 3000);
-});
+}
+
+document.getElementById('save-settings-btn').addEventListener('click', () =>
+  saveSettings(PAY_KEYS.map(k => 'pay_' + k), 'save-settings-btn', 'settings-status', 'Tersimpan!'));
+document.getElementById('save-general-btn').addEventListener('click', () =>
+  saveSettings(['wa_number', 'promo_id', 'promo_en', 'qris_img'], 'save-general-btn', 'general-status', 'Tersimpan!'));
+
+/* ---------- Orders ---------- */
+const ORDERS_STATUSES = ['pending','paid','done','cancelled'];
+const statusBadge = (s) => ({
+  pending:   '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">Pending</span>',
+  paid:      '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">Paid</span>',
+  done:      '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Done</span>',
+  cancelled: '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/15 text-red-300 border border-red-500/30">Cancelled</span>'
+}[s] || s);
+
+async function loadOrders() {
+  document.getElementById('orders-loading').classList.remove('hidden');
+  document.getElementById('orders-table').classList.add('hidden');
+  document.getElementById('orders-empty').classList.add('hidden');
+  const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(100);
+  document.getElementById('orders-loading').classList.add('hidden');
+  if (error) { document.getElementById('orders-empty').classList.remove('hidden'); document.getElementById('orders-empty').querySelector('p').textContent = 'Gagal: ' + error.message; return; }
+  const list = data || [];
+  document.getElementById('order-count').textContent = list.length + ' pesanan';
+  if (!list.length) { document.getElementById('orders-empty').classList.remove('hidden'); return; }
+  document.getElementById('orders-table').classList.remove('hidden');
+  document.getElementById('orders-tbody').innerHTML = list.map(o => `
+    <tr class="hover:bg-slate-800/30 transition-colors">
+      <td class="px-6 py-3 text-xs text-slate-400 whitespace-nowrap">${new Date(o.created_at).toLocaleString('id-ID', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td class="px-6 py-3"><p class="text-xs font-bold text-white">${o.buyer_name}</p><p class="text-[10px] text-slate-500 font-mono-code">${o.buyer_wa}</p></td>
+      <td class="px-6 py-3"><p class="text-xs font-semibold text-slate-200">${o.product_name}</p><p class="text-[10px] text-emerald-400">${o.plan_label}</p></td>
+      <td class="px-6 py-3 text-xs font-bold ${o.currency === 'USD' ? 'text-cyan-300' : 'text-emerald-300'}">${o.currency === 'USD' ? '$' : 'Rp '}${Number(o.price).toLocaleString('id-ID')}</td>
+      <td class="px-6 py-3 text-[11px] text-slate-400">${o.pay_method}</td>
+      <td class="px-6 py-3">
+        <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-300 focus:border-emerald-500 focus:outline-none cursor-pointer">
+          ${ORDERS_STATUSES.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <div class="mt-1">${statusBadge(o.status)}</div>
+      </td>
+    </tr>`).join('');
+}
+
+window.updateOrderStatus = async function (id, status) {
+  const { error } = await supabaseClient.from('orders').update({ status }).eq('id', id);
+  if (error) alert('Gagal update status: ' + error.message);
+  else loadOrders();
+};
 
 /* ---------- Init ---------- */
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh kurs tiap 1 jam
-loadPaySettings();
+loadSettings();
+loadOrders();
+setInterval(loadOrders, 30000); // auto-refresh pesanan tiap 30 detik
 checkSession();
 </script>
 </body>
