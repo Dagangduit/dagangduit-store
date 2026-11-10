@@ -293,12 +293,7 @@
       <div class="flex justify-between border-t border-slate-800 pt-2"><span class="text-slate-500" data-i18n="modal.total">Total Bayar</span><span class="font-black text-emerald-400 text-lg" id="modal-total">-</span></div>
     </div>
     <div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-xs text-amber-300 flex gap-2"><span>⚠️</span><span data-i18n="modal.note">Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.</span></div>
-    <div class="grid grid-cols-2 gap-2 mb-3">
-      <input id="order-name" type="text" data-i18n-ph="modal.buyerName" placeholder="Nama kamu *" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:border-emerald-500 focus:outline-none">
-      <input id="order-wa" type="tel" data-i18n-ph="modal.buyerWa" placeholder="No. WhatsApp *" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:border-emerald-500 focus:outline-none">
-    </div>
-    <p id="order-error" class="hidden text-[11px] text-red-400 mb-2"></p>
-    <button id="modal-wa-btn" class="btn-shine w-full bg-emerald-500 text-slate-950 font-black py-4 rounded-xl text-sm" data-i18n="modal.wa">💬 Konfirmasi Pembayaran via WhatsApp</button>
+    <a id="modal-wa-btn" href="#" target="_blank" class="btn-shine block text-center bg-emerald-500 text-slate-950 font-black py-4 rounded-xl text-sm" data-i18n="modal.wa">💬 Konfirmasi Pembayaran via WhatsApp</a>
     <p class="text-center text-[10px] text-slate-500 mt-3" data-i18n="modal.secure">Pembayaran aman • Diproses manual oleh admin</p>
   </div>
 </div>
@@ -727,8 +722,7 @@ function openQrisModal(id, name, price, planLabel, waLabel) {
   setPayTab(CUR === 'USD' ? 'intl' : 'qris');
   const methodLabel = currentPayMethod === 'qris' ? 'QRIS (IDR)' : 'International (USD)';
   const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtPrice(price)}\nMetode: ${methodLabel}\n\nSaya sudah transfer. Berikut bukti transfernya.`;
-  document.getElementById('modal-wa-btn').dataset.waText = waText;
-  document.getElementById('order-error').classList.add('hidden');
+  document.getElementById('modal-wa-btn').href = waLink(waText);
   const modal = document.getElementById('qris-modal');
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
@@ -814,20 +808,8 @@ cfForm.addEventListener('submit', e => {
   if (window.confetti) confetti({particleCount:80, spread:70, origin:{y:.7}, colors:['#10b981','#34d399','#22d3ee']});
 });
 
-/* ==================== ORDER SUBMIT ==================== */
-document.getElementById('modal-wa-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('modal-wa-btn');
-  const errEl = document.getElementById('order-error');
-  const buyerName = document.getElementById('order-name').value.trim();
-  const buyerWa = document.getElementById('order-wa').value.trim();
-  errEl.classList.add('hidden');
-  if (buyerName.length < 2 || buyerWa.replace(/\D/g,'').length < 8) {
-    errEl.textContent = LANG === 'en' ? 'Please fill in your name and WhatsApp number.' : 'Isi nama dan nomor WhatsApp dulu ya.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  btn.disabled = true; btn.textContent = 'Memproses...';
-  const waText = btn.dataset.waText || '';
+/* ==================== ORDER TRACKING (otomatis, tanpa form) ==================== */
+document.getElementById('modal-wa-btn').addEventListener('click', () => {
   const orderData = {
     product_id: currentProduct ? currentProduct.id : null,
     product_name: document.getElementById('modal-product-name').textContent,
@@ -835,14 +817,10 @@ document.getElementById('modal-wa-btn').addEventListener('click', async () => {
     price: currentPlan ? Math.round((CUR === 'USD' ? Number(currentPlan.price) / RATE : Number(currentPlan.price)) * 100) / 100 : 0,
     currency: CUR,
     pay_method: currentPayMethod === 'qris' ? 'QRIS' : 'International',
-    buyer_name: buyerName,
-    buyer_wa: buyerWa.replace(/\D/g,'')
+    buyer_name: 'WA User',
+    buyer_wa: ''
   };
-  try {
-    await supabaseClient.from('orders').insert(orderData);
-  } catch(e) { /* order tetap lanjut ke WA walau insert gagal */ }
-  window.open(waLink(waText + `\n\nNama: ${buyerName}\nWA: ${buyerWa}`), '_blank');
-  btn.disabled = false; btn.textContent = t('modal.wa');
+  supabaseClient.from('orders').insert(orderData).then(() => {});
 });
 
 /* ==================== INIT ==================== */
