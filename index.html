@@ -96,7 +96,7 @@
         <button onclick="setLang('id')" id="lang-id" class="px-2.5 py-1.5 bg-emerald-500/15 text-emerald-300">ID</button>
         <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1.5 bg-slate-900 text-slate-500">EN</button>
       </div>
-      <a href="https://wa.me/6285161853108" target="_blank" class="btn-shine bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl"><span data-i18n="nav.wa">💬 Chat WA</span></a>
+      <a id="nav-wa-btn" href="#" target="_blank" class="btn-shine bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl"><span data-i18n="nav.wa">💬 Chat WA</span></a>
     </div>
   </div>
 </header>
@@ -293,7 +293,12 @@
       <div class="flex justify-between border-t border-slate-800 pt-2"><span class="text-slate-500" data-i18n="modal.total">Total Bayar</span><span class="font-black text-emerald-400 text-lg" id="modal-total">-</span></div>
     </div>
     <div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-xs text-amber-300 flex gap-2"><span>⚠️</span><span data-i18n="modal.note">Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.</span></div>
-    <a id="modal-wa-btn" href="https://wa.me/6285161853108" target="_blank" class="btn-shine block text-center bg-emerald-500 text-slate-950 font-black py-4 rounded-xl text-sm" data-i18n="modal.wa">💬 Konfirmasi Pembayaran via WhatsApp</a>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <input id="order-name" type="text" data-i18n-ph="modal.buyerName" placeholder="Nama kamu *" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:border-emerald-500 focus:outline-none">
+      <input id="order-wa" type="tel" data-i18n-ph="modal.buyerWa" placeholder="No. WhatsApp *" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:border-emerald-500 focus:outline-none">
+    </div>
+    <p id="order-error" class="hidden text-[11px] text-red-400 mb-2"></p>
+    <button id="modal-wa-btn" class="btn-shine w-full bg-emerald-500 text-slate-950 font-black py-4 rounded-xl text-sm" data-i18n="modal.wa">💬 Konfirmasi Pembayaran via WhatsApp</button>
     <p class="text-center text-[10px] text-slate-500 mt-3" data-i18n="modal.secure">Pembayaran aman • Diproses manual oleh admin</p>
   </div>
 </div>
@@ -316,6 +321,10 @@
 const SUPABASE_URL = 'https://vdzyfyerqnyaxotlawgr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ==================== CONFIG (bisa dioverride via admin settings) ==================== */
+let WA_NUMBER = '6285161853108';
+const waLink = (text = '') => 'https://wa.me/' + WA_NUMBER + (text ? '?text=' + encodeURIComponent(text) : '');
 
 /* ==================== I18N & CURRENCY ==================== */
 let LANG = (navigator.language || 'id').toLowerCase().startsWith('id') ? 'id' : 'en', CUR = LANG === 'en' ? 'USD' : 'IDR', RATE = 16000;
@@ -340,6 +349,7 @@ const I18N = {
     'cat.qris':'QRIS Instan','cat.buy':'Beli','cat.rent':'Sewa',
     'plan.buy':'Beli Sekali','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.12m':'Sewa 1 Tahun',
     'modal.title':'Checkout','modal.sub':'Pilih metode pembayaran di bawah ini','modal.qrisHint':'Scan dengan GoPay, OVO, DANA, ShopeePay, atau m-banking apa pun','modal.intlHint':'Bayar via PayPal / Wise / Crypto — konfirmasi manual via WhatsApp',
+    'modal.buyerName':'Nama kamu *','modal.buyerWa':'No. WhatsApp *',
     'modal.product':'Produk','modal.plan':'Paket','modal.total':'Total Bayar','modal.note':'Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.','modal.wa':'💬 Konfirmasi Pembayaran via WhatsApp','modal.secure':'Pembayaran aman • Diproses manual oleh admin',
     'faq.title':'Pertanyaan Sering Ditanyakan','faq.sub':'Masih ragu? Chat WhatsApp kami langsung.',
     'footer.tag':'EA & Indikator Trading • MT4/MT5','footer.disc':'⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.',
@@ -373,6 +383,7 @@ const I18N = {
     'cat.qris':'Instant QRIS','cat.buy':'Buy','cat.rent':'Rent',
     'plan.buy':'Buy Once','plan.1m':'Rent 1 Month','plan.3m':'Rent 3 Months','plan.12m':'Rent 1 Year',
     'modal.title':'Checkout','modal.sub':'Choose a payment method below','modal.qrisHint':'Scan with GoPay, OVO, DANA, ShopeePay, or any mobile banking app','modal.intlHint':'Pay via PayPal / Wise / Crypto — manual confirmation via WhatsApp',
+    'modal.buyerName':'Your name *','modal.buyerWa':'WhatsApp number *',
     'modal.product':'Product','modal.plan':'Plan','modal.total':'Total','modal.note':'After payment, send proof via WhatsApp. Product files delivered within 5 minutes.','modal.wa':'💬 Confirm Payment via WhatsApp','modal.secure':'Secure payment • Processed manually by admin',
     'faq.title':'Frequently Asked Questions','faq.sub':'Still unsure? Chat us on WhatsApp.',
     'footer.tag':'Trading EA & Indicators • MT4/MT5','footer.disc':'⚠️ Trading involves risk. Make sure you understand before trading.',
@@ -637,7 +648,7 @@ function renderProducts() {
               <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(pl.orig)}</span>` : ''}<span class="font-black">${fmtPrice(pl.price)}</span></span>
             </button>`).join('')}
         </div>
-        <a href="https://wa.me/6285161853108?text=${encodeURIComponent('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank"
+        <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank"
           class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
       </div>
     </div>`;
@@ -672,11 +683,20 @@ function renderIntlOptions() {
     </div>`).join('')
     : `<p class="text-xs text-slate-500 text-center py-3">${LANG==='en'?'International payment links not configured yet. Please chat via WhatsApp.':'Link pembayaran internasional belum diatur. Silakan chat via WhatsApp.'}</p>`;
 }
-async function loadPaySettings() {
+async function loadSettings() {
   try {
-    const { data, error } = await supabaseClient.from('settings').select('key, value').like('key', 'pay_');
+    const { data, error } = await supabaseClient.from('settings').select('key, value');
     if (error || !data) return;
-    data.forEach(r => { const k = r.key.slice(4); if (k in PAY_LINKS) PAY_LINKS[k] = r.value || ''; });
+    data.forEach(r => {
+      const v = r.value || '';
+      if (r.key === 'wa_number' && v) WA_NUMBER = v.replace(/\D/g, '');
+      else if (r.key === 'promo_id' && v) I18N.id['promo.text'] = v;
+      else if (r.key === 'promo_en' && v) I18N.en['promo.text'] = v;
+      else if (r.key === 'qris_img' && v) document.getElementById('modal-qris-img').src = v;
+      else if (r.key.startsWith('pay_')) { const k = r.key.slice(4); if (k in PAY_LINKS) PAY_LINKS[k] = v; }
+    });
+    document.getElementById('nav-wa-btn').href = waLink();
+    setLang(LANG); // refresh teks promo jika berubah
   } catch(e) {}
 }
 function copyPay(text) {
@@ -707,7 +727,8 @@ function openQrisModal(id, name, price, planLabel, waLabel) {
   setPayTab(CUR === 'USD' ? 'intl' : 'qris');
   const methodLabel = currentPayMethod === 'qris' ? 'QRIS (IDR)' : 'International (USD)';
   const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtPrice(price)}\nMetode: ${methodLabel}\n\nSaya sudah transfer. Berikut bukti transfernya.`;
-  document.getElementById('modal-wa-btn').href = 'https://wa.me/6285161853108?text=' + encodeURIComponent(waText);
+  document.getElementById('modal-wa-btn').dataset.waText = waText;
+  document.getElementById('order-error').classList.add('hidden');
   const modal = document.getElementById('qris-modal');
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
@@ -789,13 +810,44 @@ cfForm.addEventListener('submit', e => {
   const type = document.getElementById('cf-type').selectedOptions[0].textContent;
   const budget = document.getElementById('cf-budget').selectedOptions[0].textContent;
   const msg = `Halo Admin DagangDuit, saya ingin request custom project:\n\nNama: ${name}\nPlatform: ${platform}\nJenis: ${type}\nBudget: ${budget}\n\nDetail kebutuhan:\n${desc}`;
-  window.open('https://wa.me/6285161853108?text=' + encodeURIComponent(msg), '_blank');
+  window.open(waLink(msg), '_blank');
   if (window.confetti) confetti({particleCount:80, spread:70, origin:{y:.7}, colors:['#10b981','#34d399','#22d3ee']});
+});
+
+/* ==================== ORDER SUBMIT ==================== */
+document.getElementById('modal-wa-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('modal-wa-btn');
+  const errEl = document.getElementById('order-error');
+  const buyerName = document.getElementById('order-name').value.trim();
+  const buyerWa = document.getElementById('order-wa').value.trim();
+  errEl.classList.add('hidden');
+  if (buyerName.length < 2 || buyerWa.replace(/\D/g,'').length < 8) {
+    errEl.textContent = LANG === 'en' ? 'Please fill in your name and WhatsApp number.' : 'Isi nama dan nomor WhatsApp dulu ya.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Memproses...';
+  const waText = btn.dataset.waText || '';
+  const orderData = {
+    product_id: currentProduct ? currentProduct.id : null,
+    product_name: document.getElementById('modal-product-name').textContent,
+    plan_label: currentPlan ? currentPlan.label : '',
+    price: currentPlan ? Math.round((CUR === 'USD' ? Number(currentPlan.price) / RATE : Number(currentPlan.price)) * 100) / 100 : 0,
+    currency: CUR,
+    pay_method: currentPayMethod === 'qris' ? 'QRIS' : 'International',
+    buyer_name: buyerName,
+    buyer_wa: buyerWa.replace(/\D/g,'')
+  };
+  try {
+    await supabaseClient.from('orders').insert(orderData);
+  } catch(e) { /* order tetap lanjut ke WA walau insert gagal */ }
+  window.open(waLink(waText + `\n\nNama: ${buyerName}\nWA: ${buyerWa}`), '_blank');
+  btn.disabled = false; btn.textContent = t('modal.wa');
 });
 
 /* ==================== INIT ==================== */
 setLang(LANG); // terapkan bahasa hasil deteksi browser
-loadPaySettings();
+loadSettings();
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
 loadProducts();
