@@ -270,12 +270,23 @@
   <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeQrisModal()"></div>
   <div class="modal-card relative bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto p-6">
     <button onclick="closeQrisModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-lg">✕</button>
-    <div class="text-center mb-5">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-3 text-2xl">📱</div>
-      <h3 class="font-black text-lg" data-i18n="modal.title">Checkout QRIS</h3>
-      <p class="text-xs text-slate-400 mt-1" data-i18n="modal.sub">Scan kode QR di bawah ini dengan aplikasi e-wallet / m-banking apa pun</p>
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-3 text-2xl">💳</div>
+      <h3 class="font-black text-lg" data-i18n="modal.title">Checkout</h3>
+      <p class="text-xs text-slate-400 mt-1" data-i18n="modal.sub">Pilih metode pembayaran di bawah ini</p>
     </div>
-    <div class="bg-white rounded-2xl p-4 flex justify-center mb-4"><img id="modal-qris-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=QRIS-DagangDuit" alt="QRIS" class="w-48 h-48 object-contain qris-pulse rounded-lg"></div>
+    <div class="grid grid-cols-2 gap-2 mb-4">
+      <button id="tab-qris" onclick="setPayTab('qris')" class="py-2.5 rounded-xl text-xs font-black border transition">🇮🇩 QRIS (IDR)</button>
+      <button id="tab-intl" onclick="setPayTab('intl')" class="py-2.5 rounded-xl text-xs font-black border transition">🌍 International (USD)</button>
+    </div>
+    <div id="pay-qris">
+      <div class="bg-white rounded-2xl p-4 flex justify-center mb-4"><img id="modal-qris-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=QRIS-DagangDuit" alt="QRIS" class="w-48 h-48 object-contain qris-pulse rounded-lg"></div>
+      <p class="text-[11px] text-slate-500 text-center mb-4" data-i18n="modal.qrisHint">Scan dengan GoPay, OVO, DANA, ShopeePay, atau m-banking apa pun</p>
+    </div>
+    <div id="pay-intl" class="hidden">
+      <div id="intl-options" class="space-y-2 mb-4"></div>
+      <p class="text-[11px] text-slate-500 text-center mb-4" data-i18n="modal.intlHint">Bayar via PayPal / Wise / Crypto — konfirmasi manual via WhatsApp</p>
+    </div>
     <div class="bg-slate-950 rounded-xl p-4 mb-4 space-y-2 text-sm">
       <div class="flex justify-between"><span class="text-slate-500" data-i18n="modal.product">Produk</span><span class="font-bold text-right" id="modal-product-name">-</span></div>
       <div class="flex justify-between"><span class="text-slate-500" data-i18n="modal.plan">Paket</span><span class="font-bold text-emerald-400" id="modal-plan-label">-</span></div>
@@ -307,7 +318,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ==================== I18N & CURRENCY ==================== */
-let LANG = 'id', CUR = 'IDR', RATE = 16000;
+let LANG = (navigator.language || 'id').toLowerCase().startsWith('id') ? 'id' : 'en', CUR = LANG === 'en' ? 'USD' : 'IDR', RATE = 16000;
 const I18N = {
   id: {
     'promo.text':'PROMO: Diskon s.d 40% + Gratis Setting VPS','promo.cta':'Klaim Sekarang →',
@@ -328,7 +339,7 @@ const I18N = {
     'cat.results':'produk ditemukan','cat.available':'Tersedia','cat.sale':'DISKON','cat.buyRent':'Beli / Sewa','cat.priceHead':'Harga',
     'cat.qris':'QRIS Instan','cat.buy':'Beli','cat.rent':'Sewa',
     'plan.buy':'Beli Sekali','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.12m':'Sewa 1 Tahun',
-    'modal.title':'Checkout QRIS','modal.sub':'Scan kode QR di bawah ini dengan aplikasi e-wallet / m-banking apa pun',
+    'modal.title':'Checkout','modal.sub':'Pilih metode pembayaran di bawah ini','modal.qrisHint':'Scan dengan GoPay, OVO, DANA, ShopeePay, atau m-banking apa pun','modal.intlHint':'Bayar via PayPal / Wise / Crypto — konfirmasi manual via WhatsApp',
     'modal.product':'Produk','modal.plan':'Paket','modal.total':'Total Bayar','modal.note':'Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.','modal.wa':'💬 Konfirmasi Pembayaran via WhatsApp','modal.secure':'Pembayaran aman • Diproses manual oleh admin',
     'faq.title':'Pertanyaan Sering Ditanyakan','faq.sub':'Masih ragu? Chat WhatsApp kami langsung.',
     'footer.tag':'EA & Indikator Trading • MT4/MT5','footer.disc':'⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.',
@@ -361,7 +372,7 @@ const I18N = {
     'cat.results':'products found','cat.available':'Available','cat.sale':'SALE','cat.buyRent':'Buy / Rent','cat.priceHead':'Price',
     'cat.qris':'Instant QRIS','cat.buy':'Buy','cat.rent':'Rent',
     'plan.buy':'Buy Once','plan.1m':'Rent 1 Month','plan.3m':'Rent 3 Months','plan.12m':'Rent 1 Year',
-    'modal.title':'QRIS Checkout','modal.sub':'Scan the QR code below with any e-wallet / mobile banking app',
+    'modal.title':'Checkout','modal.sub':'Choose a payment method below','modal.qrisHint':'Scan with GoPay, OVO, DANA, ShopeePay, or any mobile banking app','modal.intlHint':'Pay via PayPal / Wise / Crypto — manual confirmation via WhatsApp',
     'modal.product':'Product','modal.plan':'Plan','modal.total':'Total','modal.note':'After payment, send proof via WhatsApp. Product files delivered within 5 minutes.','modal.wa':'💬 Confirm Payment via WhatsApp','modal.secure':'Secure payment • Processed manually by admin',
     'faq.title':'Frequently Asked Questions','faq.sub':'Still unsure? Chat us on WhatsApp.',
     'footer.tag':'Trading EA & Indicators • MT4/MT5','footer.disc':'⚠️ Trading involves risk. Make sure you understand before trading.',
@@ -587,6 +598,7 @@ function renderProducts() {
     const okQ = !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q) || (p.platform || '').toLowerCase().includes(q);
     return okCat && okQ;
   });
+  if (!allProducts.length && !loadingState.classList.contains('hidden')) return; // masih loading
   productCount.textContent = filtered.length + ' ' + t('cat.results');
   emptyState.classList.add('hidden'); noResultState.classList.add('hidden'); productGrid.classList.add('hidden');
   if (!filtered.length) { (allProducts.length ? noResultState : emptyState).classList.remove('hidden'); return; }
@@ -635,6 +647,47 @@ function renderProducts() {
   requestAnimationFrame(() => productGrid.querySelectorAll('.reveal').forEach(el => io.observe(el)));
 }
 
+/* ==================== PAYMENT METHODS ==================== */
+// Isi link/akun pembayaran internasional di sini (kosongkan yang tidak dipakai)
+const PAY_LINKS = {
+  paypal: '',   // contoh: 'https://paypal.me/username'
+  wise:   '',   // contoh: 'https://wise.com/pay/username'
+  usdt:   '',   // contoh alamat wallet TRC20: 'T...'
+  bank:   ''    // contoh: 'Bank Name • Account 123 • Name'
+};
+let currentPayMethod = 'qris';
+function renderIntlOptions() {
+  const box = document.getElementById('intl-options');
+  const items = [];
+  if (PAY_LINKS.paypal) items.push({icon:'🅿️', label:'PayPal', sub:PAY_LINKS.paypal, url:PAY_LINKS.paypal});
+  if (PAY_LINKS.wise)   items.push({icon:'💸', label:'Wise',   sub:PAY_LINKS.wise,   url:PAY_LINKS.wise});
+  if (PAY_LINKS.usdt)   items.push({icon:'₮',  label:'USDT (TRC20)', sub:PAY_LINKS.usdt, copy:true});
+  if (PAY_LINKS.bank)   items.push({icon:'🏦', label:'Bank Transfer', sub:PAY_LINKS.bank, copy:true});
+  box.innerHTML = items.length ? items.map((it,i) => `
+    <div class="flex items-center gap-3 bg-slate-950 border border-slate-800 rounded-xl p-3">
+      <span class="text-xl">${it.icon}</span>
+      <div class="flex-1 min-w-0"><p class="text-xs font-bold">${it.label}</p><p class="text-[10px] text-slate-500 truncate font-mono-code">${it.sub}</p></div>
+      ${it.url ? `<a href="${it.url}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold hover:bg-emerald-500/25 transition shrink-0">Bayar →</a>`
+               : `<button onclick="copyPay('${it.sub.replace(/'/g,"\\'")}')" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold hover:bg-slate-700 transition shrink-0">Copy</button>`}
+    </div>`).join('')
+    : `<p class="text-xs text-slate-500 text-center py-3">${LANG==='en'?'International payment links not configured yet. Please chat via WhatsApp.':'Link pembayaran internasional belum diatur. Silakan chat via WhatsApp.'}</p>`;
+}
+function copyPay(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (window.confetti) confetti({particleCount:30, spread:40, origin:{y:.6}, colors:['#10b981','#34d399']});
+  });
+}
+function setPayTab(m) {
+  currentPayMethod = m;
+  document.getElementById('pay-qris').classList.toggle('hidden', m !== 'qris');
+  document.getElementById('pay-intl').classList.toggle('hidden', m !== 'intl');
+  const on = 'py-2.5 rounded-xl text-xs font-black border transition bg-emerald-500/15 border-emerald-400/40 text-emerald-300';
+  const off = 'py-2.5 rounded-xl text-xs font-black border transition bg-slate-900 border-slate-800 text-slate-400';
+  document.getElementById('tab-qris').className = m==='qris' ? on : off;
+  document.getElementById('tab-intl').className = m==='intl' ? on : off;
+  if (m === 'intl') renderIntlOptions();
+}
+
 /* ==================== MODAL QRIS ==================== */
 let currentProduct = null, currentPlan = null;
 function openQrisModal(id, name, price, planLabel, waLabel) {
@@ -644,7 +697,9 @@ function openQrisModal(id, name, price, planLabel, waLabel) {
   document.getElementById('modal-plan-label').textContent = planLabel;
   document.getElementById('modal-total').textContent = fmtPrice(price);
   const imgs = currentProduct ? ((Array.isArray(currentProduct.images) && currentProduct.images.length ? currentProduct.images : [currentProduct.image_url].filter(Boolean))) : [];
-  const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtPrice(price)}\n\nSaya sudah transfer via QRIS. Berikut bukti transfernya.`;
+  setPayTab(CUR === 'USD' ? 'intl' : 'qris');
+  const methodLabel = currentPayMethod === 'qris' ? 'QRIS (IDR)' : 'International (USD)';
+  const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtPrice(price)}\nMetode: ${methodLabel}\n\nSaya sudah transfer. Berikut bukti transfernya.`;
   document.getElementById('modal-wa-btn').href = 'https://wa.me/6285161853108?text=' + encodeURIComponent(waText);
   const modal = document.getElementById('qris-modal');
   modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -732,6 +787,7 @@ cfForm.addEventListener('submit', e => {
 });
 
 /* ==================== INIT ==================== */
+setLang(LANG); // terapkan bahasa hasil deteksi browser
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
 loadProducts();
