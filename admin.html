@@ -200,7 +200,7 @@
 
 <script>
 /* ============================================================
-   KONFIGURASI — Kredensial Supabase Anda
+   KONFIGURASI — Supabase Tunggal & Bersih
    ============================================================ */
 const SUPABASE_URL = 'https://vdzyfyerqnyaxotlawgr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
@@ -465,7 +465,7 @@ async function loadProducts() {
   `).join('');
 
   productTable.classList.remove('hidden');
-};
+}
 
 window.deleteProduct = async function (id, name) {
   if (!confirm(`Hapus produk "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
