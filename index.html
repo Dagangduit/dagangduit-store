@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DagangDuit | EA & Indikator Trading Otomatis</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -11,15 +14,11 @@
 <style>
   body{font-family:'Plus Jakarta Sans',sans-serif; overflow-x:hidden;}
   .font-mono-code{font-family:'JetBrains Mono',monospace;}
-
-  /* ============ 1. AURORA BACKGROUND ============ */
   .aurora{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:#020617;}
   .aurora::before,.aurora::after{content:''; position:absolute; width:60vw; height:60vw; border-radius:50%; filter:blur(120px); opacity:.35; animation:auroraMove 14s ease-in-out infinite alternate;}
   .aurora::before{background:radial-gradient(circle,#10b981,transparent 70%); top:-10%; left:-10%;}
   .aurora::after{background:radial-gradient(circle,#06b6d4,transparent 70%); bottom:-20%; right:-10%; animation-delay:-7s;}
   @keyframes auroraMove{0%{transform:translate(0,0) scale(1)}100%{transform:translate(80px,40px) scale(1.15)}}
-
-  /* ============ 2. PARTICLE CANDLE NAIK ============ */
   .particle{position:absolute; bottom:-20px; width:3px; border-radius:99px; opacity:.5; animation:rise linear infinite;}
   @keyframes rise{to{transform:translateY(-110vh) translateX(20px); opacity:0}}
   .particle:nth-child(1){left:10%; height:18px; background:#34d399; animation-duration:9s; animation-delay:0s}
@@ -27,66 +26,52 @@
   .particle:nth-child(3){left:45%; height:14px; background:#34d399; animation-duration:8s; animation-delay:1s}
   .particle:nth-child(4){left:65%; height:22px; background:#22d3ee; animation-duration:11s; animation-delay:3s}
   .particle:nth-child(5){left:85%; height:16px; background:#34d399; animation-duration:10s; animation-delay:0.5s}
-
-  /* ============ 3. GLASS & CARD 3D ============ */
   .glass-panel{background:linear-gradient(160deg,rgba(30,41,59,.6),rgba(15,23,42,.7)); backdrop-filter:blur(20px); border:1px solid rgba(148,163,184,.14);}
   .tilt-card{transform-style:preserve-3d; will-change:transform; transition:transform .15s ease-out, box-shadow .3s, border-color .3s; position:relative; overflow:hidden;}
   .tilt-card:hover{border-color:rgba(52,211,153,.6); box-shadow:0 25px 50px -12px rgba(16,185,129,.35);}
   .tilt-card::before{content:''; position:absolute; inset:0; background:radial-gradient(300px circle at var(--mx,50%) var(--my,50%), rgba(52,211,153,.18), transparent 60%); opacity:0; transition:opacity .3s; pointer-events:none; z-index:1;}
   .tilt-card:hover::before{opacity:1;}
-
-  /* ============ 4. TOMBOL SHINE + MAGNET ============ */
   .btn-shine{position:relative; overflow:hidden; transition:transform .2s, box-shadow .2s;}
   .btn-shine::after{content:''; position:absolute; top:0; left:-80%; width:50%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:shine 2.8s ease-in-out infinite;}
   @keyframes shine{0%,60%{left:-80%}100%{left:130%}}
   .btn-shine:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 15px 30px -10px rgba(16,185,129,.6);}
   .btn-shine:active{transform:scale(.97);}
-
-  /* ============ 5. TICKER MARQUEE ============ */
   .marquee-track{display:flex; gap:2.5rem; width:max-content; animation:marquee 28s linear infinite;}
   .marquee-track:hover{animation-play-state:paused;}
   @keyframes marquee{to{transform:translateX(-50%)}}
-
-  /* ============ 6. GRADIENT TEXT HIDUP ============ */
   .animated-gradient{background:linear-gradient(90deg,#34d399,#2dd4bf,#22d3ee,#a7f3d0,#34d399); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:gradMove 5s linear infinite;}
   @keyframes gradMove{to{background-position:300% 0}}
-
-  /* ============ 7. REVEAL STAGGER ============ */
   .reveal{opacity:0; transform:translateY(35px) scale(.98); transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);}
   .reveal.visible{opacity:1; transform:translateY(0) scale(1);}
-
-  /* Typing cursor */
   .typing-cursor::after{content:'|'; animation:blink 0.8s infinite; color:#34d399; margin-left:2px;}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-
-  /* Pulse QRIS */
   .qris-pulse{animation:qrisPulse 2s ease-in-out infinite;}
   @keyframes qrisPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}
-
-  /* Floating badge */
   .float-slow{animation:floatY 4s ease-in-out infinite;}
   .float-slow2{animation:floatY 5s ease-in-out infinite; animation-delay:-2s;}
   @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-
-  /* Counter pop */
+  .float-logo{animation:floatLogo 6s ease-in-out infinite; filter:drop-shadow(0 0 20px rgba(52,211,153,.45));}
+  @keyframes floatLogo{0%,100%{transform:translateY(0) rotate(-4deg) scale(1)}50%{transform:translateY(-16px) rotate(5deg) scale(1.06)}}
   .pop{animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
   @keyframes popIn{from{transform:scale(.8); opacity:0}to{transform:scale(1); opacity:1}}
-
-  /* Scrollbar cantik */
   ::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#134e4a; border-radius:99px}
-
   @keyframes modal-pop{from{opacity:0; transform:translateY(24px) scale(.96)}to{opacity:1; transform:translateY(0) scale(1)}}
   .modal-card{animation:modal-pop .3s cubic-bezier(.34,1.56,.64,1);}
+  details summary::-webkit-details-marker{display:none;}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col">
 
-<!-- AURORA + PARTICLE -->
 <div class="aurora"><span class="particle"></span><span class="particle"></span><span class="particle"></span><span class="particle"></span><span class="particle"></span></div>
 
+<!-- LOGO MENGAMBANG -->
+<div class="fixed right-3 sm:right-5 top-24 sm:top-28 z-40 pointer-events-none">
+  <img src="logo.png" alt="DagangDuit" class="float-logo w-14 h-14 sm:w-20 sm:h-20 rounded-2xl object-contain">
+</div>
+
 <!-- TOP PROMO -->
-<div class="relative z-20 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-center text- sm:text-xs font-extrabold py-2 px-4">
-  🔥 PROMO: Diskon s.d 40% + Gratis Setting VPS — <a href="#katalog" class="underline">Klaim Sekarang →</a>
+<div class="relative z-20 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-center text-xs sm:text-sm font-extrabold py-2 px-4">
+  🔥 <span data-i18n="promo.text">PROMO: Diskon s.d 40% + Gratis Setting VPS</span> — <a href="#katalog" class="underline" data-i18n="promo.cta">Klaim Sekarang →</a>
 </div>
 
 <!-- HEADER -->
@@ -94,27 +79,27 @@
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <a href="#" class="flex items-center gap-3">
       <div class="relative"><img src="logo.png" class="h-11 w-11 rounded-2xl object-contain"><span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950 animate-ping"></span></div>
-      <div><h1 class="font-black tracking-wider leading-none">DAGANGDUIT <span class="text- bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded-md align-middle">PRO</span></h1><p class="text- text-emerald-400 font-bold tracking-widest mt-0.5">EA • INDIKATOR • TRADING TOOLS</p></div>
+      <div><h1 class="font-black tracking-wider leading-none">DAGANGDUIT <span class="bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded-md align-middle text-xs">PRO</span></h1><p class="text-[10px] text-emerald-400 font-bold tracking-widest mt-0.5" data-i18n="brand.sub">EA • INDIKATOR • TRADING TOOLS</p></div>
     </a>
     <nav class="hidden lg:flex gap-7 text-xs font-bold uppercase tracking-wider text-slate-400">
-      <a href="#katalog" class="hover:text-emerald-400 transition">Katalog</a>
-      <a href="#calculator" class="hover:text-emerald-400 transition">Kalkulator</a>
-      <a href="#testimoni" class="hover:text-emerald-400 transition">Testimoni</a>
+      <a href="#katalog" class="hover:text-emerald-400 transition" data-i18n="nav.catalog">Katalog</a>
+      <a href="#calculator" class="hover:text-emerald-400 transition" data-i18n="nav.calc">Kalkulator</a>
+      <a href="#testimoni" class="hover:text-emerald-400 transition" data-i18n="nav.testi">Testimoni</a>
       <a href="#faq" class="hover:text-emerald-400 transition">FAQ</a>
     </nav>
     <div class="flex gap-2 items-center">
-      <div class="flex rounded-lg overflow-hidden border border-slate-800 text- font-black"><button onclick="setLang('id')" id="lang-id" class="px-2.5 py-1.5 bg-emerald-500/15 text-emerald-300">ID</button><button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1.5 bg-slate-900 text-slate-500">EN</button></div>
-      <a href="https://wa.me/6285161853108" target="_blank" class="btn-shine bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl">💬 Chat WA</a>
+      <div class="flex rounded-lg overflow-hidden border border-slate-800 text-[10px] font-black">
+        <button onclick="setLang('id')" id="lang-id" class="px-2.5 py-1.5 bg-emerald-500/15 text-emerald-300">ID</button>
+        <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1.5 bg-slate-900 text-slate-500">EN</button>
+      </div>
+      <a href="https://wa.me/6285161853108" target="_blank" class="btn-shine bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl"><span data-i18n="nav.wa">💬 Chat WA</span></a>
     </div>
   </div>
 </header>
 
-<!-- TICKER MARQUEE - BARU -->
+<!-- TICKER MARQUEE (LIVE) -->
 <div class="relative z-20 bg-slate-900/80 border-b border-slate-800 overflow-hidden py-2">
-  <div class="marquee-track text- font-mono-code" id="ticker">
-    <span>EUR/USD <b class="text-emerald-400">▲ 1.0842 +0.32%</b></span><span>XAU/USD <b class="text-red-400">▼ 2,645.20 -0.45%</b></span><span>BTC/USD <b class="text-emerald-400">▲ 97,420 +1.82%</b></span><span>GBP/USD <b class="text-emerald-400">▲ 1.2721 +0.18%</b></span><span>USD/JPY <b class="text-red-400">▼ 154.32 -0.12%</b></span><span>OIL WTI <b class="text-emerald-400">▲ 71.45 +0.92%</b></span>
-    <span>EUR/USD <b class="text-emerald-400">▲ 1.0842 +0.32%</b></span><span>XAU/USD <b class="text-red-400">▼ 2,645.20 -0.45%</b></span><span>BTC/USD <b class="text-emerald-400">▲ 97,420 +1.82%</b></span><span>GBP/USD <b class="text-emerald-400">▲ 1.2721 +0.18%</b></span><span>USD/JPY <b class="text-red-400">▼ 154.32 -0.12%</b></span><span>OIL WTI <b class="text-emerald-400">▲ 71.45 +0.92%</b></span>
-  </div>
+  <div class="marquee-track text-xs font-mono-code" id="ticker"><span class="text-slate-500">Memuat harga pasar...</span></div>
 </div>
 
 <main class="relative z-10">
@@ -123,234 +108,469 @@
     <div class="grid lg:grid-cols-12 gap-10 items-center">
       <div class="lg:col-span-7">
         <div class="inline-flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-500/30 px-4 py-2 rounded-full mb-5 backdrop-blur">
-          <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> LIVE • <span id="live-count">128</span> Trader Online Sekarang
+          <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> LIVE • <span id="live-count">128</span> <span data-i18n="hero.online">Trader Online Sekarang</span>
         </div>
-        <h1 class="text- leading-[1.02] sm:text-6xl lg:text- font-black tracking-tight">
-          Trading Tenang.<br>
-          <span class="animated-gradient" id="typing-text">Profit Jalan Otomatis,</span><br>
-          <span id="typing-suffix" class="typing-cursor">Tanpa Emosi.</span>
+        <h1 class="text-4xl leading-[1.02] sm:text-6xl lg:text-7xl font-black tracking-tight">
+          <span data-i18n="hero.l1">Trading Tenang.</span><br>
+          <span class="animated-gradient" data-i18n="hero.l2">Profit Jalan Otomatis,</span><br>
+          <span id="typing-suffix" class="typing-cursor" data-i18n="hero.l3">Tanpa Emosi.</span>
         </h1>
-        <p class="text-slate-400 text-base lg:text-lg mt-5 max-w-2xl leading-relaxed">EA & Indikator MT4/MT5 buatan <b class="text-white">Agus Pujianto</b>. Disiplin dengan Hard Stop-Loss & Auto Risk Management. Bayar QRIS, file langsung terkirim via WA.</p>
-
+        <p class="text-slate-400 text-base lg:text-lg mt-5 max-w-2xl leading-relaxed" data-i18n="hero.desc">EA &amp; Indikator MT4/MT5 buatan <b class="text-white">Agus Pujianto</b>. Disiplin dengan Hard Stop-Loss &amp; Auto Risk Management. Bayar QRIS, file langsung terkirim via WA.</p>
         <div class="flex flex-col sm:flex-row gap-3 mt-7">
-          <a href="#katalog" class="btn-shine bg-emerald-500 text-slate-950 font-black text-sm px-7 py-4 rounded-2xl text-center">🛒 Lihat Katalog & Harga →</a>
-          <a href="#calculator" class="bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-800 font-bold text-sm px-7 py-4 rounded-2xl text-center transition">📈 Hitung Potensi Profit</a>
+          <a href="#katalog" class="btn-shine bg-emerald-500 text-slate-950 font-black text-sm px-7 py-4 rounded-2xl text-center" data-i18n="hero.cta1">🛒 Lihat Katalog &amp; Harga →</a>
+          <a href="#calculator" class="bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-800 font-bold text-sm px-7 py-4 rounded-2xl text-center transition" data-i18n="hero.cta2">📈 Hitung Potensi Profit</a>
         </div>
-
-        <!-- COUNTER ANIMASI -->
         <div class="grid grid-cols-3 gap-4 mt-8 max-w-md">
-          <div><p class="text-2xl font-black"><span class="counter" data-target="120">0</span>+</p><p class="text- text-slate-500 font-bold uppercase">Trader Pakai</p></div>
-          <div><p class="text-2xl font-black"><span class="counter" data-target="49" data-decimal="1">0</span> ★</p><p class="text- text-slate-500 font-bold uppercase">Rating (4.9)</p></div>
-          <div><p class="text-2xl font-black"><span class="counter" data-target="5">0</span> Menit</p><p class="text- text-slate-500 font-bold uppercase">File Terkirim</p></div>
+          <div><p class="text-2xl font-black"><span class="counter" data-target="120">0</span>+</p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c1">Trader Pakai</p></div>
+          <div><p class="text-2xl font-black"><span class="counter" data-target="49" data-decimal="1">0</span> ★</p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c2">Rating (4.9)</p></div>
+          <div><p class="text-2xl font-black"><span class="counter" data-target="5">0</span> <span data-i18n="hero.c3u">Menit</span></p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c3">File Terkirim</p></div>
         </div>
       </div>
-
-      <!-- HERO CARD FLOATING -->
       <div class="lg:col-span-5 relative">
-        <div class="glass-panel rounded- p-4 rotate-1 hover:rotate-0 transition duration-500 tilt-card">
+        <div class="glass-panel rounded-3xl p-4 rotate-1 hover:rotate-0 transition duration-500 tilt-card">
           <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80" class="rounded-2xl w-full h-56 object-cover">
-          <div class="flex justify-between items-center mt-4"><div><p class="text-xs text-slate-400">EA Best Seller</p><p class="font-bold text-sm">DagangDuit Auto Risk EA</p></div><div class="text-right"><p class="text-xs line-through text-slate-500">Rp 750.000</p><p class="font-black text-emerald-400">Rp 450.000</p></div></div>
-          <a href="#katalog" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl">Beli Sekarang - QRIS ⚡</a>
+          <div class="flex justify-between items-center mt-4"><div><p class="text-xs text-slate-400" data-i18n="hero.cardTag">EA Best Seller</p><p class="font-bold text-sm">DagangDuit Auto Risk EA</p></div><div class="text-right"><p class="text-xs line-through text-slate-500">Rp 750.000</p><p class="font-black text-emerald-400">Rp 450.000</p></div></div>
+          <a href="#katalog" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl" data-i18n="hero.cardBtn">Beli Sekarang - QRIS ⚡</a>
         </div>
-        <!-- Floating Badge -->
-        <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text- text-slate-400 leading-none">Order Baru</p><p class="text-xs font-bold">Rizky • Jakarta • EA</p></div></div>
-        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text- font-bold leading-none">PROFIT HARI INI</p><p class="text-sm font-black">+ $124.50 ▲</p></div>
+        <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text-[10px] text-slate-400 leading-none" data-i18n="hero.badge1">Order Baru</p><p class="text-xs font-bold">Rizky • Jakarta • EA</p></div></div>
+        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black">+ $124.50 ▲</p></div>
       </div>
     </div>
   </section>
 
-  <!-- MARKET GRID -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-8 pb-10"><div class="flex justify-between mb-4"><h2 class="text-xl font-extrabold">Harga Pasar Terkini</h2><span class="text- font-black text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1.5 rounded-full animate-pulse">● LIVE</span></div><div id="market-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div></section>
-
   <!-- KALKULATOR -->
   <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-8 py-8 reveal">
-    <div class="glass-panel p-6 sm:p-10 rounded-">
+    <div class="glass-panel p-6 sm:p-10 rounded-3xl">
       <div class="grid lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-5"><span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Kalkulator Profit</span><h2 class="text-2xl sm:text-3xl font-extrabold mt-2 mb-5">Simulasikan Modal Kamu Jadi Berapa?</h2>
+        <div class="lg:col-span-5">
+          <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="calc.kicker">Kalkulator Profit</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 mb-5" data-i18n="calc.title">Simulasikan Modal Kamu Jadi Berapa?</h2>
           <div class="space-y-4">
-            <div><label class="text-xs text-slate-400 block mb-2">Modal Awal <span id="calc-deposit-cur">($)</span></label><input id="calc-deposit" type="number" value="1000" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
-            <div><label class="text-xs text-slate-400 block mb-2">Profit Bulanan (%)</label><input id="calc-rate" type="range" min="1" max="30" value="5" class="w-full accent-emerald-500"><p class="text-right text-sm font-mono-code text-emerald-300"><span id="rate-label">5</span>% / bulan</p></div>
-            <div><label class="text-xs text-slate-400 block mb-2">Durasi (Bulan)</label><input id="calc-months" type="number" value="12" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
+            <div><label class="text-xs text-slate-400 block mb-2"><span data-i18n="calc.deposit">Modal Awal</span> <span id="calc-deposit-cur">($)</span></label><input id="calc-deposit" type="number" value="1000" min="0" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
+            <div><label class="text-xs text-slate-400 block mb-2" data-i18n="calc.rate">Profit Bulanan (%)</label><input id="calc-rate" type="number" value="5" min="0" max="100" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
+            <div><label class="text-xs text-slate-400 block mb-2" data-i18n="calc.months">Durasi (Bulan)</label><input id="calc-months" type="number" value="12" min="1" max="120" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
           </div>
         </div>
         <div class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl p-6 sm:p-8">
-          <p class="text-xs text-slate-500 uppercase font-bold">Proyeksi Compounding</p>
+          <p class="text-xs text-slate-500 uppercase font-bold" data-i18n="calc.proj">Proyeksi Compounding</p>
           <div class="text-4xl sm:text-5xl font-black text-emerald-400 font-mono-code my-4 pop" id="calc-result-total">$1,795.86</div>
-          <!-- Progress Bar Animasi -->
           <div class="h-3 bg-slate-800 rounded-full overflow-hidden mb-4"><div id="calc-bar" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full transition-all duration-700" style="width:20%"></div></div>
-          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-900"><div><span class="text- text-slate-500 block">Keuntungan</span><span class="font-bold font-mono-code" id="calc-result-profit">+$795.86</span></div><div><span class="text- text-slate-500 block">Risk/Reward</span><span class="font-bold text-teal-400">1 : 2.5</span></div></div>
-          <a href="#katalog" class="btn-shine mt-6 block text-center bg-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-sm">Mau Hasil Seperti Ini? → Pilih EA-nya</a>
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-900"><div><span class="text-xs text-slate-500 block" data-i18n="calc.profit">Keuntungan</span><span class="font-bold font-mono-code" id="calc-result-profit">+$795.86</span></div><div><span class="text-xs text-slate-500 block" data-i18n="calc.rr">Risk/Reward</span><span class="font-bold text-teal-400">1 : 2.5</span></div></div>
+          <a href="#katalog" class="btn-shine mt-6 block text-center bg-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-sm" data-i18n="calc.cta">Mau Hasil Seperti Ini? → Pilih EA-nya</a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- TESTIMONI MARQUEE -->
-  <section id="testimoni" class="py-14 overflow-hidden">
-    <h2 class="text-2xl sm:text-3xl font-extrabold text-center">Apa Kata Mereka?</h2>
-    <p class="text-center text-slate-400 text-sm mt-2 mb-8">Geser otomatis • Testimoni nyata pembeli</p>
-    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:35s">
-      <div class="glass-panel min-w- p-6 rounded-3xl"><div class="text-amber-400">★★★★★</div><p class="text-sm text-slate-300 mt-3">"EA-nya disiplin banget, nggak lagi MC karena emosi. Dibantu setting sampai jalan!"</p><p class="text-xs font-bold mt-4">— Rizky, Jakarta</p></div>
-      <div class="glass-panel min-w- p-6 rounded-3xl"><div class="text-amber-400">★★★★★</div><p class="text-sm text-slate-300 mt-3">"Indikator bersih, nggak lag. Admin fast respon, recommended!"</p><p class="text-xs font-bold mt-4">— Sari, Surabaya</p></div>
-      <div class="glass-panel min-w- p-6 rounded-3xl"><div class="text-amber-400">★★★★★</div><p class="text-sm text-slate-300 mt-3">"Custom EA 2 hari jadi, sesuai persis logika saya. Worth it!"</p><p class="text-xs font-bold mt-4">— Andi, Bandung</p></div>
-      <div class="glass-panel min-w- p-6 rounded-3xl"><div class="text-amber-400">★★★★★</div><p class="text-sm text-slate-300 mt-3">"EA-nya disiplin banget, nggak lagi MC karena emosi. Dibantu setting sampai jalan!"</p><p class="text-xs font-bold mt-4">— Rizky, Jakarta</p></div>
-      <div class="glass-panel min-w- p-6 rounded-3xl"><div class="text-amber-400">★★★★★</div><p class="text-sm text-slate-300 mt-3">"Indikator bersih, nggak lag. Admin fast respon, recommended!"</p><p class="text-xs font-bold mt-4">— Sari, Surabaya</p></div>
-    </div></div>
+  <section id="testimoni" class="py-14 overflow-hidden reveal">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-center" data-i18n="testi.title">Apa Kata Mereka?</h2>
+    <p class="text-center text-slate-400 text-sm mt-2 mb-8" data-i18n="testi.sub">Geser otomatis • Testimoni nyata pembeli</p>
+    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:35s" id="testi-track"></div></div>
   </section>
 
   <!-- KATALOG -->
   <section id="katalog" class="max-w-7xl mx-auto px-4 sm:px-8 py-10 reveal">
-    <div class="flex justify-between items-end mb-6"><div><span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Etalase</span><h2 class="text-2xl sm:text-3xl font-extrabold mt-1">Katalog Produk & Harga</h2></div><span id="product-count" class="text-xs font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800">Memuat...</span></div>
+    <div class="flex justify-between items-end mb-6"><div><span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="cat.kicker">Etalase</span><h2 class="text-2xl sm:text-3xl font-extrabold mt-1" data-i18n="cat.title">Katalog Produk &amp; Harga</h2></div><span id="product-count" class="text-xs font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800" data-i18n="cat.loading">Memuat...</span></div>
     <div class="flex flex-col sm:flex-row gap-3 mb-8">
-      <input id="search-input" placeholder="Cari EA / Indikator..." class="flex-1 bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none">
-      <div class="flex gap-2"><button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-emerald-500/15 border-emerald-400/40 text-emerald-300 transition">Semua</button><button onclick="setCategory('EA')" id="cat-EA" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 transition">EA</button><button onclick="setCategory('Indicator')" id="cat-Indicator" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 transition">Indicator</button></div>
+      <input id="search-input" data-i18n-ph="cat.search" placeholder="Cari EA / Indikator..." class="flex-1 bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none">
+      <div class="flex gap-2">
+        <button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-emerald-500/15 border-emerald-400/40 text-emerald-300 transition" data-i18n="cat.all">Semua</button>
+        <button onclick="setCategory('EA')" id="cat-EA" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">EA</button>
+        <button onclick="setCategory('Indicator')" id="cat-Indicator" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">Indicator</button>
+      </div>
     </div>
-    <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm">Memuat produk...</p></div>
-    <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm">Belum ada produk.</div>
-    <div id="no-result-state" class="hidden py-16 text-center text-slate-500 text-sm">Tidak ada produk yang cocok.</div>
+    <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
+    <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk.</div>
+    <div id="no-result-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.noresult">Tidak ada produk yang cocok.</div>
     <div id="product-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </section>
 
   <!-- FAQ -->
-  <section id="faq" class="max-w-4xl mx-auto px-4 py-14 w-full reveal"><h2 class="text-2xl font-extrabold text-center mb-8">Pertanyaan Sering Ditanyakan</h2><div class="space-y-3">
-    <details class="glass-panel rounded-2xl p-5 group"><summary class="font-bold text-sm cursor-pointer list-none flex justify-between">Bagaimana file dikirim setelah bayar QRIS? <span class="group-open:rotate-45 transition">+</span></summary><p class="text-xs text-slate-400 mt-3 leading-relaxed">Klik konfirmasi WA. File + panduan PDF dikirim langsung, biasanya &lt; 5 menit di jam kerja.</p></details>
-    <details class="glass-panel rounded-2xl p-5 group"><summary class="font-bold text-sm cursor-pointer list-none flex justify-between">Apakah ada garansi? <span class="group-open:rotate-45 transition">+</span></summary><p class="text-xs text-slate-400 mt-3 leading-relaxed">Ya. Dibantu setting sampai jalan di MT4/MT5 / VPS. Bug dari kode kami diperbaiki gratis.</p></details>
-    <details class="glass-panel rounded-2xl p-5 group"><summary class="font-bold text-sm cursor-pointer list-none flex justify-between">Bisa custom EA dari strategi saya? <span class="group-open:rotate-45 transition">+</span></summary><p class="text-xs text-slate-400 mt-3 leading-relaxed">Bisa! Chat WA dan kirim rule entry/exit kamu.</p></details>
-  </div></section>
+  <section id="faq" class="max-w-4xl mx-auto px-4 py-14 w-full reveal">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-center mb-2" data-i18n="faq.title">Pertanyaan Sering Ditanyakan</h2>
+    <p class="text-center text-slate-400 text-sm mb-8" data-i18n="faq.sub">Masih ragu? Chat WhatsApp kami langsung.</p>
+    <div class="space-y-3" id="faq-list"></div>
+  </section>
 </main>
+<!-- FOOTER -->
+<footer class="border-t border-slate-800/60 bg-slate-950 py-8 mt-10 relative z-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3"><img src="logo.png" class="h-9 w-9 rounded-xl object-contain"><div><p class="font-black text-sm">DAGANGDUIT PRO</p><p class="text-[10px] text-slate-500" data-i18n="footer.tag">EA &amp; Indikator Trading • MT4/MT5</p></div></div>
+    <p class="text-xs text-slate-500 text-center" data-i18n="footer.disc">⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.</p>
+    <p class="text-xs text-slate-600">© 2026 DagangDuit. All rights reserved.</p>
+  </div>
+</footer>
 
 <!-- MODAL QRIS -->
-<div id="qris-modal" onclick="if(event.target===this)closeQrisModal()" class="fixed inset-0 z-[80] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-  <div class="modal-card bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h- overflow-y-auto p-6 relative">
-    <button onclick="closeQrisModal()" class="absolute top-5 right-5 bg-slate-800 w-8 h-8 rounded-full">✕</button>
-    <span class="text- font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-md border border-emerald-800">Instant QRIS Checkout</span>
-    <h3 class="text-xl font-bold mt-2" id="modal-product-name">Nama Produk</h3><p class="text-xs text-slate-400" id="modal-product-desc"></p>
-    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text- text-amber-300 my-4">⏰ Harga promo bisa berubah sewaktu-waktu. Amankan sekarang.</div>
-    <div id="modal-gallery" class="hidden mb-4"><div class="rounded-2xl overflow-hidden border border-slate-800"><img id="modal-main-img" class="w-full h-52 object-cover cursor-zoom-in" onclick="openLightbox(this.src)"></div><div id="modal-thumbs" class="flex gap-2 overflow-x-auto mt-2"></div></div>
-    <div id="modal-plans-wrap" class="hidden mb-4"><label class="text- text-slate-500 font-semibold">Pilih Skema:</label><div id="modal-plans" class="grid grid-cols-2 gap-2 mt-1"></div></div>
-    <div class="bg-white p-4 rounded-2xl flex justify-center mb-4 qris-pulse"><img id="modal-qris-img" class="w-52 h-52 object-contain"></div>
-    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex justify-between mb-3"><div><span class="text- text-slate-400 block">Total Tagihan</span><span class="text-xl font-black text-emerald-400 font-mono-code" id="modal-product-price">Rp 0</span></div><span class="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 h-fit">Bebas Admin</span></div>
-    <div class="text- text-slate-400 mb-4 space-y-1"><p>✅ File + Panduan PDF</p><p>✅ Dibantu Setting Sampai Jalan</p></div>
-    <a id="modal-wa-btn" href="#" target="_blank" onclick="fireConfetti()" class="btn-shine block w-full bg-emerald-500 text-slate-950 font-black text-center py-3.5 rounded-xl text-sm">✅ Saya Sudah Bayar - Konfirmasi WA</a>
+<div id="qris-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeQrisModal()"></div>
+  <div class="modal-card relative bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto p-6">
+    <button onclick="closeQrisModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-lg">✕</button>
+    <div class="text-center mb-5">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-3 text-2xl">📱</div>
+      <h3 class="font-black text-lg" data-i18n="modal.title">Checkout QRIS</h3>
+      <p class="text-xs text-slate-400 mt-1" data-i18n="modal.sub">Scan kode QR di bawah ini dengan aplikasi e-wallet / m-banking apa pun</p>
+    </div>
+    <div class="bg-white rounded-2xl p-4 flex justify-center mb-4"><img id="modal-qris-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=QRIS-DagangDuit" alt="QRIS" class="w-48 h-48 object-contain qris-pulse rounded-lg"></div>
+    <div class="bg-slate-950 rounded-xl p-4 mb-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-slate-500" data-i18n="modal.product">Produk</span><span class="font-bold text-right" id="modal-product-name">-</span></div>
+      <div class="flex justify-between"><span class="text-slate-500" data-i18n="modal.plan">Paket</span><span class="font-bold text-emerald-400" id="modal-plan-label">-</span></div>
+      <div class="flex justify-between border-t border-slate-800 pt-2"><span class="text-slate-500" data-i18n="modal.total">Total Bayar</span><span class="font-black text-emerald-400 text-lg" id="modal-total">-</span></div>
+    </div>
+    <div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-xs text-amber-300 flex gap-2"><span>⚠️</span><span data-i18n="modal.note">Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.</span></div>
+    <a id="modal-wa-btn" href="https://wa.me/6285161853108" target="_blank" class="btn-shine block text-center bg-emerald-500 text-slate-950 font-black py-4 rounded-xl text-sm" data-i18n="modal.wa">💬 Konfirmasi Pembayaran via WhatsApp</a>
+    <p class="text-center text-[10px] text-slate-500 mt-3" data-i18n="modal.secure">Pembayaran aman • Diproses manual oleh admin</p>
   </div>
 </div>
 
 <!-- LIGHTBOX -->
-<div id="lightbox" class="fixed inset-0 z-[90] bg-slate-950/95 hidden items-center justify-center p-4" onclick="if(event.target===this)closeLightbox()"><button onclick="closeLightbox()" class="absolute top-5 right-5 bg-slate-800 w-10 h-10 rounded-full z-10">✕</button><div id="lightbox-stage" class="w-full max-w-5xl flex justify-center" style="height:80vh"><img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-xl"></div><div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 bg-slate-900 rounded-full px-3 py-2"><button onclick="lbZoom(-0.25)" class="w-8 h-8 rounded-full bg-slate-800">−</button><span id="lb-label" class="text-xs w-12 text-center py-2">100%</span><button onclick="lbZoom(0.25)" class="w-8 h-8 rounded-full bg-slate-800">+</button><button onclick="lbReset()" class="px-3 h-8 rounded-full bg-slate-800 text- font-bold">Reset</button></div></div>
-
-<!-- STICKY MOBILE -->
-<div class="fixed bottom-0 left-0 right-0 z-[70] sm:hidden bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3 flex gap-2"><a href="#katalog" class="flex-1 bg-emerald-500 text-slate-950 font-black text-sm py-3 rounded-xl text-center btn-shine">🛒 Lihat Katalog</a><a href="https://wa.me/6285161853108" class="flex-1 bg-slate-800 font-bold text-sm py-3 rounded-xl text-center border border-slate-700">💬 Chat WA</a></div>
-<div class="h-16 sm:hidden"></div>
-
-<footer class="relative z-10 border-t border-slate-800 py-8 px-4 text-xs text-slate-500 text-center">© 2026 DagangDuit • Agus Pujianto • Trading berisiko, gunakan risk management.</footer>
+<div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/95 backdrop-blur-md">
+  <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-red-500 transition flex items-center justify-center">✕</button>
+  <button onclick="zoomLightbox(-0.25)" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">−</button>
+  <button onclick="zoomLightbox(0.25)" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">+</button>
+  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 bg-slate-900/90 border border-slate-700 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400" id="zoom-level">100%</div>
+  <div id="lightbox-stage" class="overflow-hidden w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing" style="touch-action:none">
+    <img id="lightbox-img" src="" alt="Preview" draggable="false" class="max-w-none select-none" style="transform:translate(0px,0px) scale(1); transition:transform .15s ease-out;">
+  </div>
+</div>
 
 <script>
-const SUPABASE_URL='https://vdzyfyerqnyaxotlawgr.supabase.co';
-const SUPABASE_ANON_KEY='sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
-const WHATSAPP_NUMBER='6285161853108';
-const QRIS_IMAGE_URL='https://placehold.co/400x400/png?text=QRIS+DagangDuit';
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let LANG='id',CUR='IDR',RATE=16000;
-const fmtMoney=(idr)=>{const n=Number(idr)||0; if(CUR==='IDR')return 'Rp '+Math.round(n).toLocaleString('id-ID'); return '$'+(n/RATE).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
-const fmtCalc=(n)=>CUR==='IDR'?'Rp '+Math.round(n).toLocaleString('id-ID'):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-function setLang(l){LANG=l;CUR=l==='en'?'USD':'IDR'; document.getElementById('lang-id').className='px-2.5 py-1.5 '+(l==='id'?'bg-emerald-500/15 text-emerald-300':'bg-slate-900 text-slate-500'); document.getElementById('lang-en').className='px-2.5 py-1.5 '+(l==='en'?'bg-emerald-500/15 text-emerald-300':'bg-slate-900 text-slate-500'); document.getElementById('calc-deposit-cur').innerText=CUR==='IDR'?'(Rp)':'($)'; updateCalculator(); renderProducts();}
+/* ==================== SUPABASE ==================== */
+const SUPABASE_URL = 'https://vdzyfyerqnyaxotlawgr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ptHKCrkf65KPE6ncG7RoOQ_UeE8S4On';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== ANIMASI 1: TYPING =====
-const typingWords=["Tanpa Emosi.","Tanpa Begadang.","Profit Otomatis.","Tanpa FOMO."];
-let twIdx=0, twChar=0, twDel=false;
-function typeLoop(){
-  const el=document.getElementById('typing-suffix'); if(!el) return;
-  const word=typingWords[twIdx];
-  if(!twDel){ twChar++; el.innerHTML=word.slice(0,twChar); if(twChar===word.length){ twDel=true; return setTimeout(typeLoop,1800);} }
-  else{ twChar--; el.innerHTML=word.slice(0,twChar); if(twChar===0){ twDel=false; twIdx=(twIdx+1)%typingWords.length; } }
-  setTimeout(typeLoop, twDel?35:70);
-} typeLoop();
+/* ==================== I18N & CURRENCY ==================== */
+let LANG = 'id', CUR = 'IDR', RATE = 16000;
+const I18N = {
+  id: {
+    'promo.text':'PROMO: Diskon s.d 40% + Gratis Setting VPS','promo.cta':'Klaim Sekarang →',
+    'brand.sub':'EA • INDIKATOR • TRADING TOOLS',
+    'nav.catalog':'Katalog','nav.calc':'Kalkulator','nav.testi':'Testimoni','nav.wa':'💬 Chat WA',
+    'hero.online':'Trader Online Sekarang','hero.l1':'Trading Tenang.','hero.l2':'Profit Jalan Otomatis,','hero.l3':'Tanpa Emosi.',
+    'hero.desc':'EA & Indikator MT4/MT5 buatan <b class="text-white">Agus Pujianto</b>. Disiplin dengan Hard Stop-Loss & Auto Risk Management. Bayar QRIS, file langsung terkirim via WA.',
+    'hero.cta1':'🛒 Lihat Katalog & Harga →','hero.cta2':'📈 Hitung Potensi Profit',
+    'hero.c1':'Trader Pakai','hero.c2':'Rating (4.9)','hero.c3u':'Menit','hero.c3':'File Terkirim',
+    'hero.cardTag':'EA Best Seller','hero.cardBtn':'Beli Sekarang - QRIS ⚡','hero.badge1':'Order Baru','hero.badge2':'PROFIT HARI INI',
+    'calc.kicker':'Kalkulator Profit','calc.title':'Simulasikan Modal Kamu Jadi Berapa?',
+    'calc.deposit':'Modal Awal','calc.rate':'Profit Bulanan (%)','calc.months':'Durasi (Bulan)',
+    'calc.proj':'Proyeksi Compounding','calc.profit':'Keuntungan','calc.rr':'Risk/Reward',
+    'calc.cta':'Mau Hasil Seperti Ini? → Pilih EA-nya',
+    'testi.title':'Apa Kata Mereka?','testi.sub':'Geser otomatis • Testimoni nyata pembeli',
+    'cat.kicker':'Etalase','cat.title':'Katalog Produk & Harga','cat.loading':'Memuat...','cat.loading2':'Memuat produk...',
+    'cat.empty':'Belum ada produk.','cat.noresult':'Tidak ada produk yang cocok.','cat.search':'Cari EA / Indikator...','cat.all':'Semua',
+    'cat.results':'produk ditemukan','cat.available':'Tersedia','cat.sale':'DISKON','cat.buyRent':'Beli / Sewa','cat.priceHead':'Harga',
+    'cat.qris':'QRIS Instan','cat.buy':'Beli','cat.rent':'Sewa',
+    'plan.buy':'Beli Sekali','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.12m':'Sewa 1 Tahun',
+    'modal.title':'Checkout QRIS','modal.sub':'Scan kode QR di bawah ini dengan aplikasi e-wallet / m-banking apa pun',
+    'modal.product':'Produk','modal.plan':'Paket','modal.total':'Total Bayar','modal.note':'Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.','modal.wa':'💬 Konfirmasi Pembayaran via WhatsApp','modal.secure':'Pembayaran aman • Diproses manual oleh admin',
+    'faq.title':'Pertanyaan Sering Ditanyakan','faq.sub':'Masih ragu? Chat WhatsApp kami langsung.',
+    'footer.tag':'EA & Indikator Trading • MT4/MT5','footer.disc':'⚠️ Trading berisiko. Pastikan Anda paham sebelum bertransaksi.'
+  },
+  en: {
+    'promo.text':'PROMO: Up to 40% OFF + Free VPS Setup','promo.cta':'Claim Now →',
+    'brand.sub':'EA • INDICATORS • TRADING TOOLS',
+    'nav.catalog':'Catalog','nav.calc':'Calculator','nav.testi':'Reviews','nav.wa':'💬 Chat WA',
+    'hero.online':'Traders Online Now','hero.l1':'Trade Calm.','hero.l2':'Profit on Autopilot,','hero.l3':'No Emotions.',
+    'hero.desc':'MT4/MT5 EAs & Indicators by <b class="text-white">Agus Pujianto</b>. Disciplined with Hard Stop-Loss & Auto Risk Management. Pay via QRIS, files delivered instantly via WA.',
+    'hero.cta1':'🛒 View Catalog & Prices →','hero.cta2':'📈 Calculate Profit Potential',
+    'hero.c1':'Active Traders','hero.c2':'Rating (4.9)','hero.c3u':'Minutes','hero.c3':'Delivery Time',
+    'hero.cardTag':'Best Seller EA','hero.cardBtn':'Buy Now - QRIS ⚡','hero.badge1':'New Order','hero.badge2':'TODAY\'S PROFIT',
+    'calc.kicker':'Profit Calculator','calc.title':'Simulate Your Capital Growth',
+    'calc.deposit':'Initial Capital','calc.rate':'Monthly Profit (%)','calc.months':'Duration (Months)',
+    'calc.proj':'Compounding Projection','calc.profit':'Profit','calc.rr':'Risk/Reward',
+    'calc.cta':'Want Results Like This? → Pick Your EA',
+    'testi.title':'What They Say','testi.sub':'Auto-scrolling • Real buyer reviews',
+    'cat.kicker':'Showcase','cat.title':'Product Catalog & Prices','cat.loading':'Loading...','cat.loading2':'Loading products...',
+    'cat.empty':'No products yet.','cat.noresult':'No matching products.','cat.search':'Search EA / Indicator...','cat.all':'All',
+    'cat.results':'products found','cat.available':'Available','cat.sale':'SALE','cat.buyRent':'Buy / Rent','cat.priceHead':'Price',
+    'cat.qris':'Instant QRIS','cat.buy':'Buy','cat.rent':'Rent',
+    'plan.buy':'Buy Once','plan.1m':'Rent 1 Month','plan.3m':'Rent 3 Months','plan.12m':'Rent 1 Year',
+    'modal.title':'QRIS Checkout','modal.sub':'Scan the QR code below with any e-wallet / mobile banking app',
+    'modal.product':'Product','modal.plan':'Plan','modal.total':'Total','modal.note':'After payment, send proof via WhatsApp. Product files delivered within 5 minutes.','modal.wa':'💬 Confirm Payment via WhatsApp','modal.secure':'Secure payment • Processed manually by admin',
+    'faq.title':'Frequently Asked Questions','faq.sub':'Still unsure? Chat us on WhatsApp.',
+    'footer.tag':'Trading EA & Indicators • MT4/MT5','footer.disc':'⚠️ Trading involves risk. Make sure you understand before trading.'
+  }
+};
+const t = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
+const fmtMoney = (n) => CUR === 'USD' ? '$' + Number(n || 0).toLocaleString('en-US', {maximumFractionDigits: 2}) : 'Rp ' + Math.round(Number(n || 0)).toLocaleString('id-ID');
+const fmtCalc = (n) => CUR === 'USD' ? '$' + Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'Rp ' + Math.round(Number(n || 0)).toLocaleString('id-ID');
 
-// ===== ANIMASI 2: LIVE COUNT ACAK =====
-setInterval(()=>{ const el=document.getElementById('live-count'); if(el){ let n=parseInt(el.innerText); n+=Math.floor(Math.random()*5)-2; if(n<110)n=110; if(n>165)n=165; el.innerText=n; } },3000);
-
-// ===== ANIMASI 3: COUNTER NAIK =====
-const counterObs=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ const el=e.target; const target=+el.dataset.target; const dec=el.dataset.decimal?1:0; let cur=0; const step=target/40; const iv=setInterval(()=>{ cur+=step; if(cur>=target){ cur=target; clearInterval(iv);} el.innerText=dec?(cur/10).toFixed(1):Math.floor(cur); },30); counterObs.unobserve(el);} }) },{threshold:.5});
-document.querySelectorAll('.counter').forEach(el=>counterObs.observe(el));
-
-// ===== ANIMASI 4: REVEAL + STAGGER =====
-const revealObs=new IntersectionObserver(es=>{ es.forEach((e,i)=>{ if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'), i*80); revealObs.unobserve(e.target);} }) },{threshold:.1});
-document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
-
-// ===== KALKULATOR + PROGRESS BAR =====
-function updateCalculator(){
-  const d=parseFloat(document.getElementById('calc-deposit').value)||0;
-  const r=parseFloat(document.getElementById('calc-rate').value)||0;
-  const m=parseInt(document.getElementById('calc-months').value)||0;
-  document.getElementById('rate-label').innerText=r;
-  const total=d*Math.pow(1+r/100,m); const profit=total-d;
-  const totalEl=document.getElementById('calc-result-total'); totalEl.innerText=fmtCalc(total);
-  totalEl.classList.remove('pop'); void totalEl.offsetWidth; totalEl.classList.add('pop');
-  document.getElementById('calc-result-profit').innerText='+'+fmtCalc(profit)+' ('+(d>0?((profit/d)*100).toFixed(1):0)+'%)';
-  document.getElementById('calc-bar').style.width=Math.min(100, (profit/d)*100 || 0)+'%';
+async function loadRate() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const j = await r.json();
+    if (j && j.rates && j.rates.IDR) { RATE = j.rates.IDR; if (allProducts.length) renderProducts(); }
+  } catch(e) {}
 }
-['calc-deposit','calc-rate','calc-months'].forEach(id=>document.getElementById(id).addEventListener('input',updateCalculator));
-
-// ===== KATALOG =====
-let allProducts=[],activeCategory='ALL',searchQuery='',currentProduct=null,currentPlan=null;
-const productImages=(p)=>(Array.isArray(p.images)&&p.images.length)?p.images:(p.image_url?[p.image_url]:[]);
-const coverImage=(p)=>productImages(p)[0]||'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80';
-const discPct=(p)=>Math.min(100,Math.max(0,Number(p.discount_percent)||0));
-const discPrice=(p,price)=>Math.round((Number(price)||0)*(1-discPct(p)/100));
-const rentalPlans=(p)=>{ const d=discPct(p); const mk=(k,l,o)=>({key:k,label:l,orig:Number(o)||0,price:d?discPrice(p,o):(Number(o)||0)}); const pl=[mk('buy','Beli',p.price)]; if(p.price_1m)pl.push(mk('1m','Sewa 1 Bulan',p.price_1m)); if(p.price_3m)pl.push(mk('3m','Sewa 3 Bulan',p.price_3m)); if(p.price_12m)pl.push(mk('12m','Sewa 1 Tahun',p.price_12m)); return pl; };
-function filteredProducts(){ const q=searchQuery.trim().toLowerCase(); return allProducts.filter(p=> (activeCategory==='ALL'||(p.category||'EA')===activeCategory) && (!q||(p.name||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)) ); }
-function setCategory(c){ activeCategory=c; ['ALL','EA','Indicator'].forEach(x=>{ const b=document.getElementById('cat-'+x); b.className='cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition '+(x===c?'bg-emerald-500/15 border-emerald-400/40 text-emerald-300':'bg-slate-900 border-slate-800 text-slate-400'); }); renderProducts(); }
-function renderProducts(){
-  const grid=document.getElementById('product-grid'); const list=filteredProducts(); const count=document.getElementById('product-count');
-  document.getElementById('empty-state').classList.add('hidden'); document.getElementById('no-result-state').classList.add('hidden'); grid.classList.add('hidden');
-  if(allProducts.length===0){ document.getElementById('empty-state').classList.remove('hidden'); count.innerText='0 Produk'; return; }
-  if(list.length===0){ document.getElementById('no-result-state').classList.remove('hidden'); count.innerText='0 hasil'; return; }
-  count.innerText=list.length+' Produk Tersedia';
-  grid.innerHTML=list.map((p,idx)=>{
-    const dPct=discPct(p); const cat=p.category||'EA';
-    const priceRow=(label,orig,cls)=>{ const fin=dPct?discPrice(p,orig):Number(orig); return `<div class="flex justify-between items-center"><span class="text-xs text-slate-400">${label}</span><span class="text-right">${dPct?`<span class="block text- line-through text-slate-500 font-mono-code">${fmtMoney(orig)}</span>`:''}<span class="${cls} font-mono-code">${fmtMoney(fin)}</span></span></div>`; };
-    return `<div class="glass-panel tilt-card rounded-3xl overflow-hidden flex flex-col justify-between reveal" style="transition-delay:${idx*70}ms">
-      <div><div class="h-48 overflow-hidden relative bg-slate-950"><img src="${coverImage(p)}" onclick="openLightbox('${coverImage(p)}')" class="w-full h-full object-cover hover:scale-105 transition duration-500 cursor-zoom-in">
-      ${idx===0?`<span class="absolute top-3 right-3 bg-amber-400 text-slate-950 text- font-black px-2.5 py-1 rounded-full">⭐ TERLARIS</span>`:dPct>0?`<span class="absolute top-3 right-3 bg-rose-500 text-white text- font-black px-2.5 py-1 rounded-full">-${dPct}% DISKON</span>`:''}
-      <div class="absolute top-3 left-3 flex gap-1.5"><span class="bg-slate-950/80 border border-slate-700 text- font-extrabold px-2.5 py-1 rounded-full uppercase">${cat}</span><span class="bg-slate-950/80 border border-slate-700 text- font-extrabold text-emerald-400 px-2.5 py-1 rounded-full font-mono-code">${p.platform||'MT5'}</span></div></div>
-      <div class="p-5"><div class="text-amber-400 text-">★★★★★ <span class="text-slate-500">4.9</span></div><h4 class="font-extrabold mt-1 mb-1.5">${p.name}</h4><p class="text-slate-400 text-xs line-clamp-2 leading-relaxed">${p.description||'Tidak ada deskripsi.'}</p></div></div>
-      <div class="p-5 pt-0 space-y-3"><div class="rounded-2xl bg-slate-950/70 border border-slate-800 p-3.5 space-y-2"><div class="flex justify-between pb-2 border-b border-slate-800"><span class="text- font-bold uppercase tracking-widest text-slate-500">Beli / Sewa</span><span class="text- font-bold text-emerald-400">QRIS ⚡</span></div>${priceRow('Beli',p.price,'text-sm font-black text-emerald-300')}${p.price_1m?priceRow('Sewa 1 Bulan',p.price_1m,'text-xs font-bold text-teal-300'):''}${p.price_3m?priceRow('Sewa 3 Bulan',p.price_3m,'text-xs font-bold text-teal-300'):''}${p.price_12m?priceRow('Sewa 1 Tahun',p.price_12m,'text-xs font-bold text-teal-300'):''}</div>
-      <div class="grid grid-cols-2 gap-2"><button onclick="openQrisModal('${p.id}')" class="btn-shine bg-emerald-500 text-slate-950 font-black text-xs py-3 rounded-xl">Beli Sekarang</button><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Halo, saya tertarik '+p.name)}" target="_blank" class="bg-slate-800 font-bold text-xs py-3 rounded-xl text-center border border-slate-700">Tanya WA</a></div></div></div>`;
-  }).join(''); grid.classList.remove('hidden');
-  // Aktifkan tilt + reveal untuk kartu baru
-  grid.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
-  initTilt();
+function setLang(l) {
+  LANG = l; CUR = (l === 'en') ? 'USD' : 'IDR';
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.getElementById('lang-id').className = 'px-2.5 py-1.5 ' + (l==='id' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
+  document.getElementById('lang-en').className = 'px-2.5 py-1.5 ' + (l==='en' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
+  document.getElementById('calc-deposit-cur').textContent = CUR === 'USD' ? '($)' : '(Rp)';
+  updateCalculator(); renderProducts(); renderFAQ();
 }
-// ===== ANIMASI 5: 3D TILT =====
-function initTilt(){
-  document.querySelectorAll('.tilt-card').forEach(card=>{
-    if(card.dataset.tilt) return; card.dataset.tilt=1;
-    card.addEventListener('mousemove',e=>{
-      const r=card.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width; const y=(e.clientY-r.top)/r.height;
-      card.style.setProperty('--mx',(x*100)+'%'); card.style.setProperty('--my',(y*100)+'%');
-      card.style.transform=`perspective(900px) rotateY(${(x-.5)*10}deg) rotateX(${(.5-y)*10}deg) translateY(-4px)`;
-    });
-    card.addEventListener('mouseleave',()=>{ card.style.transform='perspective(900px) rotateY(0) rotateX(0)'; });
+
+/* ==================== CALCULATOR ==================== */
+function updateCalculator() {
+  const dep = parseFloat(document.getElementById('calc-deposit').value) || 0;
+  const rate = parseFloat(document.getElementById('calc-rate').value) || 0;
+  const months = parseInt(document.getElementById('calc-months').value) || 1;
+  const total = dep * Math.pow(1 + rate / 100, months);
+  const profit = total - dep;
+  document.getElementById('calc-result-total').textContent = fmtCalc(total);
+  document.getElementById('calc-result-profit').textContent = '+' + fmtCalc(profit);
+  document.getElementById('calc-bar').style.width = Math.min(100, (profit / (dep || 1)) * 20) + '%';
+}
+['calc-deposit','calc-rate','calc-months'].forEach(id => document.getElementById(id).addEventListener('input', updateCalculator));
+
+/* ==================== ANIMATIONS ==================== */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }), {threshold:.12});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// TYPING EFFECT
+document.addEventListener('DOMContentLoaded', () => {
+  const words = ['Tanpa Emosi.','Bebas Stres.','Profit Maksimal.','Disiplin Total.','No Revenge Trading.','Risk Terukur.'];
+  const el = document.getElementById('typing-suffix'); let wi = 0, ci = 0, del = false;
+  (function typeLoop(){
+    const w = words[wi];
+    el.textContent = w.slice(0, ci);
+    if (!del && ci < w.length) { ci++; setTimeout(typeLoop, 70); }
+    else if (!del) { del = true; setTimeout(typeLoop, 1800); }
+    else if (ci > 0) { ci--; setTimeout(typeLoop, 35); }
+    else { del = false; wi = (wi + 1) % words.length; setTimeout(typeLoop, 300); }
+  })();
+  // COUNTERS
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; cio.unobserve(e.target);
+    const el2 = e.target, target = parseFloat(el2.dataset.target), dec = el2.dataset.decimal === '1';
+    const dur = 1600, t0 = performance.now();
+    (function tick(now){ const p = Math.min((now - t0) / dur, 1), ease = 1 - Math.pow(1 - p, 3);
+      el2.textContent = dec ? (target * ease).toFixed(1) : Math.round(target * ease);
+      if (p < 1) requestAnimationFrame(tick); })(t0);
+  }), {threshold:.5});
+  document.querySelectorAll('.counter').forEach(el => cio.observe(el));
+  // LIVE COUNT
+  let count = 118; setInterval(() => { count += Math.floor(Math.random() * 5) - 2; if (count < 100) count = 100; if (count > 160) count = 160; document.getElementById('live-count').textContent = count; }, 3000);
+  // TILT CARDS
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => { const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+      const rx = ((e.clientY - r.top) / r.height - .5) * -8, ry = ((e.clientX - r.left) / r.width - .5) * 8;
+      card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`; });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
+});
+
+/* ==================== TICKER LIVE ==================== */
+const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['GC=F','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
+async function fetchQuote(sym) {
+  try {
+    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
+    const j = await r.json(); const m = j.chart.result[0].meta;
+    return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.regularMarketPrice };
+  } catch(e) { return null; }
 }
-initTilt();
-async function loadProducts(){ const loading=document.getElementById('loading-state'); const {data,error}=await supabaseClient.from('products').select('*').order('created_at',{ascending:false}); loading.classList.add('hidden'); if(error){ document.getElementById('empty-state').classList.remove('hidden'); return; } allProducts=data||[]; renderProducts(); }
-function selectPlan(key){ currentPlan=rentalPlans(currentProduct).find(pl=>pl.key===key)||null; if(!currentPlan)return; document.getElementById('modal-product-price').innerText=fmtMoney(currentPlan.price); document.querySelectorAll('.plan-btn').forEach(b=>{ b.className='plan-btn text-left px-3 py-2.5 rounded-xl border text-xs font-bold '+(b.dataset.plan===key?'bg-emerald-500/15 border-emerald-400/50 text-emerald-300':'bg-slate-950 border-slate-800 text-slate-400'); }); document.getElementById('modal-wa-btn').href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Halo Agus, saya sudah bayar QRIS: ${currentProduct.name} - ${currentPlan.label} (${fmtMoney(currentPlan.price)})`)}`; }
-function openQrisModal(id){ currentProduct=allProducts.find(p=>p.id===id); if(!currentProduct)return; const p=currentProduct; document.getElementById('modal-product-name').innerText=p.name; document.getElementById('modal-product-desc').innerText=p.description||''; document.getElementById('modal-qris-img').src=QRIS_IMAGE_URL; const imgs=productImages(p); const g=document.getElementById('modal-gallery'); if(imgs.length){ g.classList.remove('hidden'); document.getElementById('modal-main-img').src=imgs[0]; document.getElementById('modal-thumbs').innerHTML=imgs.map((u,i)=>`<img src="${u}" onclick="document.getElementById('modal-main-img').src='${u}'" class="h-16 w-16 rounded-lg object-cover border ${i===0?'border-emerald-400':'border-slate-800'} cursor-pointer">`).join(''); } else g.classList.add('hidden'); const plans=rentalPlans(p); const wrap=document.getElementById('modal-plans-wrap'); if(plans.length>1){ wrap.classList.remove('hidden'); document.getElementById('modal-plans').innerHTML=plans.map(pl=>`<button data-plan="${pl.key}" onclick="selectPlan('${pl.key}')" class="plan-btn text-left px-3 py-2.5 rounded-xl border text-xs font-bold bg-slate-950 border-slate-800 text-slate-400"><span class="block">${pl.label}</span><span class="block font-mono-code text-emerald-400">${fmtMoney(pl.price)}</span></button>`).join(''); selectPlan('buy'); } else { wrap.classList.add('hidden'); currentPlan=plans[0]; document.getElementById('modal-product-price').innerText=fmtMoney(currentPlan.price); document.getElementById('modal-wa-btn').href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Halo Agus, saya sudah bayar QRIS: ${p.name} (${fmtMoney(currentPlan.price)})`)}`; } document.getElementById('qris-modal').classList.remove('hidden'); }
-function closeQrisModal(){ document.getElementById('qris-modal').classList.add('hidden'); }
-document.getElementById('search-input').addEventListener('input',e=>{ searchQuery=e.target.value; renderProducts(); });
-function fireConfetti(){ if(window.confetti) confetti({particleCount:90, spread:70, origin:{y:.6}, colors:['#10b981','#fbbf24','#22d3ee']}); }
-// Lightbox
-let lbScale=1,lbX=0,lbY=0;
-function applyLb(){ document.getElementById('lightbox-img').style.transform=`translate(${lbX}px,${lbY}px) scale(${lbScale})`; document.getElementById('lb-label').innerText=Math.round(lbScale*100)+'%'; }
-function openLightbox(s){ lbScale=1;lbX=0;lbY=0; document.getElementById('lightbox-img').src=s; applyLb(); const lb=document.getElementById('lightbox'); lb.classList.remove('hidden'); lb.classList.add('flex'); }
-function closeLightbox(){ const lb=document.getElementById('lightbox'); lb.classList.add('hidden'); lb.classList.remove('flex'); }
-function lbZoom(d){ lbScale=Math.min(5,Math.max(.5,lbScale+d)); applyLb(); } function lbReset(){ lbScale=1;lbX=0;lbY=0; applyLb(); }
-// Market
-const MARKETS=[{sym:'EURUSD=X',name:'EUR/USD'},{sym:'GBPUSD=X',name:'GBP/USD'},{sym:'USDJPY=X',name:'USD/JPY'},{sym:'XAUUSD=X',name:'XAU/USD'},{sym:'BTC-USD',name:'BTC/USD'},{sym:'CL=F',name:'OIL'}];
-async function loadMarkets(){ const grid=document.getElementById('market-grid'); grid.innerHTML=MARKETS.map(m=>`<div class="glass-panel rounded-2xl p-4"><p class="text- font-bold text-slate-500 uppercase">${m.name}</p><p class="mkt-price text-base font-black font-mono-code mt-2">…</p><span class="mkt-chg text- font-black text-slate-500">—</span></div>`).join(''); await Promise.all(MARKETS.map(async(m,i)=>{ try{ const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${m.sym}?interval=1d&range=5d`); const j=await r.json(); const res=j.chart.result[0]; const closes=(res.indicators.quote[0].close||[]).filter(c=>c!=null); const price=res.meta.regularMarketPrice??closes[closes.length-1]; const prev=closes[closes.length-2]||res.meta.previousClose; const chg=((price-prev)/prev)*100; const card=grid.children[i]; card.querySelector('.mkt-price').innerText=price.toLocaleString('en-US',{maximumFractionDigits:4}); card.querySelector('.mkt-price').className+=' '+(chg>=0?'text-emerald-300':'text-red-300'); const b=card.querySelector('.mkt-chg'); b.innerText=(chg>=0?'+':'')+chg.toFixed(2)+'%'; b.className+=' '+(chg>=0?'text-emerald-400':'text-red-400'); }catch(e){} })); }
-loadMarkets(); setInterval(loadMarkets,60000); loadProducts(); updateCalculator();
-supabaseClient.channel('products-changes').on('postgres_changes',{event:'*',schema:'public',table:'products'},loadProducts).subscribe();
+async function loadTicker() {
+  const items = await Promise.all(TICKER_SYMBOLS.map(async ([sym, name]) => {
+    const q = await fetchQuote(sym); if (!q) return '';
+    const up = q.price >= q.prev, pct = ((q.price - q.prev) / q.prev * 100);
+    return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${name}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${q.price.toLocaleString('en-US',{maximumFractionDigits:2})}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span></span>`;
+  }));
+  const html = items.filter(Boolean).join('<span class="text-slate-700">|</span>');
+  if (html) document.getElementById('ticker').innerHTML = html + '<span class="text-slate-700">|</span>' + html;
+}
+
+/* ==================== TESTIMONI ==================== */
+const TESTIMONIALS = [
+  {n:'Rizky Pratama',c:'Jakarta',t:'EA-nya mantap! 3 bulan konsisten profit 8-12% per bulan. Support WA super cepat.',s:5},
+  {n:'Sari Wulandari',c:'Surabaya',t:'Dulu sering revenge trading. Sejak pakai Auto Risk EA, psikologi jauh lebih tenang.',s:5},
+  {n:'Budi Santoso',c:'Bandung',t:'Indikator SMC-nya akurat banget. Worth every rupiah!',s:5},
+  {n:'Andi Wijaya',c:'Medan',t:'File langsung terkirim setelah bayar QRIS. Mantap!',s:5},
+  {n:'Dewi Lestari',c:'Semarang',t:'Profit konsisten, tidak ada lag. Recommended!',s:5},
+  {n:'Fajar Nugroho',c:'Makassar',t:'Customer service ramah, produknya original. Repeat order!',s:5},
+];
+function renderTestimonials() {
+  const card = t => `<div class="glass-panel rounded-2xl p-5 w-72 shrink-0 mx-2"><div class="flex gap-0.5 mb-2">${'★'.repeat(t.s)}</div><p class="text-xs text-slate-300 leading-relaxed mb-3">"${t.t}"</p><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-black text-emerald-400">${t.n[0]}</div><div><p class="text-xs font-bold">${t.n}</p><p class="text-[10px] text-slate-500">${t.c} • Verified</p></div></div></div>`;
+  const html = TESTIMONIALS.map(card).join('');
+  document.getElementById('testi-track').innerHTML = html + html;
+}
+
+/* ==================== FAQ ==================== */
+const FAQS = {
+  id: [
+    {q:'Bagaimana cara pembelian?',a:'Pilih produk → klik Beli/Sewa → scan QRIS → kirim bukti via WA → file dikirim maksimal 5 menit.'},
+    {q:'Apakah EA ini cocok untuk pemula?',a:'Ya! Semua EA kami dirancang dengan Auto Risk Management & Hard Stop-Loss bawaan. Pemula sekalipun bisa trading disiplin.'},
+    {q:'Platform apa yang didukung?',a:'Semua produk mendukung MetaTrader 4 (MT4) dan MetaTrader 5 (MT5) versi Windows & VPS.'},
+    {q:'Bagaimana sistem sewanya?',a:'Pilih durasi 1/3/12 bulan. Setelah masa sewa habis, perpanjang kapan saja via WhatsApp dengan harga sama.'},
+    {q:'Apakah ada garansi?',a:'Ya, garansi 7 hari uang kembali jika produk tidak berfungsi sesuai deskripsi.'},
+    {q:'Bisakah request custom EA?',a:'Bisa! Hubungi kami via WA untuk konsultasi pembuatan EA/indikator custom sesuai strategi Anda.'},
+  ],
+  en: [
+    {q:'How do I purchase?',a:'Pick a product → click Buy/Rent → scan QRIS → send proof via WA → files delivered within 5 minutes.'},
+    {q:'Is this EA suitable for beginners?',a:'Yes! All our EAs are built with Auto Risk Management & built-in Hard Stop-Loss. Even beginners can trade with discipline.'},
+    {q:'Which platforms are supported?',a:'All products support MetaTrader 4 (MT4) and MetaTrader 5 (MT5) on Windows & VPS.'},
+    {q:'How does the rental system work?',a:'Choose 1/3/12 month duration. After it expires, renew anytime via WhatsApp at the same price.'},
+    {q:'Is there a warranty?',a:'Yes, 7-day money-back guarantee if the product does not work as described.'},
+    {q:'Can I request a custom EA?',a:'Sure! Contact us via WA for custom EA/indicator development based on your strategy.'},
+  ]
+};
+function renderFAQ() {
+  document.getElementById('faq-list').innerHTML = (FAQS[LANG] || FAQS.id).map(f => `
+    <details class="glass-panel rounded-xl overflow-hidden group">
+      <summary class="flex justify-between items-center p-4 cursor-pointer font-bold text-sm hover:text-emerald-400 transition">
+        <span>${f.q}</span><span class="text-emerald-400 text-lg transition-transform group-open:rotate-45">+</span>
+      </summary>
+      <div class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">${f.a}</div>
+    </details>`).join('');
+}
+/* ==================== KATALOG ==================== */
+const fmtPrice = (idr) => CUR === 'USD'
+  ? '$' + (Number(idr || 0) / RATE).toLocaleString('en-US', {maximumFractionDigits: 2})
+  : 'Rp ' + Math.round(Number(idr || 0)).toLocaleString('id-ID');
+const discPct = (p) => Math.min(90, Math.max(0, Number(p.discount_percent) || 0));
+const discPrice = (p, v) => v ? Math.round(Number(v) * (1 - discPct(p) / 100)) : null;
+
+let allProducts = [], activeCategory = 'ALL', searchQuery = '';
+const loadingState = document.getElementById('loading-state');
+const emptyState = document.getElementById('empty-state');
+const noResultState = document.getElementById('no-result-state');
+const productGrid = document.getElementById('product-grid');
+const productCount = document.getElementById('product-count');
+
+async function loadProducts() {
+  const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+  loadingState.classList.add('hidden');
+  if (error || !data || !data.length) { emptyState.classList.remove('hidden'); return; }
+  allProducts = data; renderProducts();
+}
+function setCategory(c) {
+  activeCategory = c;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    const on = b.id === 'cat-' + c;
+    b.className = 'cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition ' + (on ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400');
+  });
+  renderProducts();
+}
+document.getElementById('search-input').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderProducts(); });
+
+function renderProducts() {
+  const q = searchQuery.trim();
+  const filtered = allProducts.filter(p => {
+    const okCat = activeCategory === 'ALL' || (p.category || '').toUpperCase() === activeCategory;
+    const okQ = !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q) || (p.platform || '').toLowerCase().includes(q);
+    return okCat && okQ;
+  });
+  productCount.textContent = filtered.length + ' ' + t('cat.results');
+  emptyState.classList.add('hidden'); noResultState.classList.add('hidden'); productGrid.classList.add('hidden');
+  if (!filtered.length) { (allProducts.length ? noResultState : emptyState).classList.remove('hidden'); return; }
+  productGrid.innerHTML = filtered.map((p, idx) => {
+    const imgs = (Array.isArray(p.images) && p.images.length ? p.images : (p.image_url ? [p.image_url] : []));
+    const cover = imgs[0] || '';
+    const disc = discPct(p);
+    const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
+    const plans = [
+      {key:'buy', label:t('plan.buy'), price:finalPrice, orig:disc?p.price:null, wa:'Beli'},
+      {key:'1m', label:t('plan.1m'), price:discPrice(p,p.price_1m), orig:disc?p.price_1m:null, wa:'Sewa 1 Bulan'},
+      {key:'3m', label:t('plan.3m'), price:discPrice(p,p.price_3m), orig:disc?p.price_3m:null, wa:'Sewa 3 Bulan'},
+      {key:'12m', label:t('plan.12m'), price:discPrice(p,p.price_12m), orig:disc?p.price_12m:null, wa:'Sewa 1 Tahun'},
+    ].filter(pl => pl.price);
+    const badges = [
+      p.platform ? `<span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-[10px] font-black text-slate-300">${p.platform}</span>` : '',
+      disc ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/90 text-white text-[10px] font-black">-${disc}%</span>` : '',
+      idx === 0 ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">★ TERLARIS</span>` : '',
+    ].join('');
+    return `
+    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card reveal">
+      <div class="relative h-44 bg-slate-900 overflow-hidden cursor-zoom-in" onclick="openLightbox('${cover.replace(/'/g,"\\'")}')">
+        ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
+        <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
+        ${imgs.length > 1 ? `<span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold">📷 ${imgs.length}</span>` : ''}
+      </div>
+      <div class="p-4 flex flex-col flex-1">
+        <h3 class="font-extrabold text-sm leading-snug mb-1">${p.name}</h3>
+        <p class="text-[11px] text-slate-500 line-clamp-2 mb-3 flex-1">${p.description || ''}</p>
+        <div class="space-y-1.5 mb-3">
+          ${plans.map(pl => `
+            <button onclick="openQrisModal('${p.id}','${(p.name||'').replace(/'/g,"\\'")}',${pl.price},'${pl.label.replace(/'/g,"\\'")}','${pl.wa.replace(/'/g,"\\'")}')"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-xs font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
+              <span>${pl.label}</span>
+              <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(pl.orig)}</span>` : ''}<span class="font-black">${fmtPrice(pl.price)}</span></span>
+            </button>`).join('')}
+        </div>
+        <a href="https://wa.me/6285161853108?text=${encodeURIComponent('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank"
+          class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
+      </div>
+    </div>`;
+  }).join('');
+  productGrid.classList.remove('hidden');
+  requestAnimationFrame(() => productGrid.querySelectorAll('.reveal').forEach(el => io.observe(el)));
+}
+
+/* ==================== MODAL QRIS ==================== */
+let currentProduct = null, currentPlan = null;
+function openQrisModal(id, name, price, planLabel, waLabel) {
+  currentProduct = allProducts.find(p => p.id === id) || null;
+  currentPlan = { price, label: planLabel, waLabel };
+  document.getElementById('modal-product-name').textContent = name;
+  document.getElementById('modal-plan-label').textContent = planLabel;
+  document.getElementById('modal-total').textContent = fmtPrice(price);
+  const imgs = currentProduct ? ((Array.isArray(currentProduct.images) && currentProduct.images.length ? currentProduct.images : [currentProduct.image_url].filter(Boolean))) : [];
+  const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtPrice(price)}\n\nSaya sudah transfer via QRIS. Berikut bukti transfernya.`;
+  document.getElementById('modal-wa-btn').href = 'https://wa.me/6285161853108?text=' + encodeURIComponent(waText);
+  const modal = document.getElementById('qris-modal');
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  if (window.confetti) confetti({particleCount:60, spread:60, origin:{y:.7}, colors:['#10b981','#34d399','#fbbf24']});
+}
+function closeQrisModal() {
+  const m = document.getElementById('qris-modal');
+  m.classList.add('hidden'); m.classList.remove('flex');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQrisModal(); closeLightbox(); } });
+
+/* ==================== LIGHTBOX (drag + zoom) ==================== */
+let lbScale = 1, lbX = 0, lbY = 0, lbDragging = false, lbSX = 0, lbSY = 0, lbOX = 0, lbOY = 0;
+function applyLb() {
+  document.getElementById('lightbox-img').style.transform = `translate(${lbX}px,${lbY}px) scale(${lbScale})`;
+  document.getElementById('zoom-level').textContent = Math.round(lbScale * 100) + '%';
+}
+function openLightbox(src) {
+  if (!src) return;
+  document.getElementById('lightbox-img').src = src;
+  lbScale = 1; lbX = 0; lbY = 0; applyLb();
+  document.getElementById('lightbox').classList.remove('hidden');
+  document.getElementById('lightbox').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+  document.getElementById('lightbox').classList.remove('flex');
+  document.body.style.overflow = '';
+}
+function zoomLightbox(d) { lbScale = Math.min(5, Math.max(0.5, lbScale + d)); applyLb(); }
+const lbStage = document.getElementById('lightbox-stage');
+lbStage.addEventListener('wheel', e => { e.preventDefault(); zoomLightbox(e.deltaY < 0 ? 0.2 : -0.2); }, {passive:false});
+lbStage.addEventListener('pointerdown', e => { lbDragging = true; lbSX = e.clientX; lbSY = e.clientY; lbOX = lbX; lbOY = lbY; lbStage.setPointerCapture(e.pointerId); });
+lbStage.addEventListener('pointermove', e => { if (!lbDragging) return; lbX = lbOX + (e.clientX - lbSX); lbY = lbOY + (e.clientY - lbSY); applyLb(); });
+lbStage.addEventListener('pointerup', () => lbDragging = false);
+lbStage.addEventListener('pointercancel', () => lbDragging = false);
+
+/* ==================== INIT ==================== */
+loadRate();
+setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
+loadProducts();
+loadTicker();
+setInterval(loadTicker, 5 * 60 * 1000); // refresh ticker tiap 5 menit
+renderTestimonials();
+renderFAQ();
+updateCalculator();
 </script>
 </body>
 </html>
