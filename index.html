@@ -304,7 +304,7 @@
             <!-- Galeri gambar produk -->
             <div id="modal-gallery" class="hidden mb-4">
                 <div class="rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 mb-2">
-                    <img id="modal-main-img" src="" alt="Produk" class="w-full h-52 object-cover">
+                    <img id="modal-main-img" src="" alt="Produk" onclick="openLightbox(this.src)" class="w-full h-52 object-cover cursor-zoom-in">
                 </div>
                 <div id="modal-thumbs" class="flex gap-2 overflow-x-auto"></div>
             </div>
@@ -330,6 +330,20 @@
             <a id="modal-wa-btn" href="#" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-center py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/20 text-sm" data-i18n="modal.confirm">
                 Konfirmasi Transfer via WhatsApp
             </a>
+        </div>
+    </div>
+
+    <!-- 8b. LIGHTBOX ZOOM GAMBAR -->
+    <div id="lightbox" class="fixed inset-0 z-[70] bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4" onclick="if(event.target===this)closeLightbox()">
+        <button onclick="closeLightbox()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center transition z-10">✕</button>
+        <div id="lightbox-stage" class="relative w-full max-w-5xl flex items-center justify-center cursor-grab active:cursor-grabbing" style="height:80vh">
+            <img id="lightbox-img" src="" alt="Preview" draggable="false" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl select-none" style="transform:translate(0px,0px) scale(1);transition:transform .15s ease;touch-action:none">
+        </div>
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-900/90 border border-slate-700/70 rounded-full px-3 py-2 shadow-xl">
+            <button onclick="lbZoom(-0.25)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm transition">−</button>
+            <span id="lb-label" class="text-xs font-mono-code text-slate-300 w-12 text-center">100%</span>
+            <button onclick="lbZoom(0.25)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm transition">+</button>
+            <button onclick="lbReset()" class="px-3 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold transition">Reset</button>
         </div>
     </div>
 
@@ -376,7 +390,7 @@
                 'cat.kicker':'Etalase Sistem','cat.title':'Katalog Produk &amp; Script Trading',
                 'cat.search':'Cari produk (nama / deskripsi)...','cat.all':'Semua','cat.loading':'Menghubungkan ke database Supabase...',
                 'cat.empty':'Belum ada produk yang diunggah saat ini.','cat.noresult':'Tidak ada produk yang cocok dengan pencarian/filter Anda.',
-                'cat.priceHead':'Beli / Sewa','cat.qris':'QRIS Ready','cat.buyRent':'Beli / Sewa','cat.available':'Produk Tersedia','cat.results':'hasil',
+                'cat.priceHead':'Beli / Sewa','cat.qris':'QRIS Ready','cat.buyRent':'Beli / Sewa','cat.available':'Produk Tersedia','cat.results':'hasil','cat.sale':'DISKON',
                 'plan.buy':'Beli','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.12m':'Sewa 1 Tahun',
                 'modal.plan':'Pilih Skema:','modal.total':'Total Tagihan','modal.noadmin':'Bebas Biaya Admin','modal.confirm':'Konfirmasi Transfer via WhatsApp',
                 'faq.kicker':'Frequently Asked Questions','faq.title':'Pertanyaan Umum Calon Pembeli',
@@ -406,7 +420,7 @@
                 'cat.kicker':'Product Showcase','cat.title':'Product &amp; Trading Script Catalog',
                 'cat.search':'Search products (name / description)...','cat.all':'All','cat.loading':'Connecting to Supabase database...',
                 'cat.empty':'No products uploaded yet.','cat.noresult':'No products match your search/filter.',
-                'cat.priceHead':'Buy / Rent','cat.qris':'QRIS Ready','cat.buyRent':'Buy / Rent','cat.available':'Products Available','cat.results':'results',
+                'cat.priceHead':'Buy / Rent','cat.qris':'QRIS Ready','cat.buyRent':'Buy / Rent','cat.available':'Products Available','cat.results':'results','cat.sale':'SALE',
                 'plan.buy':'Buy','plan.1m':'1-Month Rental','plan.3m':'3-Month Rental','plan.12m':'1-Year Rental',
                 'modal.plan':'Choose Plan:','modal.total':'Total Bill','modal.noadmin':'No Admin Fee','modal.confirm':'Confirm Transfer via WhatsApp',
                 'faq.kicker':'Frequently Asked Questions','faq.title':'Common Buyer Questions',
@@ -437,9 +451,14 @@
             try {
                 const res = await fetch('https://open.er-api.com/v6/latest/USD');
                 const json = await res.json();
-                if (json && json.rates && json.rates.IDR) RATE = json.rates.IDR;
+                if (json && json.rates && json.rates.IDR) {
+                    RATE = json.rates.IDR;
+                    applyLang(); // refresh semua harga dengan kurs terbaru
+                }
             } catch (e) { /* gunakan fallback */ }
         }
+        // Auto-refresh kurs tiap 1 jam
+        setInterval(loadRate, 60 * 60 * 1000);
 
         function setLang(lang) {
             LANG = lang;
@@ -506,11 +525,21 @@
         const productImages = (p) => (Array.isArray(p.images) && p.images.length) ? p.images : (p.image_url ? [p.image_url] : []);
         const coverImage = (p) => productImages(p)[0] || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80';
 
+        // Diskon produk (persen 0-100)
+        const discPct = (p) => Math.min(100, Math.max(0, Number(p.discount_percent) || 0));
+        const discPrice = (p, price) => Math.round((Number(price) || 0) * (1 - discPct(p) / 100));
+
         const rentalPlans = (p) => {
-            const plans = [{ key: 'buy', label: t('plan.buy'), price: Number(p.price) || 0 }];
-            if (p.price_1m)  plans.push({ key: '1m',  label: t('plan.1m'),  price: Number(p.price_1m) });
-            if (p.price_3m)  plans.push({ key: '3m',  label: t('plan.3m'),  price: Number(p.price_3m) });
-            if (p.price_12m) plans.push({ key: '12m', label: t('plan.12m'), price: Number(p.price_12m) });
+            const d = discPct(p);
+            const mk = (key, label, orig) => ({
+                key, label,
+                orig: Number(orig) || 0,
+                price: d ? discPrice(p, orig) : (Number(orig) || 0)
+            });
+            const plans = [mk('buy', t('plan.buy'), p.price)];
+            if (p.price_1m)  plans.push(mk('1m',  t('plan.1m'),  p.price_1m));
+            if (p.price_3m)  plans.push(mk('3m',  t('plan.3m'),  p.price_3m));
+            if (p.price_12m) plans.push(mk('12m', t('plan.12m'), p.price_12m));
             return plans;
         };
 
@@ -559,12 +588,24 @@
                 const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
                 const cat = p.category || 'EA';
                 const catColor = cat === 'Indicator' ? 'text-violet-300 border-violet-400/40 bg-violet-500/10' : 'text-blue-300 border-blue-400/40 bg-blue-500/10';
+                const dPct = discPct(p);
+                const priceRow = (label, orig, cls) => {
+                    const fin = dPct ? discPrice(p, orig) : Number(orig);
+                    return `<div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-400">${label}</span>
+                        <span class="text-right leading-tight">
+                            ${dPct ? `<span class="block text-[10px] text-slate-500 line-through font-mono-code">${fmtMoney(orig)}</span>` : ''}
+                            <span class="${cls} font-mono-code">${fmtMoney(fin)}</span>
+                        </span>
+                    </div>`;
+                };
 
                 return `
                 <div class="glass-panel rounded-3xl overflow-hidden flex flex-col justify-between glow-card group">
                     <div>
                         <div class="h-48 overflow-hidden bg-slate-950 relative">
-                            <img src="${coverImage(p)}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90 group-hover:opacity-100">
+                            <img src="${coverImage(p)}" alt="${p.name}" onclick="openLightbox('${coverImage(p)}')" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90 group-hover:opacity-100 cursor-zoom-in">
+                            ${dPct > 0 ? `<span class="absolute top-3 right-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-rose-500/40 tracking-wide">-${dPct}% ${t('cat.sale')}</span>` : ''}
                             <div class="absolute top-3 left-3 flex gap-1.5">
                                 <span class="bg-slate-950/80 border border-slate-700/60 backdrop-blur-md text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${catColor}">${cat}</span>
                                 <span class="bg-slate-950/80 border border-slate-700/60 backdrop-blur-md text-[10px] font-extrabold text-emerald-400 px-2.5 py-1 rounded-full uppercase tracking-wider font-mono-code">${p.platform || 'MT5'}</span>
@@ -583,22 +624,10 @@
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">${t('cat.priceHead')}</span>
                                 <span class="text-[10px] font-bold text-emerald-400">${t('cat.qris')}</span>
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">${t('plan.buy')}</span>
-                                <span class="text-sm font-black text-emerald-300 font-mono-code">${fmtMoney(p.price)}</span>
-                            </div>
-                            ${p.price_1m ? `<div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">${t('plan.1m')}</span>
-                                <span class="text-xs font-bold text-teal-300 font-mono-code">${fmtMoney(p.price_1m)}</span>
-                            </div>` : ''}
-                            ${p.price_3m ? `<div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">${t('plan.3m')}</span>
-                                <span class="text-xs font-bold text-teal-300 font-mono-code">${fmtMoney(p.price_3m)}</span>
-                            </div>` : ''}
-                            ${p.price_12m ? `<div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">${t('plan.12m')}</span>
-                                <span class="text-xs font-bold text-teal-300 font-mono-code">${fmtMoney(p.price_12m)}</span>
-                            </div>` : ''}
+                            ${priceRow(t('plan.buy'), p.price, 'text-sm font-black text-emerald-300')}
+                            ${p.price_1m ? priceRow(t('plan.1m'), p.price_1m, 'text-xs font-bold text-teal-300') : ''}
+                            ${p.price_3m ? priceRow(t('plan.3m'), p.price_3m, 'text-xs font-bold text-teal-300') : ''}
+                            ${p.price_12m ? priceRow(t('plan.12m'), p.price_12m, 'text-xs font-bold text-teal-300') : ''}
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="openQrisModal('${p.id}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-center text-xs py-2.5 rounded-xl transition flex items-center justify-center shadow-lg shadow-emerald-950">
@@ -685,7 +714,7 @@
                     <button type="button" data-plan="${pl.key}" onclick="selectPlan('${pl.key}')"
                             class="plan-btn text-left px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600">
                         <span class="block">${pl.label}</span>
-                        <span class="block font-mono-code text-emerald-400 mt-0.5">${fmtMoney(pl.price)}</span>
+                        <span class="block font-mono-code text-emerald-400 mt-0.5">${pl.orig > pl.price ? `<span class="line-through text-slate-600 text-[10px]">${fmtMoney(pl.orig)}</span> ` : ''}${fmtMoney(pl.price)}</span>
                     </button>`).join('');
                 selectPlan('buy');
             } else {
@@ -708,6 +737,55 @@
             searchQuery = e.target.value;
             renderProducts();
         });
+
+        // ===================== LIGHTBOX ZOOM GAMBAR =====================
+        let lbScale = 1, lbX = 0, lbY = 0, lbDrag = false, lbSX = 0, lbSY = 0;
+
+        function applyLb() {
+            document.getElementById('lightbox-img').style.transform = `translate(${lbX}px,${lbY}px) scale(${lbScale})`;
+            document.getElementById('lb-label').innerText = Math.round(lbScale * 100) + '%';
+        }
+        function openLightbox(src) {
+            lbScale = 1; lbX = 0; lbY = 0;
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            applyLb();
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('hidden');
+            lb.classList.add('flex');
+        }
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.classList.add('hidden');
+            lb.classList.remove('flex');
+        }
+        function lbZoom(d) {
+            lbScale = Math.min(5, Math.max(0.5, lbScale + d));
+            applyLb();
+        }
+        function lbReset() { lbScale = 1; lbX = 0; lbY = 0; applyLb(); }
+
+        (function initLightbox() {
+            const stage = document.getElementById('lightbox-stage');
+            stage.addEventListener('pointerdown', (e) => {
+                lbDrag = true; lbSX = e.clientX - lbX; lbSY = e.clientY - lbY;
+                stage.setPointerCapture(e.pointerId);
+            });
+            stage.addEventListener('pointermove', (e) => {
+                if (!lbDrag) return;
+                lbX = e.clientX - lbSX; lbY = e.clientY - lbSY;
+                applyLb();
+            });
+            stage.addEventListener('pointerup', () => { lbDrag = false; });
+            stage.addEventListener('pointercancel', () => { lbDrag = false; });
+            stage.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                lbZoom(e.deltaY < 0 ? 0.15 : -0.15);
+            }, { passive: false });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeLightbox();
+            });
+        })();
 
         loadProducts();
         loadRate().then(applyLang);
