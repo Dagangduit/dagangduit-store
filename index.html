@@ -308,7 +308,7 @@
         const WHATSAPP_NUMBER = '6285161853108';               // Nomor WA Anda
         const QRIS_IMAGE_URL = 'https://placehold.co/400x400/png?text=QRIS+DagangDuit'; // Link Gambar QRIS Anda
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
         // Logic Kalkulator Compounding Interaktif
@@ -336,7 +336,7 @@
             const grid = document.getElementById('product-grid');
             const countLabel = document.getElementById('product-count');
 
-            const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
 
             loading.classList.add('hidden');
 
@@ -403,7 +403,7 @@
 
         loadProducts();
 
-        supabase.channel('products-changes')
+        supabaseClient.channel('products-changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, loadProducts)
             .subscribe();
     </script>
