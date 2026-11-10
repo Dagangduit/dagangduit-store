@@ -90,13 +90,16 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- ===== FORM TAMBAH PRODUK ===== -->
+      <!-- ===== FORM PRODUK (Tambah / Edit) ===== -->
       <section class="lg:col-span-1">
         <div class="glass rounded-2xl p-6 fade-in">
-          <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            Tambah Produk
-          </h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 id="form-title" class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Tambah Produk
+            </h2>
+            <button id="cancel-edit-btn" type="button" class="hidden text-xs text-slate-400 hover:text-red-400 transition-colors">Batal Edit</button>
+          </div>
 
           <form id="product-form" class="space-y-4">
             <div>
@@ -104,54 +107,89 @@
               <input id="f-name" type="text" required placeholder="Contoh: EA Gold Scalper v2"
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
             </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1.5">Kategori *</label>
+                <select id="f-category"
+                        class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white transition-all">
+                  <option value="EA">EA (Expert Advisor)</option>
+                  <option value="Indicator">Indicator</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1.5">Platform *</label>
+                <select id="f-platform"
+                        class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white transition-all">
+                  <option value="MT5">MT5</option>
+                  <option value="MT4">MT4</option>
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga (Rp) *</label>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Beli / Lisensi (Rp) *</label>
               <input id="f-price" type="number" min="0" step="1000" required placeholder="150000"
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
             </div>
+
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Platform</label>
-              <select id="f-platform"
-                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white transition-all">
-                <option value="MT4">MT4</option>
-                <option value="MT5">MT5</option>
-                <option value="PineScript">PineScript</option>
-                <option value="General">General</option>
-              </select>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Sewa (opsional, kosongkan jika tidak tersedia)</label>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">1 Bulan</label>
+                  <input id="f-price-1m" type="number" min="0" step="1000" placeholder="0"
+                         class="w-full px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">3 Bulan</label>
+                  <input id="f-price-3m" type="number" min="0" step="1000" placeholder="0"
+                         class="w-full px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-1">12 Bulan</label>
+                  <input id="f-price-12m" type="number" min="0" step="1000" placeholder="0"
+                         class="w-full px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all" />
+                </div>
+              </div>
             </div>
+
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1.5">Deskripsi</label>
               <textarea id="f-desc" rows="3" placeholder="Deskripsi singkat produk..."
                         class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 transition-all resize-none"></textarea>
             </div>
 
-            <!-- Upload gambar -->
+            <!-- Upload gambar (multi) -->
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Gambar Produk</label>
-              <div class="flex items-center gap-3">
-                <label class="flex-1 cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/70 border border-dashed border-slate-600/60 text-xs text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                  <span id="upload-label">Pilih File</span>
-                  <input id="f-image" type="file" accept="image/*" class="hidden" />
-                </label>
-              </div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Gambar Produk (bisa lebih dari 1)</label>
+              <label class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/70 border border-dashed border-slate-600/60 text-xs text-slate-300 hover:border-emerald-400/50 hover:text-emerald-300 transition-colors cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                <span>Pilih File (multi)</span>
+                <input id="f-image" type="file" accept="image/*" multiple class="hidden" />
+              </label>
               <div id="upload-progress" class="hidden mt-2">
                 <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden">
                   <div id="upload-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div>
                 </div>
                 <p id="upload-status" class="mt-1 text-[11px] text-slate-500">Mengunggah...</p>
               </div>
-              <div id="image-preview-wrap" class="hidden mt-3">
-                <img id="image-preview" class="w-full h-32 object-cover rounded-xl border border-slate-700/60" alt="Preview" />
-                <p class="mt-1 text-[11px] text-emerald-400/80 truncate" id="image-url-text"></p>
+
+              <!-- Preview grid -->
+              <div id="image-preview-grid" class="hidden mt-3 grid grid-cols-3 gap-2"></div>
+
+              <!-- Tambah URL manual -->
+              <div class="flex gap-2 mt-2">
+                <input id="f-image-url" type="url" placeholder="atau tempel URL gambar"
+                       class="flex-1 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-xs text-white placeholder-slate-600 transition-all" />
+                <button id="add-url-btn" type="button"
+                        class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-600/50 text-xs text-slate-300 hover:bg-slate-700 transition-colors">Tambah</button>
               </div>
-              <!-- URL manual fallback -->
-              <input id="f-image-url" type="url" placeholder="atau tempel URL gambar manual"
-                     class="mt-2 w-full px-4 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-xs text-white placeholder-slate-600 transition-all" />
+              <p class="mt-1 text-[10px] text-slate-600">Gambar pertama akan jadi cover produk.</p>
             </div>
 
             <p id="form-error" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2"></p>
-            <p id="form-success" class="hidden text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">Produk berhasil disimpan!</p>
+            <p id="form-success" class="hidden text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2"></p>
 
             <button type="submit" id="save-btn"
                     class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50">
@@ -183,8 +221,10 @@
               <thead>
                 <tr class="text-left text-xs text-slate-500 border-b border-slate-800/60">
                   <th class="px-6 py-3 font-medium">Produk</th>
+                  <th class="px-6 py-3 font-medium">Kategori</th>
                   <th class="px-6 py-3 font-medium">Platform</th>
-                  <th class="px-6 py-3 font-medium">Harga</th>
+                  <th class="px-6 py-3 font-medium">Harga Beli</th>
+                  <th class="px-6 py-3 font-medium">Sewa (1/3/12 bln)</th>
                   <th class="px-6 py-3 font-medium">Tanggal</th>
                   <th class="px-6 py-3 font-medium text-right">Aksi</th>
                 </tr>
@@ -209,6 +249,7 @@ const STORAGE_BUCKET = 'product-images';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const numOrNull = (v) => { const n = parseFloat(v); return (v === '' || v === null || isNaN(n) || n <= 0) ? null : n; };
 
 /* ===================== AUTH ===================== */
 const authLoading = document.getElementById('auth-loading');
@@ -274,76 +315,87 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   await supabaseClient.auth.signOut();
 });
 
-/* ===================== UPLOAD GAMBAR ===================== */
-let uploadedImageUrl = '';
+/* ===================== MANAJEMEN GAMBAR (multi) ===================== */
+let imageUrls = []; // array URL gambar produk
+let editingId = null;
+let allProducts = [];
+
 const fileInput = document.getElementById('f-image');
-const uploadLabel = document.getElementById('upload-label');
 const uploadProgress = document.getElementById('upload-progress');
 const uploadBar = document.getElementById('upload-bar');
 const uploadStatus = document.getElementById('upload-status');
-const previewWrap = document.getElementById('image-preview-wrap');
-const imagePreview = document.getElementById('image-preview');
-const imageUrlText = document.getElementById('image-url-text');
+const previewGrid = document.getElementById('image-preview-grid');
 const manualUrlInput = document.getElementById('f-image-url');
 
-fileInput.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    alert('File harus berupa gambar.');
+function renderImagePreviews() {
+  if (imageUrls.length === 0) {
+    previewGrid.classList.add('hidden');
+    previewGrid.innerHTML = '';
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Ukuran file maksimal 5MB.');
-    return;
-  }
+  previewGrid.classList.remove('hidden');
+  previewGrid.innerHTML = imageUrls.map((url, i) => `
+    <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-700/60">
+      <img src="${url}" class="w-full h-full object-cover" alt="Gambar ${i + 1}" />
+      ${i === 0 ? '<span class="absolute top-1 left-1 text-[9px] bg-emerald-500 text-slate-950 font-bold px-1.5 py-0.5 rounded">COVER</span>' : ''}
+      <button type="button" onclick="removeImage(${i})"
+              class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500/90 text-white text-[10px] font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+    </div>
+  `).join('');
+}
 
-  uploadLabel.textContent = file.name;
+window.removeImage = function (i) {
+  imageUrls.splice(i, 1);
+  renderImagePreviews();
+};
+
+async function uploadFiles(files) {
+  const valid = Array.from(files).filter(f => f.type.startsWith('image/') && f.size <= 5 * 1024 * 1024);
+  if (valid.length === 0) { alert('Tidak ada file gambar valid (maks 5MB per file).'); return; }
+
   uploadProgress.classList.remove('hidden');
-  uploadBar.style.width = '30%';
-  uploadStatus.textContent = 'Mengunggah ke Supabase Storage...';
+  let done = 0;
 
-  const ext = file.name.split('.').pop() || 'png';
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  for (const file of valid) {
+    uploadStatus.textContent = `Mengunggah ${file.name} (${done + 1}/${valid.length})...`;
+    uploadBar.style.width = `${(done / valid.length) * 100}%`;
 
-  const { data, error } = await supabaseClient.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, file, { cacheControl: '3600', upsert: false });
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${done}.${ext}`;
 
-  if (error) {
-    uploadBar.style.width = '0%';
-    uploadStatus.textContent = 'Upload gagal: ' + error.message;
-    uploadStatus.className = 'mt-1 text-[11px] text-red-400';
-    return;
+    const { data, error } = await supabaseClient.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, { cacheControl: '3600', upsert: false });
+
+    if (error) {
+      uploadStatus.textContent = 'Upload gagal: ' + error.message;
+      uploadStatus.className = 'mt-1 text-[11px] text-red-400';
+      return;
+    }
+
+    const { data: pub } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
+    imageUrls.push(pub.publicUrl);
+    done++;
+    renderImagePreviews();
   }
-
-  uploadBar.style.width = '70%';
-  const { data: pub } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
-  uploadedImageUrl = pub.publicUrl;
 
   uploadBar.style.width = '100%';
   uploadStatus.textContent = 'Upload selesai!';
   uploadStatus.className = 'mt-1 text-[11px] text-emerald-400';
-
-  imagePreview.src = uploadedImageUrl;
-  imageUrlText.textContent = uploadedImageUrl;
-  previewWrap.classList.remove('hidden');
-  manualUrlInput.value = uploadedImageUrl;
-
   setTimeout(() => uploadProgress.classList.add('hidden'), 1500);
+}
+
+fileInput.addEventListener('change', async (e) => {
+  if (e.target.files.length) await uploadFiles(e.target.files);
+  e.target.value = '';
 });
 
-manualUrlInput.addEventListener('input', () => {
+document.getElementById('add-url-btn').addEventListener('click', () => {
   const url = manualUrlInput.value.trim();
-  uploadedImageUrl = url;
-  if (url) {
-    imagePreview.src = url;
-    imageUrlText.textContent = url;
-    previewWrap.classList.remove('hidden');
-  } else {
-    previewWrap.classList.add('hidden');
-  }
+  if (!url) return;
+  imageUrls.push(url);
+  manualUrlInput.value = '';
+  renderImagePreviews();
 });
 
 /* ===================== CRUD PRODUK ===================== */
@@ -351,38 +403,64 @@ const productForm = document.getElementById('product-form');
 const saveBtn = document.getElementById('save-btn');
 const formError = document.getElementById('form-error');
 const formSuccess = document.getElementById('form-success');
+const formTitle = document.getElementById('form-title');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+function resetForm() {
+  productForm.reset();
+  imageUrls = [];
+  editingId = null;
+  renderImagePreviews();
+  formTitle.innerHTML = '<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg> Tambah Produk';
+  saveBtn.textContent = 'Simpan Produk';
+  cancelEditBtn.classList.add('hidden');
+}
+
+cancelEditBtn.addEventListener('click', resetForm);
 
 productForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const name = document.getElementById('f-name').value.trim();
   const price = parseFloat(document.getElementById('f-price').value);
+  const category = document.getElementById('f-category').value;
   const platform = document.getElementById('f-platform').value;
   const description = document.getElementById('f-desc').value.trim();
-  const imageUrl = uploadedImageUrl || manualUrlInput.value.trim() || '';
+  const price1m = numOrNull(document.getElementById('f-price-1m').value);
+  const price3m = numOrNull(document.getElementById('f-price-3m').value);
+  const price12m = numOrNull(document.getElementById('f-price-12m').value);
 
   formError.classList.add('hidden');
   formSuccess.classList.add('hidden');
 
   if (!name || isNaN(price) || price < 0) {
-    formError.textContent = 'Nama dan harga wajib diisi dengan benar.';
+    formError.textContent = 'Nama dan harga beli wajib diisi dengan benar.';
     formError.classList.remove('hidden');
     return;
   }
 
+  const payload = {
+    name,
+    price,
+    price_1m: price1m,
+    price_3m: price3m,
+    price_12m: price12m,
+    category,
+    platform,
+    description,
+    images: imageUrls,
+    image_url: imageUrls[0] || ''
+  };
+
   saveBtn.disabled = true;
   saveBtn.textContent = 'Menyimpan...';
 
-  const { error } = await supabaseClient.from('products').insert({
-    name,
-    price,
-    platform,
-    description,
-    image_url: imageUrl
-  });
+  const { error } = editingId
+    ? await supabaseClient.from('products').update(payload).eq('id', editingId)
+    : await supabaseClient.from('products').insert(payload);
 
   saveBtn.disabled = false;
-  saveBtn.textContent = 'Simpan Produk';
+  saveBtn.textContent = editingId ? 'Update Produk' : 'Simpan Produk';
 
   if (error) {
     formError.textContent = 'Gagal menyimpan: ' + error.message;
@@ -390,21 +468,40 @@ productForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  formSuccess.textContent = 'Produk berhasil disimpan!';
+  formSuccess.textContent = editingId ? 'Produk berhasil diperbarui!' : 'Produk berhasil disimpan!';
   formSuccess.classList.remove('hidden');
 
-  /* Reset form */
-  productForm.reset();
-  uploadedImageUrl = '';
-  fileInput.value = '';
-  uploadLabel.textContent = 'Pilih File';
-  uploadProgress.classList.add('hidden');
-  previewWrap.classList.add('hidden');
-
+  resetForm();
   loadProducts();
 
   setTimeout(() => formSuccess.classList.add('hidden'), 3000);
 });
+
+/* ---------- Edit produk ---------- */
+window.editProduct = function (id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+
+  editingId = p.id;
+  document.getElementById('f-name').value = p.name || '';
+  document.getElementById('f-price').value = p.price ?? '';
+  document.getElementById('f-price-1m').value = p.price_1m ?? '';
+  document.getElementById('f-price-3m').value = p.price_3m ?? '';
+  document.getElementById('f-price-12m').value = p.price_12m ?? '';
+  document.getElementById('f-category').value = p.category || 'EA';
+  document.getElementById('f-platform').value = p.platform || 'MT5';
+  document.getElementById('f-desc').value = p.description || '';
+
+  imageUrls = Array.isArray(p.images) && p.images.length ? [...p.images] : (p.image_url ? [p.image_url] : []);
+  renderImagePreviews();
+
+  formTitle.innerHTML = '<svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg> Edit Produk';
+  saveBtn.textContent = 'Update Produk';
+  cancelEditBtn.classList.remove('hidden');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('f-name').focus();
+};
 
 /* ---------- Tabel produk ---------- */
 const tableLoading = document.getElementById('table-loading');
@@ -412,6 +509,12 @@ const tableEmpty = document.getElementById('table-empty');
 const productTable = document.getElementById('product-table');
 const productTbody = document.getElementById('product-tbody');
 const productCount = document.getElementById('product-count');
+
+const catBadge = (c) => c === 'Indicator'
+  ? '<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-500/15 text-violet-300 border border-violet-400/30">Indicator</span>'
+  : '<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-400/30">EA</span>';
+
+const platBadge = (p) => `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p || 'MT5'}</span>`;
 
 async function loadProducts() {
   tableLoading.classList.remove('hidden');
@@ -436,33 +539,43 @@ async function loadProducts() {
     return;
   }
 
+  allProducts = data;
   productCount.textContent = `${data.length} produk`;
-  productTbody.innerHTML = data.map((p) => `
+
+  productTbody.innerHTML = data.map((p) => {
+    const cover = (Array.isArray(p.images) && p.images[0]) || p.image_url || '';
+    const sewa = [p.price_1m, p.price_3m, p.price_12m]
+      .map(v => v ? rupiah(v) : '—').join(' / ');
+    return `
     <tr class="hover:bg-slate-800/30 transition-colors">
       <td class="px-6 py-3">
         <div class="flex items-center gap-3">
-          ${p.image_url
-            ? `<img src="${p.image_url}" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-700/50" />`
+          ${cover
+            ? `<img src="${cover}" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-700/50" />`
             : `<div class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700/50 flex items-center justify-center text-slate-600 text-xs">NO</div>`}
           <div>
             <p class="font-semibold text-white text-sm">${p.name}</p>
-            <p class="text-xs text-slate-500 line-clamp-1 max-w-[220px]">${p.description || '-'}</p>
+            <p class="text-xs text-slate-500 line-clamp-1 max-w-[200px]">${p.description || '-'}</p>
           </div>
         </div>
       </td>
-      <td class="px-6 py-3">
-        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p.platform || 'General'}</span>
-      </td>
+      <td class="px-6 py-3">${catBadge(p.category)}</td>
+      <td class="px-6 py-3">${platBadge(p.platform)}</td>
       <td class="px-6 py-3 font-semibold text-emerald-300">${rupiah(p.price)}</td>
+      <td class="px-6 py-3 text-xs text-slate-400">${sewa}</td>
       <td class="px-6 py-3 text-xs text-slate-500">${new Date(p.created_at).toLocaleDateString('id-ID')}</td>
-      <td class="px-6 py-3 text-right">
-        <button onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')"
+      <td class="px-6 py-3 text-right whitespace-nowrap">
+        <button onclick="editProduct('${p.id}')"
+                class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold hover:bg-blue-500/20 transition-colors mr-1.5">
+          Edit
+        </button>
+        <button onclick="deleteProduct('${p.id}', '${(p.name || '').replace(/'/g, "\\'")}')"
                 class="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors">
           Hapus
         </button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 
   productTable.classList.remove('hidden');
 }
@@ -475,6 +588,7 @@ window.deleteProduct = async function (id, name) {
     alert('Gagal menghapus: ' + error.message);
     return;
   }
+  if (editingId === id) resetForm();
   loadProducts();
 };
 
