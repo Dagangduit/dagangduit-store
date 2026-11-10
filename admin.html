@@ -241,6 +241,25 @@
             <span id="product-count" class="text-xs text-slate-500"></span>
           </div>
 
+          <div class="px-6 py-3 border-b border-slate-800/40 flex flex-col sm:flex-row gap-2">
+            <input id="prod-search" type="text" placeholder="🔍 Cari nama / deskripsi..."
+              class="flex-1 bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none">
+            <select id="prod-filter-cat" class="bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none">
+              <option value="ALL">Semua Kategori</option>
+              <option value="EA">EA</option>
+              <option value="Indicator">Indicator</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+            <select id="prod-sort" class="bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none">
+              <option value="newest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+              <option value="name-asc">Nama A-Z</option>
+              <option value="name-desc">Nama Z-A</option>
+              <option value="price-asc">Harga ↑</option>
+              <option value="price-desc">Harga ↓</option>
+            </select>
+          </div>
+
           <div id="table-loading" class="flex items-center justify-center py-16 gap-3">
             <div class="w-6 h-6 rounded-full border-2 border-emerald-400/30 border-t-emerald-400 spin"></div>
             <span class="text-sm text-slate-400">Memuat produk...</span>
@@ -553,33 +572,41 @@ const catBadge = (c) => c === 'Indicator'
 
 const platBadge = (p) => `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p || 'MT5'}</span>`;
 
-async function loadProducts() {
-  tableLoading.classList.remove('hidden');
-  productTable.classList.add('hidden');
-  tableEmpty.classList.add('hidden');
+/* ---------- Filter & Sort ---------- */
+const prodSearch = document.getElementById('prod-search');
+const prodFilterCat = document.getElementById('prod-filter-cat');
+const prodSort = document.getElementById('prod-sort');
 
-  const { data, error } = await supabaseClient
-    .from('products')
-    .select('*')
-    .order('created_at', { ascending: false });
+function getFilteredProducts() {
+  const q = (prodSearch.value || '').toLowerCase().trim();
+  const cat = prodFilterCat.value;
+  let list = allProducts.filter(p => {
+    const okCat = cat === 'ALL' || (p.category || 'EA').toUpperCase() === cat.toUpperCase();
+    const okQ = !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+    return okCat && okQ;
+  });
+  const sort = prodSort.value;
+  list.sort((a, b) => {
+    if (sort === 'name-asc') return (a.name || '').localeCompare(b.name || '');
+    if (sort === 'name-desc') return (b.name || '').localeCompare(a.name || '');
+    if (sort === 'price-asc') return Number(a.price) - Number(b.price);
+    if (sort === 'price-desc') return Number(b.price) - Number(a.price);
+    if (sort === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+  return list;
+}
 
-  tableLoading.classList.add('hidden');
-
-  if (error) {
-    tableEmpty.classList.remove('hidden');
-    tableEmpty.querySelector('p').textContent = 'Gagal memuat: ' + error.message;
+function renderTable() {
+  const list = getFilteredProducts();
+  productCount.textContent = `${list.length} produk`;
+  productTable.classList.toggle('hidden', list.length === 0);
+  tableEmpty.classList.toggle('hidden', list.length > 0);
+  if (!list.length) {
+    tableEmpty.querySelector('p').textContent = allProducts.length ? 'Tidak ada produk yang cocok dengan filter.' : 'Belum ada produk. Tambahkan produk pertama Anda.';
     return;
   }
-
-  if (!data || data.length === 0) {
-    tableEmpty.classList.remove('hidden');
-    return;
-  }
-
-  allProducts = data;
-  productCount.textContent = `${data.length} produk`;
-
-  productTbody.innerHTML = data.map((p) => {
+  productTbody.innerHTML = list.map((p) => {
     const cover = (Array.isArray(p.images) && p.images[0]) || p.image_url || '';
     const disc = Number(p.discount_percent) || 0;
     const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
@@ -621,9 +648,31 @@ async function loadProducts() {
       </td>
     </tr>`;
   }).join('');
-
-  productTable.classList.remove('hidden');
 }
+
+async function loadProducts() {
+  tableLoading.classList.remove('hidden');
+  productTable.classList.add('hidden');
+  tableEmpty.classList.add('hidden');
+
+  const { data, error } = await supabaseClient
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  tableLoading.classList.add('hidden');
+
+  if (error) {
+    tableEmpty.classList.remove('hidden');
+    tableEmpty.querySelector('p').textContent = 'Gagal memuat: ' + error.message;
+    return;
+  }
+
+  allProducts = data || [];
+  renderTable();
+}
+
+[prodSearch, prodFilterCat, prodSort].forEach(el => el.addEventListener('input', renderTable));
 
 window.deleteProduct = async function (id, name) {
   if (!confirm(`Hapus produk "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
