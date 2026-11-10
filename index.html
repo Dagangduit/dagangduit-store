@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DagangDuit | EA & Indikator Trading Otomatis</title>
+<meta name="description" content="Koleksi EA & Indikator MT4/MT5 dengan Auto Risk Management. Bayar QRIS, file langsung terkirim via WhatsApp.">
+<meta property="og:title" content="DagangDuit | EA & Indikator Trading Otomatis">
+<meta property="og:description" content="EA & Indikator MT4/MT5 dengan Auto Risk Management. Bayar QRIS, file langsung terkirim via WhatsApp.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="logo.png">
+<meta name="theme-color" content="#020617">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
@@ -120,7 +126,7 @@
         </div>
         <div class="grid grid-cols-3 gap-4 mt-8 max-w-md">
           <div><p class="text-2xl font-black"><span class="counter" data-target="120">0</span>+</p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c1">Trader Pakai</p></div>
-          <div><p class="text-2xl font-black"><span class="counter" data-target="49" data-decimal="1">0</span> ★</p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c2">Rating (4.9)</p></div>
+          <div><p class="text-2xl font-black"><span class="counter" data-target="4.9" data-decimal="1">0</span> ★</p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c2">Rating (4.9)</p></div>
           <div><p class="text-2xl font-black"><span class="counter" data-target="5">0</span> <span data-i18n="hero.c3u">Menit</span></p><p class="text-[10px] text-slate-500 font-bold uppercase" data-i18n="hero.c3">File Terkirim</p></div>
         </div>
       </div>
@@ -239,9 +245,11 @@
                 <option value="Nego" data-i18n="custom.b6o">Nego / Belum tahu</option>
               </select></div>
           </div>
+          <input id="cf-website" type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
           <div><label class="text-[11px] text-slate-500 block mb-1" data-i18n="custom.fDesc">Jelaskan Strategi / Kebutuhan *</label>
             <textarea id="cf-desc" required rows="4" data-i18n-ph="custom.fDescPh" placeholder="Contoh: EA grid untuk XAUUSD dengan lot sizing otomatis, SL/TP trailing, filter news..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none resize-none"></textarea></div>
-          <button type="submit" class="btn-shine w-full bg-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-sm" data-i18n="custom.submit">🚀 Kirim Request via WhatsApp</button>
+          <p id="cf-error" class="hidden text-[11px] text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2"></p>
+          <button type="submit" id="cf-submit" class="btn-shine w-full bg-emerald-500 text-slate-950 font-black py-3.5 rounded-xl text-sm" data-i18n="custom.submit">🚀 Kirim Request via WhatsApp</button>
           <p class="text-center text-[10px] text-slate-600" data-i18n="custom.note">Gratis konsultasi • Balasan max 1x24 jam</p>
         </form>
       </div>
@@ -550,10 +558,17 @@ const productGrid = document.getElementById('product-grid');
 const productCount = document.getElementById('product-count');
 
 async function loadProducts() {
-  const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
-  loadingState.classList.add('hidden');
-  if (error || !data || !data.length) { emptyState.classList.remove('hidden'); return; }
-  allProducts = data; renderProducts();
+  try {
+    const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+    loadingState.classList.add('hidden');
+    if (error) throw error;
+    if (!data || !data.length) { emptyState.classList.remove('hidden'); return; }
+    allProducts = data; renderProducts();
+  } catch(e) {
+    loadingState.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    emptyState.innerHTML = `<p class="text-red-400 font-bold mb-1">⚠️ Gagal memuat produk</p><p class="text-xs text-slate-500">${e.message || 'Periksa koneksi / konfigurasi Supabase.'}</p>`;
+  }
 }
 function setCategory(c) {
   activeCategory = c;
@@ -689,13 +704,28 @@ lbStage.addEventListener('pointerup', () => lbDragging = false);
 lbStage.addEventListener('pointercancel', () => lbDragging = false);
 
 /* ==================== CUSTOM EA FORM ==================== */
-document.getElementById('custom-form').addEventListener('submit', e => {
+const cfForm = document.getElementById('custom-form');
+const cfSubmit = document.getElementById('cf-submit');
+const cfError = document.getElementById('cf-error');
+let cfCooldown = false;
+cfForm.addEventListener('submit', e => {
   e.preventDefault();
+  // Honeypot: bot mengisi field tersembunyi
+  if (document.getElementById('cf-website').value) return;
   const name = document.getElementById('cf-name').value.trim();
+  const desc = document.getElementById('cf-desc').value.trim();
+  cfError.classList.add('hidden');
+  if (name.length < 2 || desc.length < 10) {
+    cfError.textContent = LANG === 'en' ? 'Name and a brief strategy description (min. 10 chars) are required.' : 'Nama dan deskripsi strategi singkat (min. 10 karakter) wajib diisi.';
+    cfError.classList.remove('hidden');
+    return;
+  }
+  if (cfCooldown) return;
+  cfCooldown = true; cfSubmit.disabled = true; cfSubmit.classList.add('opacity-50');
+  setTimeout(() => { cfCooldown = false; cfSubmit.disabled = false; cfSubmit.classList.remove('opacity-50'); }, 5000);
   const platform = document.getElementById('cf-platform').value;
   const type = document.getElementById('cf-type').selectedOptions[0].textContent;
   const budget = document.getElementById('cf-budget').selectedOptions[0].textContent;
-  const desc = document.getElementById('cf-desc').value.trim();
   const msg = `Halo Admin DagangDuit, saya ingin request custom project:\n\nNama: ${name}\nPlatform: ${platform}\nJenis: ${type}\nBudget: ${budget}\n\nDetail kebutuhan:\n${desc}`;
   window.open('https://wa.me/6285161853108?text=' + encodeURIComponent(msg), '_blank');
   if (window.confetti) confetti({particleCount:80, spread:70, origin:{y:.7}, colors:['#10b981','#34d399','#22d3ee']});
