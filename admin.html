@@ -294,6 +294,46 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== PENGATURAN PEMBAYARAN ===== -->
+      <section class="mt-6 reveal">
+        <div class="glass rounded-2xl p-6 fade-in">
+          <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+            Pengaturan Pembayaran Internasional
+          </h2>
+          <p class="text-xs text-slate-500 mb-4">Link ini tampil di tab <b>International</b> pada modal checkout toko. Kosongkan yang tidak dipakai.</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">PayPal</label>
+              <input id="set-paypal" type="url" placeholder="https://paypal.me/username"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Wise</label>
+              <input id="set-wise" type="url" placeholder="https://wise.com/pay/username"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">USDT (TRC20)</label>
+              <input id="set-usdt" type="text" placeholder="Alamat wallet, contoh: T..."
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none font-mono-code" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Bank Transfer</label>
+              <input id="set-bank" type="text" placeholder="Bank • No. Rek • Atas Nama"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3 mt-4">
+            <button id="save-settings-btn" type="button"
+                    class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50">
+              Simpan Pengaturan
+            </button>
+            <span id="settings-status" class="text-xs text-slate-500"></span>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -737,9 +777,32 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
+/* ---------- Pengaturan Pembayaran ---------- */
+const PAY_KEYS = ['paypal', 'wise', 'usdt', 'bank'];
+async function loadPaySettings() {
+  const { data, error } = await supabaseClient.from('settings').select('key, value').like('key', 'pay_%');
+  if (error || !data) return;
+  data.forEach(r => {
+    const el = document.getElementById('set-' + r.key.slice(4));
+    if (el) el.value = r.value || '';
+  });
+}
+document.getElementById('save-settings-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('save-settings-btn');
+  const status = document.getElementById('settings-status');
+  btn.disabled = true; status.textContent = 'Menyimpan...'; status.className = 'text-xs text-slate-500';
+  const rows = PAY_KEYS.map(k => ({ key: 'pay_' + k, value: (document.getElementById('set-' + k).value || '').trim() }));
+  const { error } = await supabaseClient.from('settings').upsert(rows, { onConflict: 'key' });
+  btn.disabled = false;
+  if (error) { status.textContent = 'Gagal: ' + error.message; status.className = 'text-xs text-red-400'; return; }
+  status.textContent = '✓ Tersimpan!'; status.className = 'text-xs text-emerald-400';
+  setTimeout(() => { status.textContent = ''; }, 3000);
+});
+
 /* ---------- Init ---------- */
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh kurs tiap 1 jam
+loadPaySettings();
 checkSession();
 </script>
 </body>
