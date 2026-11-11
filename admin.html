@@ -254,8 +254,8 @@
       </section>
 
       <!-- ===== TABEL PRODUK ===== -->
-      <section class="lg:col-span-2 reveal h-full">
-        <div class="glass rounded-2xl overflow-hidden fade-in h-full flex flex-col">
+      <section class="lg:col-span-2 reveal h-full min-h-0">
+        <div class="glass rounded-2xl overflow-hidden fade-in h-full flex flex-col min-h-0">
           <div class="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between">
             <h2 class="text-base font-bold text-white">Inventory Produk</h2>
             <span id="product-count" class="text-xs text-slate-500"></span>
@@ -297,7 +297,7 @@
             <p class="text-slate-500 text-sm">Belum ada produk. Tambahkan produk pertama Anda.</p>
           </div>
 
-          <div class="table-scroll flex-1 min-h-0 overflow-auto rounded-xl border border-slate-800/40 m-4 mt-0">
+          <div id="product-table-scroll" class="table-scroll flex-1 min-h-0 overflow-auto rounded-xl border border-slate-800/40 m-4 mt-0">
             <table id="product-table" class="hidden w-full text-sm">
               <thead>
                 <tr class="text-left text-xs text-slate-500 border-b border-slate-800/60">
@@ -317,9 +317,9 @@
       </section>
 
       <!-- ===== PENGATURAN (2 kolom sama tinggi) ===== -->
-      <div class="grid lg:grid-cols-2 gap-6 mt-6 items-stretch">
-      <section class="reveal h-full">
-        <div class="glass rounded-2xl p-6 fade-in h-full">
+      <div class="grid lg:grid-cols-2 gap-6 mt-6 items-stretch lg:col-span-3">
+      <section class="reveal h-full flex">
+        <div class="glass rounded-2xl p-6 fade-in flex-1">
           <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Pengaturan Umum
@@ -357,9 +357,9 @@
         </div>
       </section>
 
-      <!-- ===== PENGA PEMBA h-fullYARAN ===== -->
-      <section class="mt-6 reveal"> h-full
-        <div class="glass rounded-2xl p-6 fade-in">
+      <!-- ===== PENGATURAN PEMBAYARAN ===== -->
+      <section class="reveal h-full flex">
+        <div class="glass rounded-2xl p-6 fade-in flex-1">
           <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
             Pengaturan Pembayaran Internasional
@@ -399,7 +399,7 @@
       </div>
 
       <!-- ===== ORDERS ===== -->
-      <section class="mt-6 reveal">
+      <section class="mt-6 reveal lg:col-span-3">
         <div class="glass rounded-2xl overflow-hidden fade-in">
           <div class="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -778,6 +778,19 @@ const prodSearch = document.getElementById('prod-search');
 const prodFilterCat = document.getElementById('prod-filter-cat');
 const prodFilterPlatform = document.getElementById('prod-filter-platform');
 const prodSort = document.getElementById('prod-sort');
+const productTableScroll = document.getElementById('product-table-scroll');
+
+/* Sinkronkan tinggi area tabel = tinggi card form */
+function syncInventoryHeight() {
+  const formCard = document.querySelector('#dashboard-view section .glass');
+  const invCard = productTableScroll ? productTableScroll.closest('.glass') : null;
+  if (!formCard || !invCard || !productTableScroll) return;
+  const header = invCard.querySelector('.px-6.py-4');
+  const filter = invCard.querySelector('.px-6.py-3');
+  const chrome = (header ? header.offsetHeight : 0) + (filter ? filter.offsetHeight : 0) + 48;
+  productTableScroll.style.maxHeight = Math.max(220, formCard.offsetHeight - chrome) + 'px';
+}
+window.addEventListener('resize', syncInventoryHeight);
 
 function getFilteredProducts() {
   const q = (prodSearch.value || '').toLowerCase().trim();
@@ -858,6 +871,7 @@ function renderTable() {
       </td>
     </tr>`;
   }).join('');
+  syncInventoryHeight();
 }
 
 async function loadProducts() {
@@ -880,6 +894,7 @@ async function loadProducts() {
 
   allProducts = data || [];
   renderTable();
+  requestAnimationFrame(syncInventoryHeight);
 }
 
 [prodSearch, prodFilterCat, prodFilterPlatform, prodSort].forEach(el => el.addEventListener('input', renderTable));
@@ -1010,6 +1025,4 @@ setInterval(loadOrders, 30000); // auto-refresh pesanan tiap 30 detik
 checkSession();
 </script>
 </body>
-</html>
-</html>
 </html>
