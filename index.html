@@ -847,6 +847,19 @@ let GLOBAL_DISC = 0; // diskon global dari pengaturan admin (0-90%)
 const discPct = (p) => Math.min(90, Math.max(GLOBAL_DISC, Number(p.discount_percent) || 0));
 const discPrice = (p, v) => v ? Math.round(Number(v) * (1 - discPct(p) / 100)) : null;
 
+// Mata uang checkout: QRIS = IDR, International = USD (USDT) — tidak tergantung bahasa
+let PAY_CUR = 'IDR';
+const fmtCheckoutPrice = (p, v) => {
+  const val = Number(v || 0);
+  const pcur = (p && p.currency) === 'USD' ? 'USD' : 'IDR';
+  if (PAY_CUR === 'USD') {
+    const usd = pcur === 'USD' ? val : val / RATE;
+    return '$' + usd.toLocaleString('en-US', {maximumFractionDigits: 2});
+  }
+  const idr = pcur === 'IDR' ? val : val * RATE;
+  return 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+};
+
 let allProducts = [], activeCategory = 'ALL', platformFilter = 'ALL', searchQuery = '';
 const loadingState = document.getElementById('loading-state');
 const emptyState = document.getElementById('empty-state');
@@ -1344,6 +1357,7 @@ function copyPay(text) {
 }
 function setPayTab(m) {
   currentPayMethod = m;
+  PAY_CUR = m === 'intl' ? 'USD' : 'IDR';
   document.getElementById('pay-qris').classList.toggle('hidden', m !== 'qris');
   document.getElementById('pay-intl').classList.toggle('hidden', m !== 'intl');
   const on = 'py-2.5 rounded-xl text-xs font-black border transition bg-emerald-500/15 border-emerald-400/40 text-emerald-300';
@@ -1351,21 +1365,29 @@ function setPayTab(m) {
   document.getElementById('tab-qris').className = m==='qris' ? on : off;
   document.getElementById('tab-intl').className = m==='intl' ? on : off;
   if (m === 'intl') renderIntlOptions();
+  updateCheckoutTotal();
 }
 
 /* ==================== MODAL QRIS ==================== */
-let currentProduct = null, currentPlan = null;
+let currentProduct = null, currentPlan = null, currentOrderName = '';
+function updateCheckoutTotal() {
+  if (!currentPlan) return;
+  const p = currentProduct || {currency:'IDR'};
+  const total = fmtCheckoutPrice(p, currentPlan.price);
+  document.getElementById('modal-total').textContent = total;
+  const methodLabel = currentPayMethod === 'qris' ? 'QRIS (IDR)' : 'International (USD)';
+  const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${currentOrderName}\nPaket: ${currentPlan.waLabel}\nTotal: ${total}\nMetode: ${methodLabel}\n\nSaya sudah transfer. Berikut bukti transfernya.`;
+  document.getElementById('modal-wa-btn').href = waLink(waText);
+}
 function openQrisModal(id, name, price, planLabel, waLabel) {
   currentProduct = allProducts.find(p => p.id === id) || null;
   currentPlan = { price, label: planLabel, waLabel };
+  currentOrderName = name;
   document.getElementById('modal-product-name').textContent = name;
   document.getElementById('modal-plan-label').textContent = planLabel;
-  document.getElementById('modal-total').textContent = fmtProductPrice(currentProduct || {currency:'IDR'}, price);
   const imgs = currentProduct ? ((Array.isArray(currentProduct.images) && currentProduct.images.length ? currentProduct.images : [currentProduct.image_url].filter(Boolean))) : [];
   setPayTab(CUR === 'USD' ? 'intl' : 'qris');
-  const methodLabel = currentPayMethod === 'qris' ? 'QRIS (IDR)' : 'International (USD)';
-  const waText = `Halo Admin DagangDuit, saya ingin order:\n\nProduk: ${name}\nPaket: ${waLabel}\nTotal: ${fmtProductPrice(currentProduct || {currency:'IDR'}, price)}\nMetode: ${methodLabel}\n\nSaya sudah transfer. Berikut bukti transfernya.`;
-  document.getElementById('modal-wa-btn').href = waLink(waText);
+  updateCheckoutTotal();
   const modal = document.getElementById('qris-modal');
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
