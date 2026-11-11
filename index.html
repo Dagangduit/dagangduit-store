@@ -899,7 +899,7 @@ document.getElementById('search-input').addEventListener('input', e => { searchQ
 function renderProducts() {
   const q = searchQuery.trim();
   const filtered = allProducts.filter(p => {
-    const okCat = activeCategory === 'ALL' || (p.category || '').toUpperCase() === activeCategory;
+    const okCat = activeCategory === 'ALL' || (p.category || '').toUpperCase() === activeCategory.toUpperCase();
     const okQ = !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q) || (p.platform || '').toLowerCase().includes(q);
     return okCat && okQ;
   });
