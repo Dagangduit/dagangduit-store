@@ -9,7 +9,7 @@ create table if not exists public.products (
   price_12m   numeric(12, 2) check (price_12m is null or price_12m >= 0),
   description text default '',
   platform    text default 'MT5',
-  category    text default 'EA' check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'Utilities')),
+  category    text default 'EA' check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'EA Utilities')),
   image_url   text default '',
   images      jsonb not null default '[]'::jsonb,
   discount_percent numeric(5, 2) not null default 0 check (discount_percent >= 0 and discount_percent <= 100),
@@ -28,7 +28,7 @@ alter table public.products add column if not exists category text default 'EA';
 -- Perbarui constraint kategori untuk tipe produk baru (EA, Indicator, VPS, PineScript)
 alter table public.products drop constraint if exists products_category_check;
 alter table public.products add constraint products_category_check
-  check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'Utilities'));
+  check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'EA Utilities'));
 alter table public.products add column if not exists images   jsonb not null default '[]'::jsonb;
 alter table public.products add column if not exists currency text not null default 'IDR';
 alter table public.products add column if not exists is_featured boolean not null default false;
