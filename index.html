@@ -204,7 +204,7 @@
           <a href="#katalog" id="hero-card-btn" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl" data-i18n="hero.cardBtn">Beli Sekarang - QRIS ⚡</a>
         </div>
         <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text-[10px] text-slate-400 leading-none" data-i18n="hero.badge1">Order Baru</p><p class="text-xs font-bold" id="badge-order">Rizky • Jakarta • EA</p></div></div>
-        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black" id="badge-profit">Rp 0</p></div>
+        <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black" id="badge-profit">+$124.50 ▲</p></div>
       </div>
     </div>
   </section>
@@ -1245,11 +1245,6 @@ async function loadSettings() {
       else if (r.key === 'promo_id' && v) I18N.id['promo.text'] = v;
       else if (r.key === 'promo_en' && v) I18N.en['promo.text'] = v;
       else if (r.key === 'qris_img' && v) document.getElementById('modal-qris-img').src = v;
-      else if (r.key === 'today_profit') {
-        profitLocked = true;
-        const p = document.getElementById('badge-profit');
-        if (p) p.textContent = 'Rp ' + Math.round(parseFloat(v) || 0).toLocaleString('id-ID');
-      }
       else if (r.key.startsWith('pay_')) { const k = r.key.slice(4); if (k in PAY_LINKS) PAY_LINKS[k] = v; }
     });
     document.getElementById('nav-wa-btn').href = waLink();
@@ -1410,9 +1405,7 @@ function rotateOrder() {
     if (orderIdx === 0) orderFeed = buildOrderFeed(); // acak ulang tiap siklus
   }, 300);
 }
-let profitLocked = false;
 function rotateProfit() {
-  if (profitLocked) return; // pakai nilai dari settings jika diisi admin
   const p = document.getElementById('badge-profit');
   if (!p) return;
   p.style.opacity = 0;
