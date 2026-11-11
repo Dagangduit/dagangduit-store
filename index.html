@@ -693,24 +693,48 @@ function bindTilt(card) {
 }
 
 /* ==================== TICKER LIVE ==================== */
-const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['XAUUSD=X','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
+const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD','fx'],['XAUUSD=X','GOLD','fx'],['BTC-USD','BTC','crypto'],['GBPUSD=X','GBP/USD','fx'],['USDJPY=X','USD/JPY','fx'],['CL=F','OIL','fx']];
 const TICKER_FALLBACK = [
   ['EUR/USD','1.0842','+0.12%'],['GOLD','2651.30','+0.45%'],['BTC','97450','+1.20%'],
   ['GBP/USD','1.2715','-0.08%'],['USD/JPY','154.32','+0.21%'],['OIL','71.84','-0.33%']
 ];
-async function fetchQuote(sym) {
-  for (const host of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
+
+// Yahoo Finance diblokir CORS oleh browser → lewat proxy publik, fallback berlapis
+async function fetchYahoo(sym) {
+  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+  const urls = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+    `https://corsproxy.io/?${encodeURIComponent(target)}`,
+    target // direct — berjaya jika domain mengizinkan CORS
+  ];
+  for (const u of urls) {
     try {
-      const r = await fetch(`${host}/v8/finance/chart/${sym}?interval=1d&range=5d`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-      const j = await r.json(); const m = j.chart.result[0].meta;
+      const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const j = await r.json();
+      const m = j.chart.result[0].meta;
       return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.previousClose || m.regularMarketPrice };
     } catch(e) {}
   }
   return null;
 }
+
+// BTC via CoinGecko — gratis, CORS-enabled, tanpa API key
+async function fetchCrypto() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const j = await r.json();
+    const p = j.bitcoin.usd, c = j.bitcoin.usd_24h_change || 0;
+    return { price: p, prev: p / (1 + c / 100) };
+  } catch(e) { return null; }
+}
+
+async function fetchQuote(sym, type) {
+  return type === 'crypto' ? fetchCrypto() : fetchYahoo(sym);
+}
+
 async function loadTicker() {
-  const items = await Promise.all(TICKER_SYMBOLS.map(async ([sym, name]) => {
-    const q = await fetchQuote(sym); if (!q) return '';
+  const items = await Promise.all(TICKER_SYMBOLS.map(async ([sym, name, type]) => {
+    const q = await fetchQuote(sym, type); if (!q) return '';
     const up = q.price >= q.prev, pct = ((q.price - q.prev) / q.prev * 100);
     return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${name}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${q.price.toLocaleString('en-US',{maximumFractionDigits:2})}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span></span>`;
   }));
@@ -1356,7 +1380,7 @@ loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
 loadProducts();
 loadTicker();
-setInterval(loadTicker, 5 * 60 * 1000); // refresh ticker tiap 5 menit
+setInterval(loadTicker, 60 * 1000); // refresh ticker tiap 60 detik
 renderTestimonials();
 renderFAQ();
 updateCalculator();
