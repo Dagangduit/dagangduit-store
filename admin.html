@@ -347,10 +347,16 @@
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Diskon Global Semua Produk (%)</label>
-              <input id="set-global-disc" type="number" min="0" max="90" step="1" placeholder="0 = nonaktif, contoh: 40"
-                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
-              <p class="mt-1 text-[10px] text-slate-600">Semua produk dapat badge & harga diskon. 0 = mati.</p>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-medium text-slate-400">Diskon Global Semua Produk (%)</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="global-disc-toggle" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-700 rounded-full peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-transform peer-checked:after:translate-x-4"></div>
+                </label>
+              </div>
+              <input id="set-global-disc" type="number" min="0" max="90" step="1" placeholder="contoh: 40" disabled
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none disabled:opacity-40" />
+              <p class="mt-1 text-[10px] text-slate-600">Semua produk dapat badge & harga diskon saat aktif.</p>
             </div>
           </div>
           <div class="flex items-center gap-3 mt-4">
@@ -945,6 +951,16 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 const PAY_KEYS = ['paypal', 'wise', 'usdt', 'bank', 'qr'];
 const GENERAL_MAP = { wa_number: 'set-wa', promo_id: 'set-promo-id', promo_en: 'set-promo-en', qris_img: 'set-qris', global_discount: 'set-global-disc' };
 
+/* Toggle diskon global */
+const gdt = document.getElementById('global-disc-toggle');
+const gdi = document.getElementById('set-global-disc');
+function syncGlobalDiscToggle() {
+  const on = gdt.checked;
+  gdi.disabled = !on;
+  if (!on) gdi.value = '0';
+}
+gdt.addEventListener('change', syncGlobalDiscToggle);
+
 async function loadSettings() {
   const { data, error } = await supabaseClient.from('settings').select('key, value');
   if (error || !data) return;
@@ -956,6 +972,8 @@ async function loadSettings() {
       document.getElementById(GENERAL_MAP[r.key]).value = r.value || '';
     }
   });
+  gdt.checked = Number(gdi.value) > 0;
+  syncGlobalDiscToggle();
 }
 
 async function saveSettings(keys, btnId, statusId, doneMsg) {
