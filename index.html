@@ -831,6 +831,13 @@ function renderProducts() {
     const cover = imgs[0] || '';
     const disc = discPct(p);
     const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
+    const plans = [
+      {key:'buy', label:t('plan.buy'), price:finalPrice, orig:disc?p.price:null},
+      {key:'1m', label:t('plan.1m'), price:discPrice(p,p.price_1m), orig:disc?p.price_1m:null},
+      {key:'3m', label:t('plan.3m'), price:discPrice(p,p.price_3m), orig:disc?p.price_3m:null},
+      {key:'6m', label:t('plan.6m'), price:discPrice(p,p.price_6m), orig:disc?p.price_6m:null},
+      {key:'12m', label:t('plan.12m'), price:discPrice(p,p.price_12m), orig:disc?p.price_12m:null},
+    ].filter(pl => pl.price);
     const badges = [
       p.platform ? `<span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-[10px] font-black text-slate-300">${p.platform}</span>` : '',
       p.category ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">${p.category}</span>` : '',
@@ -850,14 +857,14 @@ function renderProducts() {
   ${p.description || ''}
 </p>
 
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] font-black uppercase tracking-widest text-slate-500" data-i18n="cat.priceHead">Harga</span>
-          <span class="font-black text-emerald-400">${disc ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(p.price)}</span>` : ''}${fmtPrice(finalPrice)}</span>
+        <div class="space-y-1.5 mb-3">
+          ${plans.map(pl => `
+            <button onclick="event.stopPropagation(); openProductDetail('${p.id}')"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-xs font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
+              <span>${pl.label}</span>
+              <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(pl.orig)}</span>` : ''}<span class="font-black">${fmtPrice(pl.price)}</span></span>
+            </button>`).join('')}
         </div>
-        <button onclick="event.stopPropagation(); openProductDetail('${p.id}')"
-          class="w-full text-center text-[11px] font-black text-emerald-400 hover:text-emerald-300 py-2 mb-3 border border-emerald-500/20 hover:border-emerald-400/50 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-xl transition">
-          LIHAT DETAIL PRODUK →
-        </button>
         <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank" onclick="event.stopPropagation()"
           class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
       </div>
