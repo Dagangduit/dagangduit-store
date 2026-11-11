@@ -628,6 +628,46 @@ const t = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
 const fmtMoney = (n) => CUR === 'USD' ? '$' + Number(n || 0).toLocaleString('en-US', {maximumFractionDigits: 2}) : 'Rp ' + Math.round(Number(n || 0)).toLocaleString('id-ID');
 const fmtCalc = (n) => CUR === 'USD' ? '$' + Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'Rp ' + Math.round(Number(n || 0)).toLocaleString('id-ID');
 
+/* ==================== AUTO TRANSLATE PRODUCT DESCRIPTION ==================== */
+const descCache = {}; // key: productId|targetLang -> translated text
+try { Object.assign(descCache, JSON.parse(localStorage.getItem('dd_desc_cache') || '{}')); } catch(e) {}
+function saveDescCache() {
+  try { localStorage.setItem('dd_desc_cache', JSON.stringify(descCache)); } catch(e) {}
+}
+async function translateText(text, target) {
+  if (!text || !text.trim()) return text;
+  try {
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + target + '&dt=t&q=' + encodeURIComponent(text);
+    const r = await fetch(url);
+    const j = await r.json();
+    if (j && j[0]) return j[0].map(seg => seg[0]).join('');
+  } catch(e) {}
+  return text;
+}
+function getDesc(p) {
+  if (!p || !p.description) return '';
+  const key = String(p.id) + '|' + LANG;
+  return descCache[key] || p.description;
+}
+let translating = false;
+async function translateAllDescriptions() {
+  if (translating || !allProducts.length) return;
+  translating = true;
+  const target = LANG === 'en' ? 'en' : 'id';
+  let changed = false;
+  for (const p of allProducts) {
+    if (!p.description) continue;
+    const key = String(p.id) + '|' + target;
+    if (descCache[key]) continue;
+    const tr = await translateText(p.description, target);
+    if (tr) { descCache[key] = tr; changed = true; }
+    await new Promise(r => setTimeout(r, 120)); // hindari rate-limit
+  }
+  saveDescCache();
+  translating = false;
+  if (changed) { renderProducts(); if (currentDetailProductId != null) { const dp = allProducts.find(x => String(x.id) === String(currentDetailProductId)); if (dp) document.getElementById('detail-product-description').textContent = getDesc(dp) || t('detail.nodesc'); } }
+}
+
 async function loadRate() {
   try {
     const r = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -643,7 +683,7 @@ function setLang(l) {
   document.getElementById('lang-id').className = 'px-2.5 py-1.5 ' + (l==='id' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('lang-en').className = 'px-2.5 py-1.5 ' + (l==='en' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('calc-deposit-cur').textContent = CUR === 'USD' ? '($)' : '(Rp)';
-  updateCalculator(); renderProducts(); renderFAQ(); renderTestimonials();
+  updateCalculator(); renderProducts(); renderFAQ(); renderTestimonials(); translateAllDescriptions();
   if (window.resetTyping) window.resetTyping();
 }
 
@@ -877,7 +917,7 @@ async function loadProducts() {
     loadingState.classList.add('hidden');
     if (error) throw error;
     if (!data || !data.length) { emptyState.classList.remove('hidden'); return; }
-    allProducts = data; renderProducts(); orderFeed = buildOrderFeed(); updateHeroCard();
+    allProducts = data; renderProducts(); orderFeed = buildOrderFeed(); updateHeroCard(); translateAllDescriptions();
     heroList = [...allProducts].sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
     heroIdx = Math.max(0, heroList.findIndex(x => x.id === featuredProductId));
     const bo = document.getElementById('badge-order');
@@ -998,7 +1038,7 @@ function renderProducts() {
       <div class="p-3 flex flex-col flex-1">
         <h3 class="font-extrabold text-sm leading-snug mb-1">${p.name}</h3>
         <p class="text-[11px] text-slate-500 line-clamp-2 mb-2">
-  ${p.description || ''}
+  ${getDesc(p) || ''}
 </p>
 
         <div class="space-y-1 mb-2 min-h-[150px] flex-1">
@@ -1059,7 +1099,7 @@ function openProductDetail(productId) {
 
   // Deskripsi lengkap, termasuk baris baru
   document.getElementById('detail-product-description').textContent =
-    product.description || t('detail.nodesc');
+    getDesc(product) || t('detail.nodesc');
 
   // GALLERY IMAGES
   detailGalleryImages = (
