@@ -264,7 +264,7 @@
     <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
     <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk.</div>
     <div id="no-result-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.noresult">Tidak ada produk yang cocok.</div>
-    <div id="product-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <div id="product-grid" class="hidden space-y-6"></div>
   </section>
 
   <!-- FAQ -->
@@ -911,6 +911,31 @@ function setPlatform(v) {
 }
 document.getElementById('search-input').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderProducts(); });
 
+// Rotasi katalog: maks 16 produk acak (2 baris x 8), diacak ulang tiap 5 menit (seeded agar stabil saat filter/search)
+const CATALOG_LIMIT = 16;
+let catalogRot = 0;
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = (seed >>> 0) || 1;
+  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function refreshCatalog() {
+  const g = productGrid;
+  if (g.classList.contains('hidden')) { catalogRot++; renderProducts(); return; }
+  g.style.transition = 'opacity .3s ease, transform .3s ease';
+  g.style.opacity = '0';
+  g.style.transform = 'translateX(24px)';
+  setTimeout(() => {
+    catalogRot++;
+    renderProducts();
+    g.style.opacity = '1';
+    g.style.transform = 'translateX(0)';
+  }, 300);
+}
+setInterval(refreshCatalog, 5 * 60 * 1000); // ganti produk tiap 5 menit, bareng badge
+
 function renderProducts() {
   const q = searchQuery.trim();
   const filtered = allProducts.filter(p => {
@@ -920,10 +945,11 @@ function renderProducts() {
     return okCat && okPlat && okQ;
   });
   if (!allProducts.length && !loadingState.classList.contains('hidden')) return; // masih loading
-  productCount.textContent = filtered.length + ' ' + t('cat.results');
+  const display = filtered.length > CATALOG_LIMIT ? seededShuffle(filtered, catalogRot).slice(0, CATALOG_LIMIT) : filtered;
+  productCount.textContent = display.length + ' / ' + filtered.length + ' ' + t('cat.results');
   emptyState.classList.add('hidden'); noResultState.classList.add('hidden'); productGrid.classList.add('hidden');
   if (!filtered.length) { (allProducts.length ? noResultState : emptyState).classList.remove('hidden'); return; }
-  productGrid.innerHTML = filtered.map((p, idx) => {
+  const cards = display.map((p, idx) => {
     const imgs = (Array.isArray(p.images) && p.images.length ? p.images : (p.image_url ? [p.image_url] : []));
     productImagesMap[p.id] = imgs;
     const cover = imgs[0] || '';
@@ -967,10 +993,16 @@ function renderProducts() {
           class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
       </div>
     </div>`;
-  }).join('');
+  });
+  // 2 baris marquee: atas geser kiri, bawah geser kanan (duplikat konten = loop mulus)
+  const half = Math.ceil(cards.length / 2);
+  const rowA = cards.slice(0, half), rowB = cards.slice(half);
+  const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[290px] sm:w-[330px] shrink-0">${c}</div>`).join('');
+  productGrid.innerHTML = `
+    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:55s; gap:1.5rem">${trackHTML(rowA)}</div></div>
+    <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:55s; gap:1.5rem">${trackHTML(rowB.length ? rowB : rowA)}</div></div>`;
   productGrid.classList.remove('hidden');
   productGrid.querySelectorAll('.tilt-card').forEach(bindTilt);
-  requestAnimationFrame(() => productGrid.querySelectorAll('.reveal').forEach(el => io.observe(el)));
 }
 /* ==================== PRODUCT DETAIL ==================== */
 let currentDetailProductId = null;
