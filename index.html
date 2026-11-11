@@ -825,13 +825,13 @@ const fmtProductPrice = (p, v) => {
   if ((p && p.currency) === 'USD') {
     return CUR === 'USD' ? '$' + val.toLocaleString('en-US', {maximumFractionDigits: 2})
                         : 'Rp ' + Math.round(val * RATE).toLocaleString('id-ID');
-  }platformFilter = 'ALL', 
+  }
   return fmtPrice(val);
 };
 const discPct = (p) => Math.min(90, Math.max(0, Number(p.discount_percent) || 0));
 const discPrice = (p, v) => v ? Math.round(Number(v) * (1 - discPct(p) / 100)) : null;
 
-leteCategory = 'ALL', searchQuery = '';
+let allProducts = [], activeCategory = 'ALL', platformFilter = 'ALL', searchQuery = '';
 const loadingState = document.getElementById('loading-state');
 const emptyState = document.getElementById('empty-state');
 const noResultState = document.getElementById('no-result-state');
@@ -1473,15 +1473,6 @@ setInterval(loadTicker, 60 * 1000); // refresh ticker tiap 60 detik
 renderTestimonials();
 renderFAQ();
 updateCalculator();
-</script>
-</body>
-</html>
-</script>
-</body>
-</html>
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
