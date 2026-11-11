@@ -405,6 +405,7 @@
                   <th class="px-6 py-3 font-medium">Total</th>
                   <th class="px-6 py-3 font-medium">Metode</th>
                   <th class="px-6 py-3 font-medium">Status</th>
+                  <th class="px-6 py-3 font-medium text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody id="orders-tbody" class="divide-y divide-slate-800/40"></tbody>
@@ -922,12 +923,22 @@ async function loadOrders() {
         </select>
         <div class="mt-1">${statusBadge(o.status)}</div>
       </td>
+      <td class="px-6 py-3 text-right">
+        <button onclick="deleteOrder('${o.id}')" class="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-bold hover:bg-red-500/20 transition">Hapus</button>
+      </td>
     </tr>`).join('');
 }
 
 window.updateOrderStatus = async function (id, status) {
   const { error } = await supabaseClient.from('orders').update({ status }).eq('id', id);
   if (error) alert('Gagal update status: ' + error.message);
+  else loadOrders();
+};
+
+window.deleteOrder = async function (id) {
+  if (!confirm('Hapus pesanan ini permanen?')) return;
+  const { error } = await supabaseClient.from('orders').delete().eq('id', id);
+  if (error) alert('Gagal hapus pesanan: ' + error.message);
   else loadOrders();
 };
 
