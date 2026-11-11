@@ -165,7 +165,6 @@
         <button onclick="setLang('id')" id="lang-id" class="px-2.5 py-1.5 bg-emerald-500/15 text-emerald-300">ID</button>
         <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1.5 bg-slate-900 text-slate-500">EN</button>
       </div>
-      <a id="nav-wa-btn" href="#" target="_blank" class="btn-shine bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl"><span data-i18n="nav.wa">💬 Chat WA</span></a>
     </div>
   </div>
 </header>
@@ -219,7 +218,7 @@
           <span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="calc.kicker">Kalkulator Profit</span>
           <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 mb-5" data-i18n="calc.title">Simulasikan Modal Kamu Jadi Berapa?</h2>
           <div class="space-y-4">
-            <div><label class="text-xs text-slate-400 block mb-2"><span data-i18n="calc.deposit">Modal Awal</span> <span id="calc-deposit-cur">($)</span></label><input id="calc-deposit" type="number" value="1000" min="0" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
+            <div><label class="text-xs text-slate-400 block mb-2"><span data-i18n="calc.deposit">Modal Awal</span> <span id="calc-deposit-cur">($)</span></label><input id="calc-deposit" type="number" value="10000" min="0" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
             <div><label class="text-xs text-slate-400 block mb-2" data-i18n="calc.rate">Profit Bulanan (%)</label><input id="calc-rate" type="number" value="5" min="0" max="100" step="0.1" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
             <div><label class="text-xs text-slate-400 block mb-2" data-i18n="calc.months">Durasi (Bulan)</label><input id="calc-months" type="number" value="12" min="1" max="120" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 font-mono-code text-emerald-400 focus:border-emerald-500 focus:outline-none"></div>
           </div>
@@ -335,6 +334,12 @@
     </div>
   </section>
 </main>
+<!-- FLOATING WHATSAPP BUTTON -->
+<a id="nav-wa-btn" href="#" target="_blank" title="Chat WhatsApp"
+  class="fixed bottom-4 right-4 z-50 flex items-center justify-center w-11 h-11 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full shadow-[0_8px_25px_-8px_rgba(16,185,129,.7)] hover:scale-110 active:scale-95 transition-all duration-300 qris-pulse">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
 <!-- FOOTER -->
 <footer class="border-t border-slate-800/60 bg-slate-950 py-8 mt-10 relative z-10">
   <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -683,6 +688,7 @@ function setLang(l) {
   document.getElementById('lang-id').className = 'px-2.5 py-1.5 ' + (l==='id' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('lang-en').className = 'px-2.5 py-1.5 ' + (l==='en' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-900 text-slate-500');
   document.getElementById('calc-deposit-cur').textContent = CUR === 'USD' ? '($)' : '(Rp)';
+  document.getElementById('calc-deposit').value = CUR === 'USD' ? 1000 : 1000000;
   updateCalculator(); renderProducts(); renderFAQ(); renderTestimonials(); translateAllDescriptions();
   if (window.resetTyping) window.resetTyping();
 }
