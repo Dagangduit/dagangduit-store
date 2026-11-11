@@ -253,7 +253,19 @@
         <option value="VPS">VPS</option>
         <option value="PineScript">PineScript</option>
       </select>
-    -1
+      <select id="platform-select" onchange="setPlatform(this.value)"
+              class="bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-300 focus:border-emerald-500 focus:outline-none cursor-pointer">
+        <option value="ALL">Semua Platform</option>
+        <option value="MT4">MT4</option>
+        <option value="MT5">MT5</option>
+      </select>
+    </div>
+    <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
+    <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk.</div>
+    <div id="no-result-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.noresult">Tidak ada produk yang cocok.</div>
+    <div id="product-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </section>
+
   <!-- FAQ -->
   <section id="faq" class="max-w-4xl mx-auto px-4 py-14 w-full reveal">
     <h2 class="text-2xl sm:text-3xl font-extrabold text-center mb-2" data-i18n="faq.title">Pertanyaan Sering Ditanyakan</h2>
