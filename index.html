@@ -852,7 +852,12 @@ async function loadProducts() {
 // Hero card menampilkan produk unggulan (pertama di katalog)
 function updateHeroCard() {
   if (!allProducts.length) return;
-  const p = allProducts[0];
+  const hasImg = p => (Array.isArray(p.images) && p.images.length) || p.image_url;
+  const p = allProducts.find(x => x.category === 'EA' && hasImg(x))
+         || allProducts.find(hasImg)
+         || allProducts[0];
+  featuredProductName = p.name || '';
+  orderFeed = buildOrderFeed();
   const imgs = (Array.isArray(p.images) && p.images.length ? p.images : (p.image_url ? [p.image_url] : []));
   const cover = imgs[0];
   if (cover) document.getElementById('hero-card-img').src = cover;
@@ -1378,11 +1383,12 @@ const ORDER_TYPES = ['EA','Indikator','VPS','PineScript'];
 const PROFIT_FEED = ['+$124.50','+$89.20','+$210.75','+$56.40','+$178.90','+$342.10','+$67.80','+$145.30','+$98.60','+$256.45','+$73.15','+$189.90'];
 let orderIdx = 0, profitIdx = 0;
 
-// Bangun feed acak: Nama • Kota • Produk (dari katalog asli, fallback tipe umum)
+// Produk unggulan (sama dengan hero card) — dipakai feed badge order
+let featuredProductName = '';
+
+// Bangun feed acak: Nama • Kota • Produk unggulan
 function buildOrderFeed() {
-  const products = (allProducts && allProducts.length)
-    ? allProducts.map(p => p.name).filter(Boolean)
-    : ORDER_TYPES;
+  const products = featuredProductName ? [featuredProductName] : ORDER_TYPES;
   const feed = [];
   for (let i = 0; i < 20; i++) {
     const name = ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)];
