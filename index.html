@@ -199,9 +199,9 @@
       </div>
       <div class="lg:col-span-5 relative">
         <div class="glass-panel rounded-3xl p-4 rotate-1 hover:rotate-0 transition duration-500 tilt-card">
-          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80" class="rounded-2xl w-full h-56 object-cover">
-          <div class="flex justify-between items-center mt-4"><div><p class="text-xs text-slate-400" data-i18n="hero.cardTag">EA Best Seller</p><p class="font-bold text-sm">DagangDuit Auto Risk EA</p></div><div class="text-right"><p class="text-xs line-through text-slate-500">Rp 750.000</p><p class="font-black text-emerald-400">Rp 450.000</p></div></div>
-          <a href="#katalog" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl" data-i18n="hero.cardBtn">Beli Sekarang - QRIS ⚡</a>
+          <img id="hero-card-img" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80" class="rounded-2xl w-full h-56 object-cover">
+          <div class="flex justify-between items-center mt-4"><div><p class="text-xs text-slate-400" data-i18n="hero.cardTag">EA Best Seller</p><p class="font-bold text-sm" id="hero-card-name">DagangDuit Auto Risk EA</p></div><div class="text-right"><p class="text-xs line-through text-slate-500" id="hero-card-old">Rp 750.000</p><p class="font-black text-emerald-400" id="hero-card-price">Rp 450.000</p></div></div>
+          <a href="#katalog" id="hero-card-btn" class="btn-shine mt-3 block text-center bg-white text-slate-950 font-extrabold text-sm py-3 rounded-xl" data-i18n="hero.cardBtn">Beli Sekarang - QRIS ⚡</a>
         </div>
         <div class="absolute -top-3 -left-2 sm:-left-4 bg-slate-900 border border-slate-700 rounded-2xl px-3 py-2 shadow-xl float-slow flex items-center gap-2"><span class="text-emerald-400 text-lg">✓</span><div><p class="text-[10px] text-slate-400 leading-none" data-i18n="hero.badge1">Order Baru</p><p class="text-xs font-bold" id="badge-order">Rizky • Jakarta • EA</p></div></div>
         <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-emerald-500 text-slate-950 rounded-2xl px-3 py-2 shadow-xl float-slow2"><p class="text-[10px] font-bold leading-none" data-i18n="hero.badge2">PROFIT HARI INI</p><p class="text-sm font-black" id="badge-profit">+ $124.50 ▲</p></div>
@@ -840,7 +840,7 @@ async function loadProducts() {
     loadingState.classList.add('hidden');
     if (error) throw error;
     if (!data || !data.length) { emptyState.classList.remove('hidden'); return; }
-    allProducts = data; renderProducts(); orderFeed = buildOrderFeed();
+    allProducts = data; renderProducts(); orderFeed = buildOrderFeed(); updateHeroCard();
     const bo = document.getElementById('badge-order');
     if (bo) bo.textContent = orderFeed[orderIdx];
   } catch(e) {
@@ -849,6 +849,24 @@ async function loadProducts() {
     emptyState.innerHTML = `<p class="text-red-400 font-bold mb-1">⚠️ Gagal memuat produk</p><p class="text-xs text-slate-500">${e.message || 'Periksa koneksi / konfigurasi Supabase.'}</p>`;
   }
 }
+// Hero card menampilkan produk unggulan (pertama di katalog)
+function updateHeroCard() {
+  if (!allProducts.length) return;
+  const p = allProducts[0];
+  const imgs = (Array.isArray(p.images) && p.images.length ? p.images : (p.image_url ? [p.image_url] : []));
+  const cover = imgs[0];
+  if (cover) document.getElementById('hero-card-img').src = cover;
+  document.getElementById('hero-card-name').textContent = p.name || 'DagangDuit Auto Risk EA';
+  const disc = discPct(p);
+  const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
+  document.getElementById('hero-card-price').textContent = fmtPrice(finalPrice);
+  const oldEl = document.getElementById('hero-card-old');
+  if (disc) { oldEl.textContent = fmtPrice(p.price); oldEl.classList.remove('hidden'); }
+  else oldEl.classList.add('hidden');
+  const btn = document.getElementById('hero-card-btn');
+  btn.onclick = (e) => { e.preventDefault(); openProductDetail(p.id); };
+}
+
 function setCategory(c) {
   activeCategory = c;
   document.querySelectorAll('.cat-btn').forEach(b => {
