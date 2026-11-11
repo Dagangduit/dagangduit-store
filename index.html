@@ -1409,12 +1409,12 @@ function rotateProfit() {
   const p = document.getElementById('badge-profit');
   if (!p) return;
   p.style.opacity = 0;
-  setTimeout(() => { profitIdx = (profitIdx + 1) % PROFIT_FEED.length; p.textContent = PROFIT_FEED[profitIdx] + ' ▲'; p.style.opacity = 1; }, 300);
+  setTimeout(() => { profitIdx = Math.floor(Math.random() * PROFIT_FEED.length); p.textContent = PROFIT_FEED[profitIdx] + ' ▲'; p.style.opacity = 1; }, 300);
 }
 document.getElementById('badge-order').style.transition = 'opacity .3s';
 document.getElementById('badge-profit').style.transition = 'opacity .3s';
-setInterval(rotateOrder, 10 * 60 * 1000);   // order baru tiap 10 menit
-setInterval(rotateProfit, 30 * 60 * 1000);  // profit tiap 30 menit (fallback saja)
+setInterval(rotateOrder, 8 * 1000);    // order baru tiap 8 detik
+setInterval(rotateProfit, 15 * 1000);  // profit tiap 15 detik
 
 /* ==================== ORDER TRACKING (otomatis, tanpa form) ==================== */
 document.getElementById('modal-wa-btn').addEventListener('click', () => {
@@ -1443,6 +1443,9 @@ setInterval(loadTicker, 60 * 1000); // refresh ticker tiap 60 detik
 renderTestimonials();
 renderFAQ();
 updateCalculator();
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
