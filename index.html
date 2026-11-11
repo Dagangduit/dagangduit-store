@@ -1011,8 +1011,8 @@ function renderProducts() {
     const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[220px] sm:w-[250px] lg:w-[280px] shrink-0 mr-4">${c}</div>`).join('');
     productGrid.innerHTML = `
       <div class="relative left-1/2 -translate-x-1/2 w-screen space-y-6">
-        <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:300s; gap:0;">${trackHTML(rowA)}</div></div>
-        <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:300s; gap:0;">${trackHTML(rowB.length ? rowB : rowA)}</div></div>
+        <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:400s; gap:0;">${trackHTML(rowA)}</div></div>
+        <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:400s; gap:0;">${trackHTML(rowB.length ? rowB : rowA)}</div></div>
       </div>`;
   }
   productGrid.classList.remove('hidden');
