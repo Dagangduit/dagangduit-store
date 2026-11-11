@@ -249,6 +249,8 @@
         <button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-emerald-500/15 border-emerald-400/40 text-emerald-300 transition" data-i18n="cat.all">Semua</button>
         <button onclick="setCategory('EA')" id="cat-EA" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">EA</button>
         <button onclick="setCategory('Indicator')" id="cat-Indicator" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">Indicator</button>
+        <button onclick="setCategory('VPS')" id="cat-VPS" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">VPS</button>
+        <button onclick="setCategory('PineScript')" id="cat-PineScript" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">PineScript</button>
       </div>
     </div>
     <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
@@ -551,7 +553,7 @@ const I18N = {
     'cat.empty':'Belum ada produk.','cat.noresult':'Tidak ada produk yang cocok.','cat.search':'Cari EA / Indikator...','cat.all':'Semua',
     'cat.results':'produk ditemukan','cat.available':'Tersedia','cat.sale':'DISKON','cat.buyRent':'Beli / Sewa','cat.priceHead':'Harga',
     'cat.qris':'QRIS Instan','cat.buy':'Beli','cat.rent':'Sewa',
-    'plan.buy':'Beli Sekali','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.12m':'Sewa 1 Tahun',
+    'plan.buy':'Beli Sekali','plan.1m':'Sewa 1 Bulan','plan.3m':'Sewa 3 Bulan','plan.6m':'Sewa 6 Bulan','plan.12m':'Sewa 1 Tahun',
     'modal.title':'Checkout','modal.sub':'Pilih metode pembayaran di bawah ini','modal.qrisHint':'Scan dengan GoPay, OVO, DANA, ShopeePay, atau m-banking apa pun','modal.intlHint':'Bayar via PayPal / Wise / Crypto — konfirmasi manual via WhatsApp',
     'modal.buyerName':'Nama kamu *','modal.buyerWa':'No. WhatsApp *',
     'modal.product':'Produk','modal.plan':'Paket','modal.total':'Total Bayar','modal.note':'Setelah bayar, kirim bukti transfer via WhatsApp. File produk dikirim maksimal 5 menit.','modal.wa':'💬 Konfirmasi Pembayaran via WhatsApp','modal.secure':'Pembayaran aman • Diproses manual oleh admin',
@@ -588,7 +590,7 @@ const I18N = {
     'cat.empty':'No products yet.','cat.noresult':'No matching products.','cat.search':'Search EA / Indicator...','cat.all':'All',
     'cat.results':'products found','cat.available':'Available','cat.sale':'SALE','cat.buyRent':'Buy / Rent','cat.priceHead':'Price',
     'cat.qris':'Instant QRIS','cat.buy':'Buy','cat.rent':'Rent',
-    'plan.buy':'Buy Once','plan.1m':'Rent 1 Month','plan.3m':'Rent 3 Months','plan.12m':'Rent 1 Year',
+    'plan.buy':'Buy Once','plan.1m':'Rent 1 Month','plan.3m':'Rent 3 Months','plan.6m':'Rent 6 Months','plan.12m':'Rent 1 Year',
     'modal.title':'Checkout','modal.sub':'Choose a payment method below','modal.qrisHint':'Scan with GoPay, OVO, DANA, ShopeePay, or any mobile banking app','modal.intlHint':'Pay via PayPal / Wise / Crypto — manual confirmation via WhatsApp',
     'modal.buyerName':'Your name *','modal.buyerWa':'WhatsApp number *',
     'modal.product':'Product','modal.plan':'Plan','modal.total':'Total','modal.note':'After payment, send proof via WhatsApp. Product files delivered within 5 minutes.','modal.wa':'💬 Confirm Payment via WhatsApp','modal.secure':'Secure payment • Processed manually by admin',
@@ -691,7 +693,7 @@ function bindTilt(card) {
 }
 
 /* ==================== TICKER LIVE ==================== */
-const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['GC=F','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
+const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD'],['XAUUSD=X','GOLD'],['BTC-USD','BTC'],['GBPUSD=X','GBP/USD'],['USDJPY=X','USD/JPY'],['CL=F','OIL']];
 const TICKER_FALLBACK = [
   ['EUR/USD','1.0842','+0.12%'],['GOLD','2651.30','+0.45%'],['BTC','97450','+1.20%'],
   ['GBP/USD','1.2715','-0.08%'],['USD/JPY','154.32','+0.21%'],['OIL','71.84','-0.33%']
@@ -699,9 +701,9 @@ const TICKER_FALLBACK = [
 async function fetchQuote(sym) {
   for (const host of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
     try {
-      const r = await fetch(`${host}/v8/finance/chart/${sym}?interval=1d&range=1d`);
+      const r = await fetch(`${host}/v8/finance/chart/${sym}?interval=1d&range=5d`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
       const j = await r.json(); const m = j.chart.result[0].meta;
-      return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.regularMarketPrice };
+      return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.previousClose || m.regularMarketPrice };
     } catch(e) {}
   }
   return null;
@@ -829,20 +831,15 @@ function renderProducts() {
     const cover = imgs[0] || '';
     const disc = discPct(p);
     const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
-    const plans = [
-      {key:'buy', label:t('plan.buy'), price:finalPrice, orig:disc?p.price:null, wa:'Beli'},
-      {key:'1m', label:t('plan.1m'), price:discPrice(p,p.price_1m), orig:disc?p.price_1m:null, wa:'Sewa 1 Bulan'},
-      {key:'3m', label:t('plan.3m'), price:discPrice(p,p.price_3m), orig:disc?p.price_3m:null, wa:'Sewa 3 Bulan'},
-      {key:'12m', label:t('plan.12m'), price:discPrice(p,p.price_12m), orig:disc?p.price_12m:null, wa:'Sewa 1 Tahun'},
-    ].filter(pl => pl.price);
     const badges = [
       p.platform ? `<span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-[10px] font-black text-slate-300">${p.platform}</span>` : '',
+      p.category ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">${p.category}</span>` : '',
       disc ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/90 text-white text-[10px] font-black">-${disc}%</span>` : '',
       idx === 0 ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">★ TERLARIS</span>` : '',
     ].join('');
     return `
-    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card reveal">
-      <div class="relative h-44 bg-slate-900 overflow-hidden cursor-zoom-in" onclick="openLightbox('${p.id}')">
+    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card reveal cursor-pointer" onclick="openProductDetail('${p.id}')">
+      <div class="relative h-44 bg-slate-900 overflow-hidden">
         ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
         <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
         ${imgs.length > 1 ? `<span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold">📷 ${imgs.length}</span>` : ''}
@@ -853,20 +850,15 @@ function renderProducts() {
   ${p.description || ''}
 </p>
 
-<button
-  onclick="openProductDetail('${p.id}')"
-  class="w-full text-center text-[11px] font-black text-emerald-400 hover:text-emerald-300 py-2 mb-3 border border-emerald-500/20 hover:border-emerald-400/50 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-xl transition">
-  LIHAT DETAIL PRODUK →
-</button>
-        <div class="space-y-1.5 mb-3">
-          ${plans.map(pl => `
-            <button onclick="openQrisModal('${p.id}','${(p.name||'').replace(/'/g,"\\'")}',${pl.price},'${pl.label.replace(/'/g,"\\'")}','${pl.wa.replace(/'/g,"\\'")}')"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-xs font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
-              <span>${pl.label}</span>
-              <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(pl.orig)}</span>` : ''}<span class="font-black">${fmtPrice(pl.price)}</span></span>
-            </button>`).join('')}
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-500" data-i18n="cat.priceHead">Harga</span>
+          <span class="font-black text-emerald-400">${disc ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtPrice(p.price)}</span>` : ''}${fmtPrice(finalPrice)}</span>
         </div>
-        <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank"
+        <button onclick="event.stopPropagation(); openProductDetail('${p.id}')"
+          class="w-full text-center text-[11px] font-black text-emerald-400 hover:text-emerald-300 py-2 mb-3 border border-emerald-500/20 hover:border-emerald-400/50 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-xl transition">
+          LIHAT DETAIL PRODUK →
+        </button>
+        <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank" onclick="event.stopPropagation()"
           class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
       </div>
     </div>`;
@@ -941,6 +933,13 @@ function openProductDetail(productId) {
       price: discPrice(product, product.price_3m),
       orig: discount ? Number(product.price_3m) : null,
       wa: 'Sewa 3 Bulan'
+    },
+    {
+      key: '6m',
+      label: t('plan.6m'),
+      price: discPrice(product, product.price_6m),
+      orig: discount ? Number(product.price_6m) : null,
+      wa: 'Sewa 6 Bulan'
     },
     {
       key: '12m',
