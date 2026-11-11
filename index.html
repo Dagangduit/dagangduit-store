@@ -580,7 +580,9 @@ const I18N = {
     'custom.submit':'🚀 Kirim Request via WhatsApp','custom.note':'Gratis konsultasi • Balasan max 1x24 jam',
     'detail.sub':'Informasi & Detail Produk','detail.badge':'Detail Produk','detail.desc':'Deskripsi Produk','detail.plans':'Pilih Paket',
     'detail.wa':'💬 Tanya via WhatsApp','detail.close':'Tutup Detail','detail.noimg':'Gambar belum tersedia',
-    'detail.nodesc':'Belum ada deskripsi produk.','detail.noprice':'Harga belum tersedia.','detail.platform':'Platform'
+    'detail.nodesc':'Belum ada deskripsi produk.','detail.noprice':'Harga belum tersedia.','detail.platform':'Platform',
+    'cat.terlaris':'★ TERLARIS','cat.wa':'💬 Tanya via WA','cat.waMsg':'Halo Admin, saya tertarik dengan ',
+    'cat.loadErr':'⚠️ Gagal memuat produk','cat.loadErrSub':'Periksa koneksi / konfigurasi Supabase.'
   },
   en: {
     'promo.text':'PROMO: Up to 40% OFF + Free VPS Setup','promo.cta':'Claim Now →',
@@ -617,7 +619,9 @@ const I18N = {
     'custom.submit':'🚀 Send Request via WhatsApp','custom.note':'Free consultation • Reply within 24h',
     'detail.sub':'Product Information & Details','detail.badge':'Product Details','detail.desc':'Product Description','detail.plans':'Choose Plan',
     'detail.wa':'💬 Ask via WhatsApp','detail.close':'Close Details','detail.noimg':'NO IMAGE AVAILABLE',
-    'detail.nodesc':'No description yet.','detail.noprice':'Price not available yet.','detail.platform':'Platform'
+    'detail.nodesc':'No description yet.','detail.noprice':'Price not available yet.','detail.platform':'Platform',
+    'cat.terlaris':'★ BEST SELLER','cat.wa':'💬 Ask via WA','cat.waMsg':'Hi Admin, I\'m interested in ',
+    'cat.loadErr':'⚠️ Failed to load products','cat.loadErrSub':'Check your connection / Supabase config.'
   }
 };
 const t = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
@@ -881,7 +885,7 @@ async function loadProducts() {
   } catch(e) {
     loadingState.classList.add('hidden');
     emptyState.classList.remove('hidden');
-    emptyState.innerHTML = `<p class="text-red-400 font-bold mb-1">⚠️ Gagal memuat produk</p><p class="text-xs text-slate-500">${e.message || 'Periksa koneksi / konfigurasi Supabase.'}</p>`;
+    emptyState.innerHTML = `<p class="text-red-400 font-bold mb-1">${t('cat.loadErr')}</p><p class="text-xs text-slate-500">${e.message || t('cat.loadErrSub')}</p>`;
   }
 }
 // Hero card: produk unggulan (featured) atau rotasi katalog tiap 5 menit
@@ -980,7 +984,7 @@ function renderProducts() {
     ].filter(pl => pl.price);
     const badges = [
       p.platform ? `<span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-[10px] font-black text-slate-300">${p.platform}</span>` : '',
-      p.category ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">${p.category}</span>` : '',
+      p.category ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-eme${t('cat.terlaris')}ext-[10px] font-black">${p.category}</span>` : '',
       disc ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/90 text-white text-[10px] font-black">-${disc}%</span>` : '',
       p.is_featured ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">★ TERLARIS</span>` : '',
     ].join('');
@@ -1005,8 +1009,8 @@ function renderProducts() {
               <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtProductPrice(p, pl.orig)}</span>` : ''}<span class="font-black">${fmtProductPrice(p, pl.price)}</span></span>
             </button>`).join('')}
         </div>
-        <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank" onclick="event.stopPropagation()"
-          class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-[11px] font-bold py-2 rounded-lg transition">💬 Tanya via WA</a>
+        <a href="${waLink(t('cat.waMsg') + p.name)}" target="_blank" onclick="event.stopPropagation()"
+          class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-[11px] font-bold py-2 rounded-lg transition">${t('cat.wa')}</a>
       </div>
     </div>`;
   });
@@ -1083,35 +1087,35 @@ function openProductDetail(productId) {
       label: t('plan.buy'),
       price: finalPrice,
       orig: discount ? Number(product.price) : null,
-      wa: 'Beli'
+      wa: t('cat.buy')
     },
     {
       key: '1m',
       label: t('plan.1m'),
       price: discPrice(product, product.price_1m),
       orig: discount ? Number(product.price_1m) : null,
-      wa: 'Sewa 1 Bulan'
+      wa: t('plan.1m')
     },
     {
       key: '3m',
       label: t('plan.3m'),
       price: discPrice(product, product.price_3m),
       orig: discount ? Number(product.price_3m) : null,
-      wa: 'Sewa 3 Bulan'
+      wa: t('plan.3m')
     },
     {
       key: '6m',
       label: t('plan.6m'),
       price: discPrice(product, product.price_6m),
       orig: discount ? Number(product.price_6m) : null,
-      wa: 'Sewa 6 Bulan'
+      wa: t('plan.6m')
     },
     {
       key: '12m',
       label: t('plan.12m'),
       price: discPrice(product, product.price_12m),
       orig: discount ? Number(product.price_12m) : null,
-      wa: 'Sewa 1 Tahun'
+      wa: t('plan.12m')
     }
   ].filter(plan => plan.price);
 
@@ -1164,9 +1168,7 @@ function openProductDetail(productId) {
   });
 
   // WhatsApp
-  const waText =
-    'Halo Admin DagangDuit, saya tertarik dengan produk: ' +
-    (product.name || '');
+  const waText = t('cat.waMsg') + (product.name || '');
 
   document.getElementById('detail-product-wa').href = waLink(waText);
 
