@@ -245,13 +245,14 @@
     <div class="flex justify-between items-end mb-6"><div><span class="text-xs font-bold uppercase tracking-widest text-emerald-400" data-i18n="cat.kicker">Etalase</span><h2 class="text-2xl sm:text-3xl font-extrabold mt-1" data-i18n="cat.title">Katalog Produk &amp; Harga</h2></div><span id="product-count" class="text-xs font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800" data-i18n="cat.loading">Memuat...</span></div>
     <div class="flex flex-col sm:flex-row gap-3 mb-8">
       <input id="search-input" data-i18n-ph="cat.search" placeholder="Cari EA / Indikator..." class="flex-1 bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none">
-      <div class="flex gap-2">
-        <button onclick="setCategory('ALL')" id="cat-ALL" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-emerald-500/15 border-emerald-400/40 text-emerald-300 transition" data-i18n="cat.all">Semua</button>
-        <button onclick="setCategory('EA')" id="cat-EA" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">EA</button>
-        <button onclick="setCategory('Indicator')" id="cat-Indicator" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">Indicator</button>
-        <button onclick="setCategory('VPS')" id="cat-VPS" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">VPS</button>
-        <button onclick="setCategory('PineScript')" id="cat-PineScript" class="cat-btn px-4 py-3 rounded-xl text-xs font-bold border bg-slate-900 border-slate-800 text-slate-400 transition">PineScript</button>
-      </div>
+      <select id="cat-select" onchange="setCategory(this.value)"
+              class="bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-300 focus:border-emerald-500 focus:outline-none cursor-pointer">
+        <option value="ALL" data-i18n="cat.all">Semua</option>
+        <option value="EA">EA</option>
+        <option value="Indicator">Indicator</option>
+        <option value="VPS">VPS</option>
+        <option value="PineScript">PineScript</option>
+      </select>
     </div>
     <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
     <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk.</div>
@@ -865,10 +866,15 @@ let featuredProductId = null, heroList = [], heroIdx = 0;
 function updateHeroCard(p) {
   if (!allProducts.length) return;
   const hasImg = x => (Array.isArray(x.images) && x.images.length) || x.image_url;
-  if (!p) p = allProducts.find(x => x.is_featured)
-         || allProducts.find(x => x.category === 'EA' && hasImg(x))
-         || allProducts.find(hasImg)
-         || allProducts[0];
+  if (!p) {
+    p = allProducts.find(x => x.is_featured);
+    if (!p) {
+      // Tidak ada yang ditandai Terlaris → pilih acak (utamakan yang punya gambar)
+      const withImg = allProducts.filter(hasImg);
+      const pool = withImg.length ? withImg : allProducts;
+      p = pool[Math.floor(Math.random() * pool.length)];
+    }
+  }
   featuredProductId = p.id;
   featuredProductName = p.name || '';
   orderFeed = buildOrderFeed();
@@ -888,10 +894,8 @@ function updateHeroCard(p) {
 
 function setCategory(c) {
   activeCategory = c;
-  document.querySelectorAll('.cat-btn').forEach(b => {
-    const on = b.id === 'cat-' + c;
-    b.className = 'cat-btn px-4 py-3 rounded-xl text-xs font-bold border transition ' + (on ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400');
-  });
+  const sel = document.getElementById('cat-select');
+  if (sel) sel.value = c;
   renderProducts();
 }
 document.getElementById('search-input').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderProducts(); });
