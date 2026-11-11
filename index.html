@@ -840,7 +840,9 @@ async function loadProducts() {
     loadingState.classList.add('hidden');
     if (error) throw error;
     if (!data || !data.length) { emptyState.classList.remove('hidden'); return; }
-    allProducts = data; renderProducts();
+    allProducts = data; renderProducts(); orderFeed = buildOrderFeed();
+    const bo = document.getElementById('badge-order');
+    if (bo) bo.textContent = orderFeed[orderIdx];
   } catch(e) {
     loadingState.classList.add('hidden');
     emptyState.classList.remove('hidden');
@@ -1352,19 +1354,38 @@ cfForm.addEventListener('submit', e => {
 });
 
 /* ==================== HERO BADGES ROTATION ==================== */
-const ORDER_FEED = [
-  'Rizky • Jakarta • EA','Dewi • Surabaya • Indikator','Budi • Bandung • EA',
-  'Sari • Medan • EA','Andi • Bali • Indikator','Putri • Yogyakarta • EA',
-  'Fajar • Semarang • EA','Maya • Makassar • Indikator','Rian • Palembang • EA',
-  'Nadia • Solo • EA','Eko • Manado • Indikator','Lina • Jambi • EA'
-];
+const ORDER_NAMES = ['Rizky','Dewi','Budi','Sari','Andi','Putri','Fajar','Maya','Rian','Nadia','Eko','Lina','Yoga','Bagus','Raka','Nina'];
+const ORDER_CITIES = ['Jakarta','Surabaya','Bandung','Medan','Bali','Yogyakarta','Semarang','Makassar','Palembang','Solo','Manado','Jambi','Bekasi','Tangerang','Bogor','Malang'];
+const ORDER_TYPES = ['EA','Indikator','VPS','PineScript'];
 const PROFIT_FEED = ['+$124.50','+$89.20','+$210.75','+$56.40','+$178.90','+$342.10','+$67.80','+$145.30','+$98.60','+$256.45','+$73.15','+$189.90'];
 let orderIdx = 0, profitIdx = 0;
+
+// Bangun feed acak: Nama • Kota • Produk (dari katalog asli, fallback tipe umum)
+function buildOrderFeed() {
+  const products = (allProducts && allProducts.length)
+    ? allProducts.map(p => p.name).filter(Boolean)
+    : ORDER_TYPES;
+  const feed = [];
+  for (let i = 0; i < 20; i++) {
+    const name = ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)];
+    const city = ORDER_CITIES[Math.floor(Math.random() * ORDER_CITIES.length)];
+    const prod = products[Math.floor(Math.random() * products.length)];
+    feed.push(`${name} • ${city} • ${prod}`);
+  }
+  return [...new Set(feed)];
+}
+let orderFeed = buildOrderFeed();
+
 function rotateOrder() {
   const o = document.getElementById('badge-order');
   if (!o) return;
   o.style.opacity = 0;
-  setTimeout(() => { orderIdx = (orderIdx + 1) % ORDER_FEED.length; o.textContent = ORDER_FEED[orderIdx]; o.style.opacity = 1; }, 300);
+  setTimeout(() => {
+    orderIdx = (orderIdx + 1) % orderFeed.length;
+    o.textContent = orderFeed[orderIdx];
+    o.style.opacity = 1;
+    if (orderIdx === 0) orderFeed = buildOrderFeed(); // acak ulang tiap siklus
+  }, 300);
 }
 function rotateProfit() {
   const p = document.getElementById('badge-profit');
@@ -1394,6 +1415,7 @@ document.getElementById('modal-wa-btn').addEventListener('click', () => {
 
 /* ==================== INIT ==================== */
 setLang(LANG); // terapkan bahasa hasil deteksi browser
+document.getElementById('badge-order').textContent = orderFeed[0];
 loadSettings();
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
