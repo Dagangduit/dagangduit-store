@@ -268,6 +268,11 @@
               <option value="PineScript">PineScript</option>
               <option value="Lainnya">Lainnya</option>
             </select>
+            <select id="prod-filter-platform" class="bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none">
+              <option value="ALL">Semua Platform</option>
+              <option value="MT4">MT4</option>
+              <option value="MT5">MT5</option>
+            </select>
             <select id="prod-sort" class="bg-slate-900/70 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none">
               <option value="newest">Terbaru</option>
               <option value="oldest">Terlama</option>
@@ -758,15 +763,18 @@ const catBadge = (c) => {
   return `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${cls}">${c || 'EA'}</span>`;
 };
 
-const platBadge = (p) => `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p || 'MT5'}</span>`;
+const platFilterPlatform = document.getElementById('prod-filter-platform');
+const prodBadge = (p) => `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">${p || 'MT5'}</span>`;
 
 /* ---------- Filter & Sort ---------- */
 const prodSearch = document.getElementById('prod-search');
 const prodFilterCat = document.getElementById('prod-filter-cat');
-const prodSort = document.getElementById('prod-sort');
-
+  const platc=oprodFintsrPlatform.value;
+  pet lrodSort = document.getElementById('prod-sort');
+at.toUpperCase();
+    const okPlat = plat === 'ALL' || (p.plform || '')e().includsplat
 function getFilteredProducts() {
-  const q = (prodSearch.value || '').toLowerCase().trim();
+  const q = (pat && okPlrodSearch.value || '').toLowerCase().trim();
   const cat = prodFilterCat.value;
   let list = allProducts.filter(p => {
     const okCat = cat === 'ALL' || (p.category || 'EA').toUpperCase() === cat.toUpperCase();
@@ -866,7 +874,7 @@ async function loadProducts() {
   renderTable();
 }
 
-[prodSearch, prodFilterCat, prodSort].forEach(el => el.addEventListener('input', renderTable));
+[prodSearch, prodFilterCat, prodFilterPlatform, prodSort].forEach(el => el.addEventListener('input', renderTable));
 
 // Toggle status Terlaris — hanya 1 produk featured pada satu waktu
 window.toggleFeatured = async function (id, current) {
