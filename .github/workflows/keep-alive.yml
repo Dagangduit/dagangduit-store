@@ -1,0 +1,30 @@
+name: Supabase Keep-Alive
+
+# Menjaga project Supabase free tier tetap aktif.
+# Free tier pause otomatis setelah ~7 hari tanpa aktivitas database.
+# Workflow ini melakukan query ringan ke REST API tiap hari.
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # tiap hari jam 08:00 WIB (01:00 UTC)
+  workflow_dispatch:        # bisa dijalankan manual dari tab Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/products?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "Supabase response: HTTP ${HTTP_CODE}"
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "Ping gagal (HTTP ${HTTP_CODE})"
+            exit 1
+          fi
+          echo "Database aktif — project tidak akan pause."

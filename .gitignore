@@ -1,0 +1,10 @@
+# Kredensial & file sensitif — JANGAN di-commit
+supabase.txt
+.env
+.env.*
+*.local
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.log
