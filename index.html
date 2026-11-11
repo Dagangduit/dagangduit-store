@@ -45,6 +45,8 @@
   .marquee-track{display:flex; gap:2.5rem; width:max-content; animation:marquee 28s linear infinite;}
   .marquee-track:hover{animation-play-state:paused;}
   @keyframes marquee{to{transform:translateX(-50%)}}
+  .marquee-track.rev{animation-name:marquee-rev;}
+  @keyframes marquee-rev{from{transform:translateX(-50%)}to{transform:translateX(0)}}
   .animated-gradient{background:linear-gradient(90deg,#34d399,#2dd4bf,#22d3ee,#a7f3d0,#34d399); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:gradMove 5s linear infinite;}
   @keyframes gradMove{to{background-position:300% 0}}
   .reveal{opacity:0; transform:translateY(35px) scale(.98); transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);}
@@ -970,39 +972,49 @@ function renderProducts() {
     ].join('');
     return `
     <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card cursor-pointer h-full" onclick="openProductDetail('${p.id}')">
-      <div class="relative h-44 bg-slate-900 overflow-hidden">
+      <div class="relative h-40 bg-slate-900 overflow-hidden">
         ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
         <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
         ${imgs.length > 1 ? `<span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold">📷 ${imgs.length}</span>` : ''}
       </div>
-      <div class="p-4 flex flex-col flex-1">
+      <div class="p-3 flex flex-col flex-1">
         <h3 class="font-extrabold text-sm leading-snug mb-1">${p.name}</h3>
         <p class="text-[11px] text-slate-500 line-clamp-2 mb-2">
   ${p.description || ''}
 </p>
 
-        <div class="space-y-1.5 mb-3 min-h-[222px]">
+        <div class="space-y-1 mb-2 min-h-[150px] flex-1">
           ${plans.map(pl => `
             <button onclick="event.stopPropagation(); openProductDetail('${p.id}')"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-xs font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
+              class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
               <span>${pl.label}</span>
               <span class="text-right">${pl.orig ? `<span class="line-through text-slate-500 text-[10px] mr-1">${fmtProductPrice(p, pl.orig)}</span>` : ''}<span class="font-black">${fmtProductPrice(p, pl.price)}</span></span>
             </button>`).join('')}
         </div>
         <a href="${waLink('Halo Admin, saya tertarik dengan ' + p.name)}" target="_blank" onclick="event.stopPropagation()"
-          class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-xs font-bold py-2.5 rounded-xl transition">💬 Tanya via WA</a>
+          class="block text-center bg-slate-800 hover:bg-emerald-600 hover:text-slate-950 border border-slate-700 hover:border-emerald-500 text-[11px] font-bold py-2 rounded-lg transition">💬 Tanya via WA</a>
       </div>
     </div>`;
   });
   // 2 baris marquee: atas geser kiri, bawah geser kanan (margin = loop mulus tanpa putus)
   const isFiltering = activeCategory !== 'ALL' || platformFilter !== 'ALL' || searchQuery.trim() !== '';
-  const playState = isFiltering ? 'paused' : 'running';
-  const half = Math.ceil(cards.length / 2);
-  const rowA = cards.slice(0, half), rowB = cards.slice(half);
-  const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[290px] sm:w-[330px] shrink-0 mr-6">${c}</div>`).join('');
-  productGrid.innerHTML = `
-    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:90s; gap:0; animation-play-state:${playState}">${trackHTML(rowA)}</div></div>
-    <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:90s; gap:0; animation-play-state:${playState}">${trackHTML(rowB.length ? rowB : rowA)}</div></div>`;
+  if (isFiltering) {
+    // Hasil filter: grid responsif yang rapi & center, bukan marquee
+    productGrid.innerHTML = `
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
+        ${cards.map(c => `<div class="w-full max-w-[340px]">${c}</div>`).join('')}
+      </div>`;
+  } else {
+    // Mode normal: 2 baris marquee berlawanan arah (loop mulus)
+    const half = Math.ceil(cards.length / 2);
+    const rowA = cards.slice(0, half), rowB = cards.slice(half);
+    const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[220px] sm:w-[250px] lg:w-[280px] shrink-0 mr-4">${c}</div>`).join('');
+    productGrid.innerHTML = `
+      <div class="relative left-1/2 -translate-x-1/2 w-screen space-y-6">
+        <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:300s; gap:0;">${trackHTML(rowA)}</div></div>
+        <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:300s; gap:0;">${trackHTML(rowB.length ? rowB : rowA)}</div></div>
+      </div>`;
+  }
   productGrid.classList.remove('hidden');
   productGrid.querySelectorAll('.tilt-card').forEach(bindTilt);
 }
