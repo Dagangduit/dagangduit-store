@@ -969,7 +969,7 @@ function renderProducts() {
       p.is_featured ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">★ TERLARIS</span>` : '',
     ].join('');
     return `
-    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card reveal cursor-pointer" onclick="openProductDetail('${p.id}')">
+    <div class="glass-panel rounded-2xl overflow-hidden flex flex-col tilt-card shine-card cursor-pointer h-full" onclick="openProductDetail('${p.id}')">
       <div class="relative h-44 bg-slate-900 overflow-hidden">
         ${cover ? `<img src="${cover}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 text-xs font-bold">NO IMAGE</div>`}
         <div class="absolute top-2 left-2 flex gap-1.5 flex-wrap">${badges}</div>
@@ -994,13 +994,15 @@ function renderProducts() {
       </div>
     </div>`;
   });
-  // 2 baris marquee: atas geser kiri, bawah geser kanan (duplikat konten = loop mulus)
+  // 2 baris marquee: atas geser kiri, bawah geser kanan (margin = loop mulus tanpa putus)
+  const isFiltering = activeCategory !== 'ALL' || platformFilter !== 'ALL' || searchQuery.trim() !== '';
+  const playState = isFiltering ? 'paused' : 'running';
   const half = Math.ceil(cards.length / 2);
   const rowA = cards.slice(0, half), rowB = cards.slice(half);
-  const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[290px] sm:w-[330px] shrink-0">${c}</div>`).join('');
+  const trackHTML = arr => arr.concat(arr).map(c => `<div class="w-[290px] sm:w-[330px] shrink-0 mr-6">${c}</div>`).join('');
   productGrid.innerHTML = `
-    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:55s; gap:1.5rem">${trackHTML(rowA)}</div></div>
-    <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:55s; gap:1.5rem">${trackHTML(rowB.length ? rowB : rowA)}</div></div>`;
+    <div class="overflow-hidden"><div class="marquee-track" style="animation-duration:90s; gap:0; animation-play-state:${playState}">${trackHTML(rowA)}</div></div>
+    <div class="overflow-hidden"><div class="marquee-track rev" style="animation-duration:90s; gap:0; animation-play-state:${playState}">${trackHTML(rowB.length ? rowB : rowA)}</div></div>`;
   productGrid.classList.remove('hidden');
   productGrid.querySelectorAll('.tilt-card').forEach(bindTilt);
 }
