@@ -5,22 +5,33 @@ create table if not exists public.products (
   price       numeric(12, 2) not null check (price >= 0),
   price_1m    numeric(12, 2) check (price_1m is null or price_1m >= 0),
   price_3m    numeric(12, 2) check (price_3m is null or price_3m >= 0),
+  price_6m    numeric(12, 2) check (price_6m is null or price_6m >= 0),
   price_12m   numeric(12, 2) check (price_12m is null or price_12m >= 0),
   description text default '',
   platform    text default 'MT5',
-  category    text default 'EA' check (category in ('EA', 'Indicator')),
+  category    text default 'EA' check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'Utilities')),
   image_url   text default '',
   images      jsonb not null default '[]'::jsonb,
   discount_percent numeric(5, 2) not null default 0 check (discount_percent >= 0 and discount_percent <= 100),
+  is_featured    boolean not null default false,
+  currency       text not null default 'IDR' check (currency in ('IDR', 'USD')),
   created_at  timestamptz not null default now()
 );
 
 -- Migrasi untuk tabel yang sudah ada (jalankan sekali, aman diulang)
 alter table public.products add column if not exists price_1m  numeric(12, 2);
 alter table public.products add column if not exists price_3m  numeric(12, 2);
+alter table public.products add column if not exists price_6m  numeric(12, 2);
 alter table public.products add column if not exists price_12m numeric(12, 2);
 alter table public.products add column if not exists category text default 'EA';
+
+-- Perbarui constraint kategori untuk tipe produk baru (EA, Indicator, VPS, PineScript)
+alter table public.products drop constraint if exists products_category_check;
+alter table public.products add constraint products_category_check
+  check (category in ('EA', 'Indicator', 'VPS', 'PineScript', 'Utilities'));
 alter table public.products add column if not exists images   jsonb not null default '[]'::jsonb;
+alter table public.products add column if not exists currency text not null default 'IDR';
+alter table public.products add column if not exists is_featured boolean not null default false;
 alter table public.products add column if not exists discount_percent numeric(5, 2) not null default 0;
 
 -- 2. Aktifkan Row Level Security
@@ -144,3 +155,19 @@ create policy "Authenticated can delete orders"
   on public.orders for delete
   to authenticated
   using (true);
+
+-- ============================================================
+-- 9. STATS HARIAN PUBLIK (untuk badge "Penjualan Hari Ini")
+--    Hanya agregat total — TANPA data pembeli.
+-- ============================================================
+create or replace view public.daily_stats as
+  select
+    coalesce(sum(price), 0) as total_sales,
+    count(*)               as order_count
+  from public.orders
+  where status <> 'cancelled'
+    and created_at >= date_trunc('day', now());
+
+grant select on public.daily_stats to anon, authenticated;
+
+notify pgrst, 'reload schema';
