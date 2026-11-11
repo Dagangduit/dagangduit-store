@@ -693,53 +693,72 @@ function bindTilt(card) {
 }
 
 /* ==================== TICKER LIVE ==================== */
-const TICKER_SYMBOLS = [['EURUSD=X','EUR/USD','fx'],['XAUUSD=X','GOLD','fx'],['BTC-USD','BTC','crypto'],['GBPUSD=X','GBP/USD','fx'],['USDJPY=X','USD/JPY','fx'],['CL=F','OIL','fx']];
+const TICKER_ITEMS = ['EUR/USD','GBP/USD','USD/JPY','GOLD','SILVER','BTC'];
 const TICKER_FALLBACK = [
-  ['EUR/USD','1.0842','+0.12%'],['GOLD','2651.30','+0.45%'],['BTC','97450','+1.20%'],
-  ['GBP/USD','1.2715','-0.08%'],['USD/JPY','154.32','+0.21%'],['OIL','71.84','-0.33%']
+  ['EUR/USD','1.16','+0.12%'],['GBP/USD','1.33','-0.08%'],['USD/JPY','158.50','+0.21%'],
+  ['GOLD','4049.70','+0.45%'],['SILVER','48.20','-0.33%'],['BTC','97450','+1.20%']
 ];
 
-// Yahoo Finance diblokir CORS oleh browser → lewat proxy publik, fallback berlapis
-async function fetchYahoo(sym) {
-  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
-  const urls = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
-    `https://corsproxy.io/?${encodeURIComponent(target)}`,
-    target // direct — berjaya jika domain mengizinkan CORS
-  ];
-  for (const u of urls) {
+// Forex via open.er-api.com — gratis, CORS-enabled, tanpa API key
+async function fetchForex() {
+  const r = await fetch('https://open.er-api.com/v6/latest/USD');
+  const j = await r.json(); const rates = j.rates || {};
+  const out = {};
+  if (rates.EUR) out['EUR/USD'] = 1 / rates.EUR;
+  if (rates.GBP) out['GBP/USD'] = 1 / rates.GBP;
+  if (rates.JPY) out['USD/JPY'] = rates.JPY;
+  return out;
+}
+
+// Gold & Silver via gold-api.com — gratis, CORS-enabled, update real-time
+async function fetchMetals() {
+  const out = {};
+  await Promise.all([['XAU','GOLD'],['XAG','SILVER']].map(async ([sym, name]) => {
     try {
-      const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const r = await fetch(`https://api.gold-api.com/price/${sym}`);
       const j = await r.json();
-      const m = j.chart.result[0].meta;
-      return { price: m.regularMarketPrice, prev: m.chartPreviousClose || m.previousClose || m.regularMarketPrice };
+      if (j && j.price) out[name] = j.price;
     } catch(e) {}
-  }
-  return null;
+  }));
+  return out;
 }
 
 // BTC via CoinGecko — gratis, CORS-enabled, tanpa API key
 async function fetchCrypto() {
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
     const j = await r.json();
-    const p = j.bitcoin.usd, c = j.bitcoin.usd_24h_change || 0;
-    return { price: p, prev: p / (1 + c / 100) };
-  } catch(e) { return null; }
+    return j.bitcoin ? { 'BTC': j.bitcoin.usd } : {};
+  } catch(e) { return {}; }
 }
 
-async function fetchQuote(sym, type) {
-  return type === 'crypto' ? fetchCrypto() : fetchYahoo(sym);
+// % perubahan vs harga pertama hari ini (disimpan di localStorage)
+function dayChange(name, price, today) {
+  const key = 'tkd_' + name + '_' + today;
+  const base = parseFloat(localStorage.getItem(key));
+  if (!base) { localStorage.setItem(key, String(price)); return 0; }
+  return (price - base) / base * 100;
 }
 
 async function loadTicker() {
-  const items = await Promise.all(TICKER_SYMBOLS.map(async ([sym, name, type]) => {
-    const q = await fetchQuote(sym, type); if (!q) return '';
-    const up = q.price >= q.prev, pct = ((q.price - q.prev) / q.prev * 100);
-    return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${name}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${q.price.toLocaleString('en-US',{maximumFractionDigits:2})}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span></span>`;
-  }));
-  let html = items.filter(Boolean).join('<span class="text-slate-700">|</span>');
-  if (!html) {
+  const [fx, metals, crypto] = await Promise.all([
+    fetchForex().catch(() => ({})),
+    fetchMetals(),
+    fetchCrypto()
+  ]);
+  const prices = { ...fx, ...metals, ...crypto };
+  const today = new Date().toISOString().slice(0, 10);
+
+  let html;
+  if (Object.keys(prices).length) {
+    html = TICKER_ITEMS.filter(n => prices[n]).map(name => {
+      const price = prices[name];
+      const pct = dayChange(name, price, today);
+      const up = pct >= 0;
+      const dec = (name === 'EUR/USD' || name === 'GBP/USD') ? 4 : (name === 'BTC' ? 0 : 2);
+      return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${name}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${price.toLocaleString('en-US',{maximumFractionDigits:dec})}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span></span>`;
+    }).join('<span class="text-slate-700">|</span>');
+  } else {
     html = TICKER_FALLBACK.map(([n,p,c]) => {
       const up = !c.startsWith('-');
       return `<span class="flex items-center gap-1.5 whitespace-nowrap"><span class="text-slate-500 font-bold">${n}</span><span class="${up?'text-emerald-400':'text-red-400'} font-bold">${p}</span><span class="${up?'text-emerald-500':'text-red-500'} text-[10px]">${up?'▲':'▼'} ${c.replace('-','')}</span></span>`;
