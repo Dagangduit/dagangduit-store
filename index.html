@@ -366,7 +366,7 @@
 </div>
 
 <!-- LIGHTBOX -->
-<div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/95 backdrop-blur-md">
+<div id="lightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-md">
   <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-red-500 transition flex items-center justify-center">✕</button>
   <button onclick="lbNav(-1)" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">‹</button>
   <button onclick="lbNav(1)" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-slate-800/80 border border-slate-700 text-white text-xl hover:bg-emerald-500 hover:text-slate-950 transition">›</button>
@@ -390,7 +390,7 @@
         <span class="text-[10px] font-black tracking-[0.25em] text-emerald-400 uppercase">
           DAGANGDUIT PRODUCT
         </span>
-        <p class="text-xs text-slate-500 mt-1">Product Information & Details</p>
+        <p class="text-xs text-slate-500 mt-1" data-i18n="detail.sub">Product Information & Details</p>
       </div>
 
       <button onclick="closeProductDetail()"
@@ -417,7 +417,7 @@
               class="w-full h-full max-h-[420px] object-contain cursor-zoom-in">
 
             <div id="detail-no-image"
-              class="hidden absolute inset-0 items-center justify-center text-slate-600 text-sm font-bold">
+              class="hidden absolute inset-0 items-center justify-center text-slate-600 text-sm font-bold" data-i18n="detail.noimg">
               NO IMAGE AVAILABLE
             </div>
 
@@ -460,7 +460,7 @@
           <div class="mb-5">
             <div class="flex items-center gap-2 mb-3">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-[10px] text-emerald-400 font-black tracking-widest uppercase">
+              <span class="text-[10px] text-emerald-400 font-black tracking-widest uppercase" data-i18n="detail.badge">
                 Product Details
               </span>
             </div>
@@ -477,7 +477,7 @@
 
           <!-- DESCRIPTION -->
           <div class="border-t border-slate-800 pt-5">
-            <h3 class="text-xs font-black uppercase tracking-widest text-slate-300 mb-3">
+            <h3 class="text-xs font-black uppercase tracking-widest text-slate-300 mb-3" data-i18n="detail.desc">
               Deskripsi Produk
             </h3>
 
@@ -488,7 +488,7 @@
 
           <!-- PURCHASE OPTIONS -->
           <div class="border-t border-slate-800 mt-6 pt-5">
-            <h3 class="text-xs font-black uppercase tracking-widest text-slate-300 mb-3">
+            <h3 class="text-xs font-black uppercase tracking-widest text-slate-300 mb-3" data-i18n="detail.plans">
               Pilih Paket
             </h3>
 
@@ -501,7 +501,7 @@
             href="#"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-5 block text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 border border-slate-700 hover:border-emerald-400 text-white text-xs font-black py-3.5 rounded-xl transition">
+            class="mt-5 block text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 border border-slate-700 hover:border-emerald-400 text-white text-xs font-black py-3.5 rounded-xl transition" data-i18n="detail.wa">
             💬 TANYA VIA WHATSAPP
           </a>
 
@@ -513,7 +513,7 @@
     <div class="px-5 sm:px-7 py-3 border-t border-slate-800 flex justify-between items-center">
       <span class="text-[10px] text-slate-600">DagangDuit • Trading Tools</span>
       <button onclick="closeProductDetail()"
-        class="text-xs font-bold text-slate-400 hover:text-white transition">
+        class="text-xs font-bold text-slate-400 hover:text-white transition" data-i18n="detail.close">
         Tutup Detail
       </button>
     </div>
@@ -565,7 +565,10 @@ const I18N = {
     'custom.tEA':'Expert Advisor (EA)','custom.tInd':'Custom Indicator','custom.tBoth':'EA + Indicator','custom.tDont':'Belum tahu — perlu saran',
     'custom.b1o':'< Rp 500rb','custom.b2o':'Rp 500rb – 1jt','custom.b3o':'Rp 1jt – 3jt','custom.b4o':'Rp 3jt – 5jt','custom.b5o':'> Rp 5jt','custom.b6o':'Nego / Belum tahu',
     'custom.fDesc':'Jelaskan Strategi / Kebutuhan *','custom.fDescPh':'Contoh: EA grid untuk XAUUSD dengan lot sizing otomatis, SL/TP trailing, filter news...',
-    'custom.submit':'🚀 Kirim Request via WhatsApp','custom.note':'Gratis konsultasi • Balasan max 1x24 jam'
+    'custom.submit':'🚀 Kirim Request via WhatsApp','custom.note':'Gratis konsultasi • Balasan max 1x24 jam',
+    'detail.sub':'Informasi & Detail Produk','detail.badge':'Detail Produk','detail.desc':'Deskripsi Produk','detail.plans':'Pilih Paket',
+    'detail.wa':'💬 Tanya via WhatsApp','detail.close':'Tutup Detail','detail.noimg':'Gambar belum tersedia',
+    'detail.nodesc':'Belum ada deskripsi produk.','detail.noprice':'Harga belum tersedia.','detail.platform':'Platform'
   },
   en: {
     'promo.text':'PROMO: Up to 40% OFF + Free VPS Setup','promo.cta':'Claim Now →',
@@ -599,7 +602,10 @@ const I18N = {
     'custom.tEA':'Expert Advisor (EA)','custom.tInd':'Custom Indicator','custom.tBoth':'EA + Indicator','custom.tDont':'Not sure — need advice',
     'custom.b1o':'< $30','custom.b2o':'$30 – $60','custom.b3o':'$60 – $180','custom.b4o':'$180 – $300','custom.b5o':'> $300','custom.b6o':'Negotiable / Not sure',
     'custom.fDesc':'Describe Your Strategy / Needs *','custom.fDescPh':'e.g. Grid EA for XAUUSD with auto lot sizing, trailing SL/TP, news filter...',
-    'custom.submit':'🚀 Send Request via WhatsApp','custom.note':'Free consultation • Reply within 24h'
+    'custom.submit':'🚀 Send Request via WhatsApp','custom.note':'Free consultation • Reply within 24h',
+    'detail.sub':'Product Information & Details','detail.badge':'Product Details','detail.desc':'Product Description','detail.plans':'Choose Plan',
+    'detail.wa':'💬 Ask via WhatsApp','detail.close':'Close Details','detail.noimg':'NO IMAGE AVAILABLE',
+    'detail.nodesc':'No description yet.','detail.noprice':'Price not available yet.','detail.platform':'Platform'
   }
 };
 const t = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
@@ -888,11 +894,11 @@ function openProductDetail(productId) {
     product.category || 'PRODUCT';
 
   document.getElementById('detail-product-platform').textContent =
-    product.platform ? 'Platform: ' + product.platform : '';
+    product.platform ? t('detail.platform') + ': ' + product.platform : '';
 
   // Deskripsi lengkap, termasuk baris baru
   document.getElementById('detail-product-description').textContent =
-    product.description || 'Belum ada deskripsi produk.';
+    product.description || t('detail.nodesc');
 
   // GALLERY IMAGES
   detailGalleryImages = (
@@ -907,19 +913,6 @@ function openProductDetail(productId) {
 
   renderDetailGallery();
 
-  productImagesMap[product.id] = images;
-
-  if (images.length && images[0]) {
-    image.src = images[0];
-    image.alt = product.name || 'Product Image';
-    image.classList.remove('hidden');
-    noImage.classList.add('hidden');
-  } else {
-    image.removeAttribute('src');
-    image.classList.add('hidden');
-    noImage.classList.remove('hidden');
-  }
-
   // Hitung harga dan paket
   const discount = discPct(product);
 
@@ -932,24 +925,28 @@ function openProductDetail(productId) {
       key: 'buy',
       label: t('plan.buy'),
       price: finalPrice,
+      orig: discount ? Number(product.price) : null,
       wa: 'Beli'
     },
     {
       key: '1m',
       label: t('plan.1m'),
       price: discPrice(product, product.price_1m),
+      orig: discount ? Number(product.price_1m) : null,
       wa: 'Sewa 1 Bulan'
     },
     {
       key: '3m',
       label: t('plan.3m'),
       price: discPrice(product, product.price_3m),
+      orig: discount ? Number(product.price_3m) : null,
       wa: 'Sewa 3 Bulan'
     },
     {
       key: '12m',
       label: t('plan.12m'),
       price: discPrice(product, product.price_12m),
+      orig: discount ? Number(product.price_12m) : null,
       wa: 'Sewa 1 Tahun'
     }
   ].filter(plan => plan.price);
@@ -961,7 +958,7 @@ function openProductDetail(productId) {
   if (!plans.length) {
     const empty = document.createElement('p');
     empty.className = 'text-xs text-slate-500';
-    empty.textContent = 'Harga belum tersedia.';
+    empty.textContent = t('detail.noprice');
     planContainer.appendChild(empty);
   }
 
@@ -976,8 +973,14 @@ function openProductDetail(productId) {
     label.textContent = plan.label;
 
     const price = document.createElement('span');
-    price.className = 'font-black text-emerald-400 whitespace-nowrap';
-    price.textContent = fmtPrice(plan.price);
+    price.className = 'font-black text-emerald-400 whitespace-nowrap text-right';
+    if (plan.orig) {
+      const orig = document.createElement('span');
+      orig.className = 'line-through text-slate-500 text-[10px] mr-1';
+      orig.textContent = fmtPrice(plan.orig);
+      price.appendChild(orig);
+    }
+    price.appendChild(document.createTextNode(fmtPrice(plan.price)));
 
     button.append(label, price);
 
@@ -1100,7 +1103,7 @@ function openDetailGalleryLightbox() {
     currentDetailProductId
   ] = detailGalleryImages;
 
-  openLightbox(currentDetailProductId);
+  openLightbox(currentDetailProductId, detailGalleryIndex);
 }
 
 // Swipe support untuk HP
@@ -1122,8 +1125,10 @@ detailGalleryStage.addEventListener('touchend', e => {
 // Keyboard navigation
 document.addEventListener('keydown', e => {
   const modal = document.getElementById('product-detail-modal');
+  const lb = document.getElementById('lightbox');
 
   if (modal.classList.contains('hidden')) return;
+  if (!lb.classList.contains('hidden')) return; // lightbox aktif di atas
 
   if (e.key === 'ArrowLeft') changeDetailImage(-1);
   if (e.key === 'ArrowRight') changeDetailImage(1);
@@ -1234,9 +1239,9 @@ function applyLb() {
   document.getElementById('zoom-level').textContent = Math.round(lbScale * 100) + '%';
   document.getElementById('lb-counter').textContent = lbImages.length > 1 ? `${lbIndex + 1} / ${lbImages.length}` : '';
 }
-function openLightbox(srcOrId) {
+function openLightbox(srcOrId, startIndex = 0) {
   if (productImagesMap[srcOrId] && productImagesMap[srcOrId].length) {
-    lbImages = productImagesMap[srcOrId]; lbIndex = 0;
+    lbImages = productImagesMap[srcOrId]; lbIndex = Math.min(startIndex, lbImages.length - 1);
   } else {
     lbImages = srcOrId ? [srcOrId] : []; lbIndex = 0;
   }
