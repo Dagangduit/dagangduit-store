@@ -1413,8 +1413,8 @@ function rotateProfit() {
 }
 document.getElementById('badge-order').style.transition = 'opacity .3s';
 document.getElementById('badge-profit').style.transition = 'opacity .3s';
-setInterval(rotateOrder, 8 * 1000);    // order baru tiap 8 detik
-setInterval(rotateProfit, 15 * 1000);  // profit tiap 15 detik
+setInterval(rotateOrder, 5 * 60 * 1000);   // order baru tiap 5 menit
+setInterval(rotateProfit, 5 * 60 * 1000); // profit tiap 5 menit
 
 /* ==================== ORDER TRACKING (otomatis, tanpa form) ==================== */
 document.getElementById('modal-wa-btn').addEventListener('click', () => {
