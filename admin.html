@@ -439,6 +439,7 @@ const STORAGE_BUCKET = 'product-images';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtCur = (n, cur) => cur === 'USD' ? '$' + Number(n || 0).toLocaleString('en-US', {maximumFractionDigits: 2}) : rupiah(n);
 const numOrNull = (v) => { const n = parseFloat(v); return (v === '' || v === null || isNaN(n) || n <= 0) ? null : n; };
 
 /* ===================== AUTH ===================== */
@@ -668,21 +669,15 @@ productForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  // Konversi ke IDR jika admin input dalam USD
-  const toIDR = (v) => v == null ? null : Math.round(v * (formCurrency === 'USD' ? RATE : 1));
-  const priceIdr = toIDR(price);
-  const price1mIdr = toIDR(price1m);
-  const price3mIdr = toIDR(price3m);
-  const price6mIdr = toIDR(price6m);
-  const price12mIdr = toIDR(price12m);
-
+  // Simpan nilai apa adanya sesuai mata uang yang dipilih admin (IDR/USD)
   const payload = {
     name,
-    price: priceIdr,
-    price_1m: price1mIdr,
-    price_3m: price3mIdr,
-    price_6m: price6mIdr,
-    price_12m: price12mIdr,
+    price,
+    price_1m: price1m,
+    price_3m: price3m,
+    price_6m: price6m,
+    price_12m: price12m,
+    currency: formCurrency,
     discount_percent: discount,
     category,
     platform,
@@ -723,7 +718,7 @@ window.editProduct = function (id) {
   if (!p) return;
 
   editingId = p.id;
-  fCurrency.value = 'IDR'; formCurrency = 'IDR'; updatePriceLabels();
+  formCurrency = p.currency || 'IDR'; fCurrency.value = formCurrency; updatePriceLabels();
   document.getElementById('f-name').value = p.name || '';
   document.getElementById('f-price').value = p.price ?? '';
   document.getElementById('f-price-1m').value = p.price_1m ?? '';
@@ -804,7 +799,7 @@ function renderTable() {
     const disc = Number(p.discount_percent) || 0;
     const finalPrice = disc ? Math.round(Number(p.price) * (1 - disc / 100)) : Number(p.price);
     const sewa = [p.price_1m, p.price_3m, p.price_6m, p.price_12m]
-      .map(v => v ? rupiah(v) : '—').join(' / ');
+      .map(v => v ? fmtCur(v, p.currency) : '—').join(' / ');
     return `
     <tr class="hover:bg-slate-800/30 transition-colors">
       <td class="px-6 py-3">
@@ -823,9 +818,10 @@ function renderTable() {
       <td class="px-6 py-3">${catBadge(p.category)}</td>
       <td class="px-6 py-3">${platBadge(p.platform)}</td>
       <td class="px-6 py-3">
+        ${p.currency === 'USD' ? '<span class="mr-1 px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[9px] font-black">USD</span>' : ''}
         ${disc
-          ? `<span class="text-xs text-slate-500 line-through mr-1.5">${rupiah(p.price)}</span><span class="font-semibold text-emerald-300">${rupiah(finalPrice)}</span>`
-          : `<span class="font-semibold text-emerald-300">${rupiah(p.price)}</span>`}
+          ? `<span class="text-xs text-slate-500 line-through mr-1.5">${fmtCur(p.price, p.currency)}</span><span class="font-semibold text-emerald-300">${fmtCur(finalPrice, p.currency)}</span>`
+          : `<span class="font-semibold text-emerald-300">${fmtCur(p.price, p.currency)}</span>`}
       </td>
       <td class="px-6 py-3 text-xs text-slate-400">${sewa}</td>
       <td class="px-6 py-3 text-xs text-slate-500">${new Date(p.created_at).toLocaleDateString('id-ID')}</td>
