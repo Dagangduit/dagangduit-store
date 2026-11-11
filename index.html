@@ -857,7 +857,7 @@ function renderProducts() {
   ${p.description || ''}
 </p>
 
-        <div class="space-y-1.5 mb-3">
+        <div class="space-y-1.5 mb-3 min-h-[222px]">
           ${plans.map(pl => `
             <button onclick="event.stopPropagation(); openProductDetail('${p.id}')"
               class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-xs font-bold transition ${pl.key==='buy' ? 'bg-emerald-500/10 border-emerald-500/40 hover:bg-emerald-500/20 text-emerald-300' : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/40 text-slate-300'}">
