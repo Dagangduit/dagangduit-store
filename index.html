@@ -1310,12 +1310,28 @@ const ORDER_FEED = [
   'Nadia • Solo • EA','Eko • Manado • Indikator','Lina • Jambi • EA'
 ];
 const PROFIT_FEED = ['+$124.50','+$89.20','+$210.75','+$56.40','+$178.90','+$342.10','+$67.80','+$145.30','+$98.60','+$256.45','+$73.15','+$189.90'];
+let orderFeed = [...ORDER_FEED];
 let orderIdx = 0, profitIdx = 0;
+
+async function loadOrderFeed() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('order_feed')
+      .select('buyer_name, product_name')
+      .limit(12);
+    if (error || !data || !data.length) return;
+    const real = data.map(o =>
+      (o.buyer_name && o.buyer_name !== 'WA User' ? o.buyer_name : 'Customer') + ' • ' + (o.product_name || 'Produk')
+    );
+    if (real.length) orderFeed = real;
+  } catch(e) {}
+}
+
 function rotateOrder() {
   const o = document.getElementById('badge-order');
   if (!o) return;
   o.style.opacity = 0;
-  setTimeout(() => { orderIdx = (orderIdx + 1) % ORDER_FEED.length; o.textContent = ORDER_FEED[orderIdx]; o.style.opacity = 1; }, 300);
+  setTimeout(() => { orderIdx = (orderIdx + 1) % orderFeed.length; o.textContent = orderFeed[orderIdx]; o.style.opacity = 1; }, 300);
 }
 function rotateProfit() {
   const p = document.getElementById('badge-profit');
@@ -1349,6 +1365,8 @@ loadSettings();
 loadRate();
 setInterval(loadRate, 60 * 60 * 1000); // refresh rate tiap 1 jam
 loadProducts();
+loadOrderFeed();
+setInterval(loadOrderFeed, 5 * 60 * 1000); // refresh order badge tiap 5 menit
 loadTicker();
 setInterval(loadTicker, 5 * 60 * 1000); // refresh ticker tiap 5 menit
 renderTestimonials();

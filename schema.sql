@@ -144,3 +144,18 @@ create policy "Authenticated can delete orders"
   on public.orders for delete
   to authenticated
   using (true);
+
+-- ============================================================
+-- 8. ORDER FEED PUBLIK (untuk badge hero di index.html)
+--    Hanya mengekspos nama pembeli + produk — TANPA buyer_wa.
+-- ============================================================
+create or replace view public.order_feed as
+  select buyer_name, product_name
+  from public.orders
+  where status <> 'cancelled'
+  order by created_at desc
+  limit 20;
+
+grant select on public.order_feed to anon, authenticated;
+
+notify pgrst, 'reload schema';
