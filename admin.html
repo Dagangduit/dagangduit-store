@@ -346,6 +346,12 @@
               <input id="set-promo-en" type="text" placeholder="PROMO: Up to 40% OFF..."
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
             </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Diskon Global Semua Produk (%)</label>
+              <input id="set-global-disc" type="number" min="0" max="90" step="1" placeholder="0 = nonaktif, contoh: 40"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+              <p class="mt-1 text-[10px] text-slate-600">Semua produk dapat badge & harga diskon. 0 = mati.</p>
+            </div>
           </div>
           <div class="flex items-center gap-3 mt-4">
             <button id="save-general-btn" type="button"
@@ -384,6 +390,11 @@
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1.5">Bank Transfer</label>
               <input id="set-bank" type="text" placeholder="Bank • No. Rek • Atas Nama"
+                     class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">QR Code Pembayaran (URL Gambar)</label>
+              <input id="set-qr" type="url" placeholder="https://.../qr.png — tampil di tab International"
                      class="w-full px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-700/60 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none" />
             </div>
           </div>
@@ -931,8 +942,8 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 /* ---------- Pengaturan (Umum + Pembayaran) ---------- */
-const PAY_KEYS = ['paypal', 'wise', 'usdt', 'bank'];
-const GENERAL_MAP = { wa_number: 'set-wa', promo_id: 'set-promo-id', promo_en: 'set-promo-en', qris_img: 'set-qris' };
+const PAY_KEYS = ['paypal', 'wise', 'usdt', 'bank', 'qr'];
+const GENERAL_MAP = { wa_number: 'set-wa', promo_id: 'set-promo-id', promo_en: 'set-promo-en', qris_img: 'set-qris', global_discount: 'set-global-disc' };
 
 async function loadSettings() {
   const { data, error } = await supabaseClient.from('settings').select('key, value');
@@ -962,7 +973,7 @@ async function saveSettings(keys, btnId, statusId, doneMsg) {
 document.getElementById('save-settings-btn').addEventListener('click', () =>
   saveSettings(PAY_KEYS.map(k => 'pay_' + k), 'save-settings-btn', 'settings-status', 'Tersimpan!'));
 document.getElementById('save-general-btn').addEventListener('click', () =>
-  saveSettings(['wa_number', 'promo_id', 'promo_en', 'qris_img'], 'save-general-btn', 'general-status', 'Tersimpan!'));
+  saveSettings(['wa_number', 'promo_id', 'promo_en', 'qris_img', 'global_discount'], 'save-general-btn', 'general-status', 'Tersimpan!'));
 
 /* ---------- Orders ---------- */
 const ORDERS_STATUSES = ['pending','paid','done','cancelled'];
