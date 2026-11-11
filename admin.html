@@ -128,9 +128,13 @@
               <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
               Tambah Produk
             </h2>
-            <button id="cancel-edit-btn" type="button" class="hidden text-xs text-slate-400 hover:text-red-400 transition-colors">Batal Edit</button>
+            <div class="flex items-center gap-3">
+              <button id="cancel-edit-btn" type="button" class="hidden text-xs text-slate-400 hover:text-red-400 transition-colors">Batal Edit</button>
+              <button id="toggle-form-btn" type="button" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 transition-colors">▸ Buka Form</button>
+            </div>
           </div>
 
+          <div id="product-form-body" class="hidden">
           <form id="product-form" class="space-y-4">
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1.5">Nama Produk *</label>
@@ -655,6 +659,15 @@ function resetForm() {
 
 cancelEditBtn.addEventListener('click', resetForm);
 
+/* ---------- Form collapsible ---------- */
+const formBody = document.getElementById('product-form-body');
+const toggleFormBtn = document.getElementById('toggle-form-btn');
+function setFormOpen(open) {
+  formBody.classList.toggle('hidden', !open);
+  toggleFormBtn.textContent = open ? '▾ Tutup Form' : '▸ Buka Form';
+}
+toggleFormBtn.addEventListener('click', () => setFormOpen(formBody.classList.contains('hidden')));
+
 productForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -1007,4 +1020,6 @@ setInterval(loadOrders, 30000); // auto-refresh pesanan tiap 30 detik
 checkSession();
 </script>
 </body>
+</html>
+</html>
 </html>
