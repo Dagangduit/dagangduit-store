@@ -253,13 +253,7 @@
         <option value="VPS">VPS</option>
         <option value="PineScript">PineScript</option>
       </select>
-    </div>
-    <div id="loading-state" class="py-16 text-center"><div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div><p class="text-slate-500 text-sm" data-i18n="cat.loading2">Memuat produk...</p></div>
-    <div id="empty-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.empty">Belum ada produk.</div>
-    <div id="no-result-state" class="hidden py-16 text-center text-slate-500 text-sm" data-i18n="cat.noresult">Tidak ada produk yang cocok.</div>
-    <div id="product-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-  </section>
-
+    -1
   <!-- FAQ -->
   <section id="faq" class="max-w-4xl mx-auto px-4 py-14 w-full reveal">
     <h2 class="text-2xl sm:text-3xl font-extrabold text-center mb-2" data-i18n="faq.title">Pertanyaan Sering Ditanyakan</h2>
@@ -831,13 +825,13 @@ const fmtProductPrice = (p, v) => {
   if ((p && p.currency) === 'USD') {
     return CUR === 'USD' ? '$' + val.toLocaleString('en-US', {maximumFractionDigits: 2})
                         : 'Rp ' + Math.round(val * RATE).toLocaleString('id-ID');
-  }
+  }platformFilter = 'ALL', 
   return fmtPrice(val);
 };
 const discPct = (p) => Math.min(90, Math.max(0, Number(p.discount_percent) || 0));
 const discPrice = (p, v) => v ? Math.round(Number(v) * (1 - discPct(p) / 100)) : null;
 
-let allProducts = [], activeCategory = 'ALL', searchQuery = '';
+leteCategory = 'ALL', searchQuery = '';
 const loadingState = document.getElementById('loading-state');
 const emptyState = document.getElementById('empty-state');
 const noResultState = document.getElementById('no-result-state');
@@ -898,14 +892,19 @@ function setCategory(c) {
   if (sel) sel.value = c;
   renderProducts();
 }
+function setPlatform(v) {
+  platformFilter = v;
+  renderProducts();
+}
 document.getElementById('search-input').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); renderProducts(); });
 
 function renderProducts() {
   const q = searchQuery.trim();
   const filtered = allProducts.filter(p => {
     const okCat = activeCategory === 'ALL' || (p.category || '').toUpperCase() === activeCategory.toUpperCase();
+    const okPlat = platformFilter === 'ALL' || (p.platform || '').toUpperCase().includes(platformFilter);
     const okQ = !q || (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q) || (p.platform || '').toLowerCase().includes(q);
-    return okCat && okQ;
+    return okCat && okPlat && okQ;
   });
   if (!allProducts.length && !loadingState.classList.contains('hidden')) return; // masih loading
   productCount.textContent = filtered.length + ' ' + t('cat.results');
@@ -1474,6 +1473,12 @@ setInterval(loadTicker, 60 * 1000); // refresh ticker tiap 60 detik
 renderTestimonials();
 renderFAQ();
 updateCalculator();
+</script>
+</body>
+</html>
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
