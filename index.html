@@ -96,6 +96,44 @@
 .product-detail-image:hover {
   transform: scale(1.04);
 }
+/* PRODUCT IMAGE GALLERY */
+.detail-gallery-main {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.detail-gallery-main img {
+  transition: opacity .25s ease, transform .4s ease;
+}
+
+.detail-gallery-main img.slide-changing {
+  opacity: .25;
+  transform: scale(.97);
+}
+
+.detail-gallery-thumb {
+  opacity: .5;
+  border: 2px solid transparent;
+  transition: all .25s ease;
+}
+
+.detail-gallery-thumb.active {
+  opacity: 1;
+  border-color: #34d399;
+  transform: translateY(-2px);
+}
+
+.detail-gallery-arrow {
+  backdrop-filter: blur(12px);
+  transition: all .2s ease;
+}
+
+.detail-gallery-arrow:hover {
+  background: #10b981;
+  color: #020617;
+  transform: scale(1.1);
+}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col">
@@ -365,25 +403,55 @@
     <div class="overflow-y-auto">
       <div class="grid lg:grid-cols-2">
 
-        <!-- IMAGE -->
-        <div class="relative bg-slate-950 min-h-[220px] lg:min-h-[450px] overflow-hidden">
-          <img id="detail-product-image"
-            src=""
-            alt="Product"
-            onclick="if(this.src) openLightbox(this.src)"
-            class="product-detail-image w-full h-full max-h-[420px] object-contain cursor-zoom-in">
+        <!-- IMAGE GALLERY -->
+        <div class="bg-slate-950 min-h-[260px] lg:min-h-[450px] flex flex-col">
 
-          <div id="detail-no-image"
-            class="hidden absolute inset-0 flex items-center justify-center text-slate-600 text-sm font-bold">
-            NO IMAGE AVAILABLE
-          </div>
+          <!-- MAIN IMAGE -->
+          <div id="detail-gallery-stage"
+              class="detail-gallery-main relative flex-1 min-h-[260px] lg:min-h-[380px] flex items-center justify-center">
 
-          <div class="absolute bottom-4 left-4">
-            <span id="detail-product-category"
-              class="px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-black">
+            <img id="detail-product-image"
+              src=""
+              alt="Product"
+              onclick="openDetailGalleryLightbox()"
+              class="w-full h-full max-h-[420px] object-contain cursor-zoom-in">
+
+            <div id="detail-no-image"
+              class="hidden absolute inset-0 items-center justify-center text-slate-600 text-sm font-bold">
+              NO IMAGE AVAILABLE
+            </div>
+
+            <!-- PREVIOUS -->
+            <button id="detail-gallery-prev"
+              onclick="changeDetailImage(-1)"
+              class="detail-gallery-arrow absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 border border-white/10 text-white text-xl hidden">
+              ‹
+            </button>
+
+            <!-- NEXT -->
+            <button id="detail-gallery-next"
+              onclick="changeDetailImage(1)"
+              class="detail-gallery-arrow absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 border border-white/10 text-white text-xl hidden">
+              ›
+            </button>
+
+            <!-- COUNTER -->
+            <span id="detail-gallery-counter"
+              class="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-3 py-1.5 rounded-full hidden">
+              1 / 1
+            </span>
+
+            <span class="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-black"
+              id="detail-product-category">
               PRODUCT
             </span>
           </div>
+
+          <!-- THUMBNAILS -->
+          <div id="detail-gallery-thumbnails"
+            class="hidden gap-2 p-3 overflow-x-auto border-t border-slate-800">
+          </div>
+
         </div>
 
         <!-- INFORMATION -->
@@ -802,10 +870,11 @@ function renderProducts() {
   requestAnimationFrame(() => productGrid.querySelectorAll('.reveal').forEach(el => io.observe(el)));
 }
 /* ==================== PRODUCT DETAIL ==================== */
-
+let currentDetailProductId = null;
 function openProductDetail(productId) {
   const product = allProducts.find(p => String(p.id) === String(productId));
   if (!product) return;
+  currentDetailProductId = product.id;
 
   const modal = document.getElementById('product-detail-modal');
   const image = document.getElementById('detail-product-image');
@@ -825,12 +894,18 @@ function openProductDetail(productId) {
   document.getElementById('detail-product-description').textContent =
     product.description || 'Belum ada deskripsi produk.';
 
-  // Gambar produk
-  const images = (
+  // GALLERY IMAGES
+  detailGalleryImages = (
     Array.isArray(product.images) && product.images.length
       ? product.images
       : (product.image_url ? [product.image_url] : [])
-  );
+  ).filter(Boolean);
+
+  detailGalleryIndex = 0;
+
+  productImagesMap[product.id] = detailGalleryImages;
+
+  renderDetailGallery();
 
   productImagesMap[product.id] = images;
 
@@ -934,7 +1009,125 @@ function openProductDetail(productId) {
 
   document.body.style.overflow = 'hidden';
 }
+/* ==================== DETAIL IMAGE SLIDER ==================== */
 
+let detailGalleryImages = [];
+let detailGalleryIndex = 0;
+let detailTouchStartX = 0;
+
+function renderDetailGallery() {
+  const image = document.getElementById('detail-product-image');
+  const thumbs = document.getElementById('detail-gallery-thumbnails');
+  const counter = document.getElementById('detail-gallery-counter');
+  const prev = document.getElementById('detail-gallery-prev');
+  const next = document.getElementById('detail-gallery-next');
+  const noImage = document.getElementById('detail-no-image');
+
+  const total = detailGalleryImages.length;
+
+  if (!total) {
+    image.removeAttribute('src');
+    image.classList.add('hidden');
+    noImage.classList.remove('hidden');
+    noImage.classList.add('flex');
+    thumbs.classList.add('hidden');
+    counter.classList.add('hidden');
+    prev.classList.add('hidden');
+    next.classList.add('hidden');
+    return;
+  }
+
+  image.classList.remove('hidden');
+  noImage.classList.add('hidden');
+  noImage.classList.remove('flex');
+
+  image.src = detailGalleryImages[detailGalleryIndex];
+
+  counter.textContent = `${detailGalleryIndex + 1} / ${total}`;
+
+  counter.classList.toggle('hidden', total <= 1);
+  prev.classList.toggle('hidden', total <= 1);
+  next.classList.toggle('hidden', total <= 1);
+
+  // Thumbnail
+  thumbs.replaceChildren();
+  thumbs.classList.toggle('hidden', total <= 1);
+
+  detailGalleryImages.forEach((src, index) => {
+    const button = document.createElement('button');
+
+    button.className =
+      'detail-gallery-thumb flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-slate-900 ' +
+      (index === detailGalleryIndex ? 'active' : '');
+
+    const thumb = document.createElement('img');
+    thumb.src = src;
+    thumb.alt = `Foto ${index + 1}`;
+    thumb.className = 'w-full h-full object-cover';
+
+    button.appendChild(thumb);
+
+    button.addEventListener('click', () => {
+      detailGalleryIndex = index;
+      renderDetailGallery();
+    });
+
+    thumbs.appendChild(button);
+  });
+}
+
+function changeDetailImage(direction) {
+  const total = detailGalleryImages.length;
+  if (total <= 1) return;
+
+  detailGalleryIndex =
+    (detailGalleryIndex + direction + total) % total;
+
+  const image = document.getElementById('detail-product-image');
+
+  image.classList.add('slide-changing');
+
+  setTimeout(() => {
+    renderDetailGallery();
+    image.classList.remove('slide-changing');
+  }, 120);
+}
+
+function openDetailGalleryLightbox() {
+  if (!detailGalleryImages.length) return;
+
+  productImagesMap[
+    currentDetailProductId
+  ] = detailGalleryImages;
+
+  openLightbox(currentDetailProductId);
+}
+
+// Swipe support untuk HP
+const detailGalleryStage = document.getElementById('detail-gallery-stage');
+
+detailGalleryStage.addEventListener('touchstart', e => {
+  detailTouchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+detailGalleryStage.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].screenX;
+  const distance = endX - detailTouchStartX;
+
+  if (Math.abs(distance) > 50) {
+    changeDetailImage(distance < 0 ? 1 : -1);
+  }
+}, { passive: true });
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const modal = document.getElementById('product-detail-modal');
+
+  if (modal.classList.contains('hidden')) return;
+
+  if (e.key === 'ArrowLeft') changeDetailImage(-1);
+  if (e.key === 'ArrowRight') changeDetailImage(1);
+});
 function closeProductDetail() {
   const modal = document.getElementById('product-detail-modal');
 
